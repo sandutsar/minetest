@@ -279,50 +279,135 @@ minetest.register_tool("basetools:sword_wood", {
 })
 minetest.register_tool("basetools:sword_stone", {
 	description = "Stone Sword".."\n"..
-		"Damage: fleshy=4",
+		"Damage: fleshy=5",
 	inventory_image = "basetools_stonesword.png",
 	tool_capabilities = {
 		full_punch_interval = 1.0,
 		max_drop_level=0,
-		damage_groups = {fleshy=4},
+		damage_groups = {fleshy=5},
 	}
 })
 minetest.register_tool("basetools:sword_steel", {
 	description = "Steel Sword".."\n"..
-		"Damage: fleshy=6",
+		"Damage: fleshy=10",
 	inventory_image = "basetools_steelsword.png",
 	tool_capabilities = {
 		full_punch_interval = 1.0,
 		max_drop_level=1,
-		damage_groups = {fleshy=6},
+		damage_groups = {fleshy=10},
+	}
+})
+minetest.register_tool("basetools:sword_titanium", {
+	description = "Titanium Sword".."\n"..
+		"Damage: fleshy=100",
+	inventory_image = "basetools_titaniumsword.png",
+	tool_capabilities = {
+		full_punch_interval = 1.0,
+		max_drop_level=1,
+		damage_groups = {fleshy=100},
+	}
+})
+minetest.register_tool("basetools:sword_blood", {
+	description = "Blood Sword".."\n"..
+		"Damage: fleshy=1000",
+	inventory_image = "basetools_bloodsword.png",
+	tool_capabilities = {
+		full_punch_interval = 1.0,
+		max_drop_level=1,
+		damage_groups = {fleshy=1000},
+	}
+})
+
+-- Max. damage sword
+minetest.register_tool("basetools:sword_mese", {
+	description = "Mese Sword".."\n"..
+		"Damage: fleshy=32767, fiery=32767, icy=32767".."\n"..
+		"Full Punch Interval: 0.0s",
+	inventory_image = "basetools_mesesword.png",
+	tool_capabilities = {
+		full_punch_interval = 0.0,
+		max_drop_level=1,
+		damage_groups = {fleshy=32767, fiery=32767, icy=32767},
 	}
 })
 
 -- Fire/Ice sword: Deal damage to non-fleshy damage groups
 minetest.register_tool("basetools:sword_fire", {
 	description = "Fire Sword".."\n"..
-		"Damage: icy=6",
+		"Damage: icy=10",
 	inventory_image = "basetools_firesword.png",
 	tool_capabilities = {
 		full_punch_interval = 1.0,
 		max_drop_level=0,
-		damage_groups = {icy=6},
+		damage_groups = {icy=10},
 	}
 })
 minetest.register_tool("basetools:sword_ice", {
 	description = "Ice Sword".."\n"..
-		"Damage: fiery=6",
+		"Damage: fiery=10",
 	inventory_image = "basetools_icesword.png",
 	tool_capabilities = {
 		full_punch_interval = 1.0,
 		max_drop_level=0,
-		damage_groups = {fiery=6},
+		damage_groups = {fiery=10},
 	}
 })
+minetest.register_tool("basetools:sword_elemental", {
+	description = "Elemental Sword".."\n"..
+		"Damage: fiery=10, icy=10",
+	inventory_image = "basetools_elementalsword.png",
+	tool_capabilities = {
+		full_punch_interval = 1.0,
+		max_drop_level=0,
+		damage_groups = {fiery=10, icy=10},
+	}
+})
+
+-- Healing weapons: heal HP
+minetest.register_tool("basetools:dagger_heal", {
+	description = "Healing Dagger".."\n"..
+		"Heal: fleshy=1".."\n"..
+		"Full Punch Interval: 0.5s",
+	inventory_image = "basetools_healdagger.png",
+	tool_capabilities = {
+		full_punch_interval = 0.5,
+		damage_groups = {fleshy=-1},
+	}
+})
+minetest.register_tool("basetools:sword_heal", {
+	description = "Healing Sword".."\n"..
+		"Heal: fleshy=10",
+	inventory_image = "basetools_healsword.png",
+	tool_capabilities = {
+		full_punch_interval = 1.0,
+		damage_groups = {fleshy=-10},
+	}
+})
+minetest.register_tool("basetools:sword_heal_super", {
+	description = "Super Healing Sword".."\n"..
+		"Heal: fleshy=32768, fiery=32768, icy=32768",
+	inventory_image = "basetools_superhealsword.png",
+	tool_capabilities = {
+		full_punch_interval = 1.0,
+		damage_groups = {fleshy=-32768, fiery=-32768, icy=-32768},
+	}
+})
+
 
 --
 -- Dagger: Low damage, fast punch interval
 --
+minetest.register_tool("basetools:dagger_wood", {
+	description = "Wooden Dagger".."\n"..
+		"Damage: fleshy=1".."\n"..
+		"Full Punch Interval: 0.5s",
+	inventory_image = "basetools_wooddagger.png",
+	tool_capabilities = {
+		full_punch_interval = 0.5,
+		max_drop_level=0,
+		damage_groups = {fleshy=1},
+	}
+})
 minetest.register_tool("basetools:dagger_steel", {
 	description = "Steel Dagger".."\n"..
 		"Damage: fleshy=2".."\n"..
@@ -335,30 +420,141 @@ minetest.register_tool("basetools:dagger_steel", {
 	}
 })
 
--- Test tool uses and punch_attack_uses
-local uses = { 1, 2, 3, 5, 10, 50, 100, 1000, 10000, 65535 }
-for i=1, #uses do
-	local u = uses[i]
-	local color = string.format("#FF00%02X", math.floor(((i-1)/#uses) * 255))
-	minetest.register_tool("basetools:pick_uses_"..string.format("%05d", u), {
-		description = u.."-Uses Pickaxe".."\n"..
-			"Digs cracky=3",
-		inventory_image = "basetools_steelpick.png^[colorize:"..color..":127",
+-- Test tool uses, punch_attack_uses, and wear bar coloring
+local tool_params = {
+	{uses = 1},
+	{uses = 2},
+	{uses = 3},
+	{
+		uses = 5,
+		wear_color = "#5865f2",
+		wear_description = "Solid color: #5865f2",
+	},
+	{
+		uses = 10,
+		wear_color = "slateblue",
+		wear_description = "Solid color: slateblue",
+	},
+	{
+		uses = 50,
+		wear_color = {
+			color_stops = {
+				[0] = "red",
+				[0.5] = "yellow",
+				[1.0] = "blue"
+			},
+			blend = "linear"
+		},
+		wear_description = "Ranges from blue to yellow to red",
+	},
+	{
+		uses = 100,
+		wear_color = {
+			color_stops = {
+				[0] = "#ffff00",
+				[0.2] = "#ff00ff",
+				[0.3] = "#ffff00",
+				[0.45] = "#c0ffee",
+				[0.6] = {r=255, g=255, b=0, a=100}, -- continues until the end
+			},
+			blend = "constant"
+		},
+		wear_description = "Misc. colors, constant interpolation",
+	},
+	{uses = 1e3},
+	{uses = 1e4},
+	{uses = 65535},
+}
+
+for i, params in ipairs(tool_params) do
+	local uses = params.uses
+	local ustring = uses.."-Use"..(uses == 1 and "" or "s")
+	local color = string.format("#FF00%02X", math.floor(((i-1)/#tool_params) * 255))
+	minetest.register_tool("basetools:pick_uses_"..string.format("%05d", uses), {
+		description = ustring.." Pickaxe".."\n"..
+			"Digs cracky=3"..
+			(params.wear_description and "\n".."Wear bar: " .. params.wear_description or ""),
+		inventory_image = "basetools_usespick.png^[colorize:"..color..":127",
 		tool_capabilities = {
 			max_drop_level=0,
 			groupcaps={
-				cracky={times={[3]=0.1, [2]=0.2, [1]=0.3}, uses=u, maxlevel=0}
+				cracky={times={[3]=0.1, [2]=0.2, [1]=0.3}, uses=uses, maxlevel=0}
 			},
 		},
+		wear_color = params.wear_color
 	})
 
-	minetest.register_tool("basetools:sword_uses_"..string.format("%05d", u), {
-		description = u.."-Uses Sword".."\n"..
+	minetest.register_tool("basetools:sword_uses_"..string.format("%05d", uses), {
+		description = ustring.." Sword".."\n"..
 			"Damage: fleshy=1",
-		inventory_image = "basetools_woodsword.png^[colorize:"..color..":127",
+		inventory_image = "basetools_usessword.png^[colorize:"..color..":127",
 		tool_capabilities = {
 			damage_groups = {fleshy=1},
-			punch_attack_uses = u,
+			punch_attack_uses = uses,
 		},
 	})
 end
+
+minetest.register_chatcommand("wear_color", {
+	params = "[idx]",
+	description = "Set wear bar color override",
+	func = function(player_name, param)
+		local player = minetest.get_player_by_name(player_name)
+		if not player then return end
+
+		local wear_color = nil
+		local wear_desc = "Reset override"
+
+		if param ~= "" then
+			local params = tool_params[tonumber(param)]
+			if not params then
+				return false, "idx out of bounds"
+			end
+			wear_color = params.wear_color
+			wear_desc = "Set override: "..(params.wear_description or "Default behavior")
+		end
+		local tool = player:get_wielded_item()
+		if tool:get_count() == 0 then
+			return false, "Tool not found"
+		end
+		tool:get_meta():set_wear_bar_params(wear_color)
+		player:set_wielded_item(tool)
+		return true, wear_desc
+	end
+})
+
+-- Punch handler to set random color & wear
+local wear_on_use = function(itemstack, user, pointed_thing)
+	local meta = itemstack:get_meta()
+	local color = math.random(0, 0xFFFFFF)
+	local colorstr = string.format("#%06x", color)
+	meta:set_wear_bar_params(colorstr)
+	minetest.log("action", "[basetool] Wear bar color of "..itemstack:get_name().." changed to "..colorstr)
+	itemstack:set_wear(math.random(0, 65535))
+	return itemstack
+end
+
+-- Place handler to clear item metadata color
+local wear_on_place = function(itemstack, user, pointed_thing)
+	local meta = itemstack:get_meta()
+	meta:set_wear_bar_params(nil)
+	return itemstack
+end
+
+minetest.register_tool("basetools:random_wear_bar", {
+	description = "Wear Bar Color Test\n" ..
+			"Punch: Set random color & wear\n" ..
+			"Place: Clear color",
+	-- Base texture: A grayscale square (can be colorized)
+	inventory_image = "basetools_usespick.png^[colorize:#FFFFFF:127",
+	tool_capabilities = {
+		max_drop_level=0,
+		groupcaps={
+			cracky={times={[3]=0.1, [2]=0.2, [1]=0.3}, uses=1000, maxlevel=0}
+		},
+	},
+
+	on_use = wear_on_use,
+	on_place = wear_on_place,
+	on_secondary_use = wear_on_place,
+})

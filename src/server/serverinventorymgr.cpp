@@ -29,46 +29,43 @@ ServerInventoryManager::ServerInventoryManager() : InventoryManager()
 {
 }
 
-ServerInventoryManager::~ServerInventoryManager()
-{
-	// Delete detached inventories
-	for (auto &detached_inventory : m_detached_inventories) {
-		delete detached_inventory.second.inventory;
-	}
-}
-
 Inventory *ServerInventoryManager::getInventory(const InventoryLocation &loc)
 {
+	// No m_env check here: allow creation and modification of detached inventories
+
 	switch (loc.type) {
 	case InventoryLocation::UNDEFINED:
 	case InventoryLocation::CURRENT_PLAYER:
 		break;
 	case InventoryLocation::PLAYER: {
+		if (!m_env)
+			return nullptr;
+
 		RemotePlayer *player = m_env->getPlayer(loc.name.c_str());
 		if (!player)
-			return NULL;
+			return nullptr;
+
 		PlayerSAO *playersao = player->getPlayerSAO();
-		if (!playersao)
-			return NULL;
-		return playersao->getInventory();
+		return playersao ? playersao->getInventory() : nullptr;
 	} break;
 	case InventoryLocation::NODEMETA: {
+		if (!m_env)
+			return nullptr;
+
 		NodeMetadata *meta = m_env->getMap().getNodeMetadata(loc.p);
-		if (!meta)
-			return NULL;
-		return meta->getInventory();
+		return meta ? meta->getInventory() : nullptr;
 	} break;
 	case InventoryLocation::DETACHED: {
 		auto it = m_detached_inventories.find(loc.name);
 		if (it == m_detached_inventories.end())
 			return nullptr;
-		return it->second.inventory;
+		return it->second.inventory.get();
 	} break;
 	default:
 		sanity_check(false); // abort
 		break;
 	}
-	return NULL;
+	return nullptr;
 }
 
 void ServerInventoryManager::setInventoryModified(const InventoryLocation &loc)
@@ -90,7 +87,7 @@ void ServerInventoryManager::setInventoryModified(const InventoryLocation &loc)
 	case InventoryLocation::NODEMETA: {
 		MapEditEvent event;
 		event.type = MEET_BLOCK_NODE_METADATA_CHANGED;
-		event.p = loc.p;
+		event.setPositionModified(loc.p);
 		m_env->getMap().dispatchEvent(event);
 	} break;
 	case InventoryLocation::DETACHED: {
@@ -108,15 +105,16 @@ Inventory *ServerInventoryManager::createDetachedInventory(
 	if (m_detached_inventories.count(name) > 0) {
 		infostream << "Server clearing detached inventory \"" << name << "\""
 			   << std::endl;
-		delete m_detached_inventories[name].inventory;
+		m_detached_inventories[name].inventory.reset();
 	} else {
 		infostream << "Server creating detached inventory \"" << name << "\""
 			   << std::endl;
 	}
 
-	Inventory *inv = new Inventory(idef);
+	auto inv_u = std::make_unique<Inventory>(idef);
+	auto inv = inv_u.get();
 	sanity_check(inv);
-	m_detached_inventories[name].inventory = inv;
+	m_detached_inventories[name].inventory = std::move(inv_u);
 	if (!player.empty()) {
 		m_detached_inventories[name].owner = player;
 
@@ -147,16 +145,17 @@ bool ServerInventoryManager::removeDetachedInventory(const std::string &name)
 	if (inv_it == m_detached_inventories.end())
 		return false;
 
-	delete inv_it->second.inventory;
+	inv_it->second.inventory.reset();
 	const std::string &owner = inv_it->second.owner;
 
 	if (!owner.empty()) {
-		RemotePlayer *player = m_env->getPlayer(owner.c_str());
+		if (m_env) {
+			RemotePlayer *player = m_env->getPlayer(owner.c_str());
 
-		if (player && player->getPeerId() != PEER_ID_INEXISTENT)
-			m_env->getGameDef()->sendDetachedInventory(
-					nullptr, name, player->getPeerId());
-
+			if (player && player->getPeerId() != PEER_ID_INEXISTENT)
+				m_env->getGameDef()->sendDetachedInventory(
+						nullptr, name, player->getPeerId());
+		}
 	} else if (m_env) {
 		// Notify all players about the change as soon ServerEnv exists
 		m_env->getGameDef()->sendDetachedInventory(
@@ -199,6 +198,6 @@ void ServerInventoryManager::sendDetachedInventories(const std::string &peer_nam
 				continue;
 		}
 
-		apply_cb(detached_inventory.first, detached_inventory.second.inventory);
+		apply_cb(detached_inventory.first, detached_inventory.second.inventory.get());
 	}
 }

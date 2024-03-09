@@ -25,9 +25,10 @@ numerical
 //! constructor
 GUIEditBoxWithScrollBar::GUIEditBoxWithScrollBar(const wchar_t* text, bool border,
 	IGUIEnvironment* environment, IGUIElement* parent, s32 id,
-	const core::rect<s32>& rectangle, bool writable, bool has_vscrollbar)
+	const core::rect<s32>& rectangle, ISimpleTextureSource *tsrc,
+	bool writable, bool has_vscrollbar)
 	: GUIEditBox(environment, parent, id, rectangle, border, writable),
-	m_background(true), m_bg_color_used(false)
+	m_background(true), m_bg_color_used(false), m_tsrc(tsrc)
 {
 #ifdef _DEBUG
 	setDebugName("GUIEditBoxWithScrollBar");
@@ -106,9 +107,8 @@ void GUIEditBoxWithScrollBar::draw()
 			skin->draw3DSunkenPane(this, bg_color, false, m_background,
 				AbsoluteRect, &AbsoluteClippingRect);
 		}
-
-		calculateFrameRect();
 	}
+	calculateFrameRect();
 
 	core::rect<s32> local_clip_rect = m_frame_rect;
 	local_clip_rect.clipAgainst(AbsoluteClippingRect);
@@ -440,7 +440,7 @@ void GUIEditBoxWithScrollBar::setTextRect(s32 line)
 	// justification
 	switch (m_halign) {
 	case EGUIA_CENTER:
-		// align to h centre
+		// align to h center
 		m_current_text_rect.UpperLeftCorner.X = (m_frame_rect.getWidth() / 2) - (d.Width / 2);
 		m_current_text_rect.LowerRightCorner.X = (m_frame_rect.getWidth() / 2) + (d.Width / 2);
 		break;
@@ -458,7 +458,7 @@ void GUIEditBoxWithScrollBar::setTextRect(s32 line)
 
 	switch (m_valign) {
 	case EGUIA_CENTER:
-		// align to v centre
+		// align to v center
 		m_current_text_rect.UpperLeftCorner.Y =
 			(m_frame_rect.getHeight() / 2) - (line_count*d.Height) / 2 + d.Height*line;
 		break;
@@ -518,7 +518,7 @@ void GUIEditBoxWithScrollBar::calculateScrollPos()
 
 		if (txt_width < m_frame_rect.getWidth()) {
 			// TODO: Needs a clean left and right gap removal depending on HAlign, similar to vertical scrolling tests for top/bottom.
-			// This check just fixes the case where it was most noticable (text smaller than clipping area).
+			// This check just fixes the case where it was most noticeable (text smaller than clipping area).
 
 			m_hscroll_pos = 0;
 			setTextRect(curs_line);
@@ -636,7 +636,7 @@ void GUIEditBoxWithScrollBar::createVScrollBar()
 	irr::core::rect<s32> scrollbarrect = m_frame_rect;
 	scrollbarrect.UpperLeftCorner.X += m_frame_rect.getWidth() - m_scrollbar_width;
 	m_vscrollbar = new GUIScrollBar(Environment, getParent(), -1,
-			scrollbarrect, false, true);
+			scrollbarrect, false, true, m_tsrc);
 
 	m_vscrollbar->setVisible(false);
 	m_vscrollbar->setSmallStep(3 * fontHeight);
@@ -650,26 +650,6 @@ void GUIEditBoxWithScrollBar::setBackgroundColor(const video::SColor &bg_color)
 {
 	m_bg_color = bg_color;
 	m_bg_color_used = true;
-}
-
-//! Writes attributes of the element.
-void GUIEditBoxWithScrollBar::serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options = 0) const
-{
-	out->addBool("Border", m_border);
-	out->addBool("Background", m_background);
-	// out->addFont("OverrideFont", OverrideFont);
-
-	GUIEditBox::serializeAttributes(out, options);
-}
-
-
-//! Reads attributes of the element
-void GUIEditBoxWithScrollBar::deserializeAttributes(io::IAttributes* in, io::SAttributeReadWriteOptions* options = 0)
-{
-	GUIEditBox::deserializeAttributes(in, options);
-
-	setDrawBorder(in->getAttributeAsBool("Border"));
-	setDrawBackground(in->getAttributeAsBool("Background"));
 }
 
 bool GUIEditBoxWithScrollBar::isDrawBackgroundEnabled() const { return false; }

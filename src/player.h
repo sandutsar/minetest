@@ -26,6 +26,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/basic_macros.h"
 #include <list>
 #include <mutex>
+#include <functional>
+#include <tuple>
 
 #define PLAYERNAME_SIZE 20
 
@@ -41,7 +43,17 @@ struct PlayerFovSpec
 
 	// The time to be take to trasition to the new FOV value.
 	// Transition is instantaneous if omitted. Omitted by default.
-	f32 transition_time;
+	f32 transition_time = 0;
+
+	inline bool operator==(const PlayerFovSpec &other) const {
+		// transition_time is compared here since that could be relevant
+		// when aborting a running transition.
+		return fov == other.fov && is_multiplier == other.is_multiplier &&
+			transition_time == other.transition_time;
+	}
+	inline bool operator!=(const PlayerFovSpec &other) const {
+		return !(*this == other);
+	}
 };
 
 struct PlayerControl
@@ -49,18 +61,18 @@ struct PlayerControl
 	PlayerControl() = default;
 
 	PlayerControl(
-		bool a_jump,
-		bool a_aux1,
-		bool a_sneak,
+		bool a_up, bool a_down, bool a_left, bool a_right,
+		bool a_jump, bool a_aux1, bool a_sneak,
 		bool a_zoom,
-		bool a_dig,
-		bool a_place,
-		float a_pitch,
-		float a_yaw,
-		float a_movement_speed,
-		float a_movement_direction
+		bool a_dig, bool a_place,
+		float a_pitch, float a_yaw,
+		float a_movement_speed, float a_movement_direction
 	)
 	{
+		// Encode direction keys into a single value so nobody uses it accidentally
+		// as movement_{speed,direction} is supposed to be the source of truth.
+		direction_keys = (a_up&1) | ((a_down&1) << 1) |
+			((a_left&1) << 2) | ((a_right&1) << 3);
 		jump = a_jump;
 		aux1 = a_aux1;
 		sneak = a_sneak;
@@ -72,35 +84,66 @@ struct PlayerControl
 		movement_speed = a_movement_speed;
 		movement_direction = a_movement_direction;
 	}
+
+#ifndef SERVER
+	// For client use
+	u32 getKeysPressed() const;
+	inline bool isMoving() const { return movement_speed > 0.001f; }
+#endif
+
+	// For server use
+	void unpackKeysPressed(u32 keypress_bits);
+
+	u8 direction_keys = 0;
 	bool jump = false;
 	bool aux1 = false;
 	bool sneak = false;
 	bool zoom = false;
 	bool dig = false;
 	bool place = false;
+	// Note: These four are NOT available on the server
 	float pitch = 0.0f;
 	float yaw = 0.0f;
-	// Note: These two are NOT available on the server
 	float movement_speed = 0.0f;
 	float movement_direction = 0.0f;
 };
 
-struct PlayerSettings
+struct PlayerPhysicsOverride
 {
-	bool free_move = false;
-	bool pitch_move = false;
-	bool fast_move = false;
-	bool continuous_forward = false;
-	bool always_fly_fast = false;
-	bool aux1_descends = false;
-	bool noclip = false;
-	bool autojump = false;
+	float speed = 1.f;
+	float jump = 1.f;
+	float gravity = 1.f;
 
-	const std::string setting_names[8] = {
-		"free_move", "pitch_move", "fast_move", "continuous_forward", "always_fly_fast",
-		"aux1_descends", "noclip", "autojump"
+	bool sneak = true;
+	bool sneak_glitch = false;
+	// "Temporary" option for old move code
+	bool new_move = true;
+
+	float speed_climb = 1.f;
+	float speed_crouch = 1.f;
+	float liquid_fluidity = 1.f;
+	float liquid_fluidity_smooth = 1.f;
+	float liquid_sink = 1.f;
+	float acceleration_default = 1.f;
+	float acceleration_air = 1.f;
+
+private:
+	auto tie() const {
+		// Make sure to add new members to this list!
+		return std::tie(
+		speed, jump, gravity, sneak, sneak_glitch, new_move, speed_climb, speed_crouch,
+		liquid_fluidity, liquid_fluidity_smooth, liquid_sink, acceleration_default,
+		acceleration_air
+		);
+	}
+
+public:
+	bool operator==(const PlayerPhysicsOverride &other) const {
+		return tie() == other.tie();
 	};
-	void readGlobalSettings();
+	bool operator!=(const PlayerPhysicsOverride &other) const {
+		return tie() != other.tie();
+	};
 };
 
 class Map;
@@ -123,15 +166,14 @@ public:
 			std::vector<CollisionInfo> *collision_info)
 	{}
 
-	const v3f &getSpeed() const
-	{
-		return m_speed;
-	}
-
-	void setSpeed(const v3f &speed)
+	// in BS-space
+	inline void setSpeed(v3f speed)
 	{
 		m_speed = speed;
 	}
+
+	// in BS-space
+	v3f getSpeed() const { return m_speed; }
 
 	const char *getName() const { return m_name; }
 
@@ -147,6 +189,7 @@ public:
 
 	v3f eye_offset_first;
 	v3f eye_offset_third;
+	v3f eye_offset_third_front;
 
 	Inventory inventory;
 
@@ -171,17 +214,20 @@ public:
 
 	PlayerControl control;
 	const PlayerControl& getPlayerControl() { return control; }
-	PlayerSettings &getPlayerSettings() { return m_player_settings; }
-	static void settingsChangedCallback(const std::string &name, void *data);
+
+	PlayerPhysicsOverride physics_override;
 
 	// Returns non-empty `selected` ItemStack. `hand` is a fallback, if specified
 	ItemStack &getWieldedItem(ItemStack *selected, ItemStack *hand) const;
 	void setWieldIndex(u16 index);
 	u16 getWieldIndex() const { return m_wield_index; }
 
-	void setFov(const PlayerFovSpec &spec)
+	bool setFov(const PlayerFovSpec &spec)
 	{
+		if (m_fov_override_spec == spec)
+			return false;
 		m_fov_override_spec = spec;
+		return true;
 	}
 
 	const PlayerFovSpec &getFov() const
@@ -189,9 +235,8 @@ public:
 		return m_fov_override_spec;
 	}
 
-	u32 keyPressed = 0;
-
 	HudElement* getHud(u32 id);
+	void        hudApply(std::function<void(const std::vector<HudElement*>&)> f);
 	u32         addHud(HudElement* hud);
 	HudElement* removeHud(u32 id);
 	void        clearHud();
@@ -201,15 +246,16 @@ public:
 
 protected:
 	char m_name[PLAYERNAME_SIZE];
-	v3f m_speed;
+	v3f m_speed; // velocity; in BS-space
 	u16 m_wield_index = 0;
 	PlayerFovSpec m_fov_override_spec = { 0.0f, false, 0.0f };
 
 	std::vector<HudElement *> hud;
+
 private:
 	// Protect some critical areas
 	// hud for example can be modified by EmergeThread
 	// and ServerThread
+	// FIXME: ^ this sounds like nonsense. should be checked.
 	std::mutex m_mutex;
-	PlayerSettings m_player_settings;
 };

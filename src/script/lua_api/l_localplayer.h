@@ -26,7 +26,6 @@ class LocalPlayer;
 class LuaLocalPlayer : public ModApiBase
 {
 private:
-	static const char className[];
 	static const luaL_Reg methods[];
 
 	// garbage collector
@@ -94,8 +93,13 @@ private:
 	static int l_hud_change(lua_State *L);
 	// hud_get(self, id)
 	static int l_hud_get(lua_State *L);
+	// hud_get_all(self)
+	static int l_hud_get_all(lua_State *L);
 
 	static int l_get_move_resistance(lua_State *L);
+
+	static LocalPlayer *getobject(LuaLocalPlayer *ref);
+	static LocalPlayer *getobject(lua_State *L, int narg);
 
 	LocalPlayer *m_localplayer = nullptr;
 
@@ -105,9 +109,7 @@ public:
 
 	static void create(lua_State *L, LocalPlayer *m);
 
-	static LuaLocalPlayer *checkobject(lua_State *L, int narg);
-	static LocalPlayer *getobject(LuaLocalPlayer *ref);
-	static LocalPlayer *getobject(lua_State *L, int narg);
-
 	static void Register(lua_State *L);
+
+	static const char className[];
 };

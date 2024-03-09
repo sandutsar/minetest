@@ -17,31 +17,26 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "IGUIEnvironment.h"
-#include "IGUIElement.h"
+#include "guiHyperText.h"
 #include "guiScrollBar.h"
-#include "IGUIFont.h"
-#include <vector>
-#include <list>
-#include <unordered_map>
-using namespace irr::gui;
 #include "client/fontengine.h"
-#include <SColor.h>
-#include "client/tile.h"
 #include "IVideoDriver.h"
 #include "client/client.h"
 #include "client/renderingengine.h"
 #include "hud.h"
-#include "guiHyperText.h"
+#include "inventory.h"
 #include "util/string.h"
+#include "irrlicht_changes/CGUITTFont.h"
 
-bool check_color(const std::string &str)
+using namespace irr::gui;
+
+static bool check_color(const std::string &str)
 {
 	irr::video::SColor color;
 	return parseColorString(str, color, false);
 }
 
-bool check_integer(const std::string &str)
+static bool check_integer(const std::string &str)
 {
 	if (str.empty())
 		return false;
@@ -67,9 +62,15 @@ void ParsedText::Element::setStyle(StyleList &style)
 		this->hovercolor = color;
 
 	unsigned int font_size = std::atoi(style["fontsize"].c_str());
+
 	FontMode font_mode = FM_Standard;
 	if (style["fontstyle"] == "mono")
 		font_mode = FM_Mono;
+
+	// hypertext[] only accepts absolute font size values and has a hardcoded
+	// default font size of 16. This is the only way to make hypertext[]
+	// respect font size settings that I can think of.
+	font_size = myround(font_size / 16.0f * g_fontengine->getFontSize(font_mode));
 
 	FontSpec spec(font_size, font_mode,
 		is_yes(style["bold"]), is_yes(style["italic"]));
@@ -604,8 +605,7 @@ u32 ParsedText::parseTag(const wchar_t *text, u32 cursor)
 
 TextDrawer::TextDrawer(const wchar_t *text, Client *client,
 		gui::IGUIEnvironment *environment, ISimpleTextureSource *tsrc) :
-		m_text(text),
-		m_client(client), m_environment(environment)
+		m_text(text), m_client(client), m_tsrc(tsrc), m_guienv(environment)
 {
 	// Size all elements
 	for (auto &p : m_text.m_paragraphs) {
@@ -616,12 +616,10 @@ TextDrawer::TextDrawer(const wchar_t *text, Client *client,
 				if (e.font) {
 					e.dim.Width = e.font->getDimension(e.text.c_str()).Width;
 					e.dim.Height = e.font->getDimension(L"Yy").Height;
-#if USE_FREETYPE
 					if (e.font->getType() == irr::gui::EGFT_CUSTOM) {
-						e.baseline = e.dim.Height - 1 -
-							((irr::gui::CGUITTFont *)e.font)->getAscender() / 64;
+						CGUITTFont *tmp = static_cast<CGUITTFont*>(e.font);
+						e.baseline = e.dim.Height - 1 - tmp->getAscender() / 64;
 					}
-#endif
 				} else {
 					e.dim = {0, 0};
 				}
@@ -638,7 +636,7 @@ TextDrawer::TextDrawer(const wchar_t *text, Client *client,
 
 				if (e.type == ParsedText::ELEMENT_IMAGE) {
 					video::ITexture *texture =
-						m_client->getTextureSource()->
+						m_tsrc->
 							getTexture(stringw_to_utf8(e.text));
 					if (texture)
 						dim = texture->getOriginalSize();
@@ -783,7 +781,7 @@ void TextDrawer::place(const core::rect<s32> &dest_rect)
 			u32 charswidth = 0;
 			u32 wordcount = 0;
 
-			// Skip begining of line separators but include them in height
+			// Skip beginning of line separators but include them in height
 			// computation.
 			while (el != p.elements.end() &&
 					el->type == ParsedText::ELEMENT_SEPARATOR) {
@@ -920,7 +918,7 @@ void TextDrawer::place(const core::rect<s32> &dest_rect)
 void TextDrawer::draw(const core::rect<s32> &clip_rect,
 		const core::position2d<s32> &dest_offset)
 {
-	irr::video::IVideoDriver *driver = m_environment->getVideoDriver();
+	irr::video::IVideoDriver *driver = m_guienv->getVideoDriver();
 	core::position2d<s32> offset = dest_offset;
 	offset.Y += m_voffset;
 
@@ -964,10 +962,10 @@ void TextDrawer::draw(const core::rect<s32> &clip_rect,
 
 			case ParsedText::ELEMENT_IMAGE: {
 				video::ITexture *texture =
-						m_client->getTextureSource()->getTexture(
+						m_tsrc->getTexture(
 								stringw_to_utf8(el.text));
 				if (texture != 0)
-					m_environment->getVideoDriver()->draw2DImage(
+					m_guienv->getVideoDriver()->draw2DImage(
 							texture, rect,
 							irr::core::rect<s32>(
 									core::position2d<s32>(0, 0),
@@ -976,15 +974,15 @@ void TextDrawer::draw(const core::rect<s32> &clip_rect,
 			} break;
 
 			case ParsedText::ELEMENT_ITEM: {
-				IItemDefManager *idef = m_client->idef();
-				ItemStack item;
-				item.deSerialize(stringw_to_utf8(el.text), idef);
+				if (m_client) {
+					IItemDefManager *idef = m_client->idef();
+					ItemStack item;
+					item.deSerialize(stringw_to_utf8(el.text), idef);
 
-				drawItemStack(
-						m_environment->getVideoDriver(),
-						g_fontengine->getFont(), item, rect, &clip_rect,
-						m_client, IT_ROT_OTHER, el.angle, el.rotation
-				);
+					drawItemStack(m_guienv->getVideoDriver(),
+							g_fontengine->getFont(), item, rect, &clip_rect, m_client,
+							IT_ROT_OTHER, el.angle, el.rotation);
+				}
 			} break;
 			}
 		}
@@ -999,7 +997,7 @@ GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
 		IGUIElement *parent, s32 id, const core::rect<s32> &rectangle,
 		Client *client, ISimpleTextureSource *tsrc) :
 		IGUIElement(EGUIET_ELEMENT, environment, parent, id, rectangle),
-		m_client(client), m_vscrollbar(nullptr),
+		m_tsrc(tsrc), m_vscrollbar(nullptr),
 		m_drawer(text, client, environment, tsrc), m_text_scrollpos(0, 0)
 {
 
@@ -1017,7 +1015,7 @@ GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
 			RelativeRect.getWidth() - m_scrollbar_width, 0,
 			RelativeRect.getWidth(), RelativeRect.getHeight());
 
-	m_vscrollbar = new GUIScrollBar(Environment, this, -1, rect, false, true);
+	m_vscrollbar = new GUIScrollBar(Environment, this, -1, rect, false, true, tsrc);
 	m_vscrollbar->setVisible(false);
 }
 
@@ -1053,14 +1051,10 @@ void GUIHyperText::checkHover(s32 X, s32 Y)
 		}
 	}
 
-#ifndef HAVE_TOUCHSCREENGUI
-	if (m_drawer.m_hovertag)
-		RenderingEngine::get_raw_device()->getCursorControl()->setActiveIcon(
-				gui::ECI_HAND);
-	else
-		RenderingEngine::get_raw_device()->getCursorControl()->setActiveIcon(
-				gui::ECI_NORMAL);
-#endif
+	ICursorControl *cursor_control = RenderingEngine::get_raw_device()->getCursorControl();
+
+	if (cursor_control)
+		cursor_control->setActiveIcon(m_drawer.m_hovertag ? gui::ECI_HAND : gui::ECI_NORMAL);
 }
 
 bool GUIHyperText::OnEvent(const SEvent &event)
@@ -1076,12 +1070,11 @@ bool GUIHyperText::OnEvent(const SEvent &event)
 	if (event.EventType == EET_GUI_EVENT &&
 			event.GUIEvent.EventType == EGET_ELEMENT_LEFT) {
 		m_drawer.m_hovertag = nullptr;
-#ifndef HAVE_TOUCHSCREENGUI
-		gui::ICursorControl *cursor_control =
-				RenderingEngine::get_raw_device()->getCursorControl();
-		if (cursor_control->isVisible())
+
+		ICursorControl *cursor_control = RenderingEngine::get_raw_device()->getCursorControl();
+
+		if (cursor_control && cursor_control->isVisible())
 			cursor_control->setActiveIcon(gui::ECI_NORMAL);
-#endif
 	}
 
 	if (event.EventType == EET_MOUSE_INPUT_EVENT) {
@@ -1133,8 +1126,16 @@ void GUIHyperText::draw()
 	m_display_text_rect = AbsoluteRect;
 	m_drawer.place(m_display_text_rect);
 
-	// Show scrollbar if text overflow
+	// Show a scrollbar if the text overflows vertically
 	if (m_drawer.getHeight() > m_display_text_rect.getHeight()) {
+		// Showing a scrollbar will reduce the width of the viewport, causing
+		// more text to be wrapped and thus increasing the height of the text.
+		// Therefore, we have to re-layout the text *before* setting the height
+		// of the scrollbar.
+		core::rect<s32> smaller_rect = m_display_text_rect;
+		smaller_rect.LowerRightCorner.X -= m_scrollbar_width;
+		m_drawer.place(smaller_rect);
+
 		m_vscrollbar->setSmallStep(m_display_text_rect.getHeight() * 0.1f);
 		m_vscrollbar->setLargeStep(m_display_text_rect.getHeight() * 0.5f);
 		m_vscrollbar->setMax(m_drawer.getHeight() - m_display_text_rect.getHeight());
@@ -1142,11 +1143,6 @@ void GUIHyperText::draw()
 		m_vscrollbar->setVisible(true);
 
 		m_vscrollbar->setPageSize(s32(m_drawer.getHeight()));
-
-		core::rect<s32> smaller_rect = m_display_text_rect;
-
-		smaller_rect.LowerRightCorner.X -= m_scrollbar_width;
-		m_drawer.place(smaller_rect);
 	} else {
 		m_vscrollbar->setMax(0);
 		m_vscrollbar->setPos(0);

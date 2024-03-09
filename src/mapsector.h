@@ -45,20 +45,32 @@ public:
 
 	void deleteBlocks();
 
-	v2s16 getPos()
+	v2s16 getPos() const
 	{
 		return m_pos;
 	}
 
-	MapBlock * getBlockNoCreateNoEx(s16 y);
-	MapBlock * createBlankBlockNoInsert(s16 y);
-	MapBlock * createBlankBlock(s16 y);
+	MapBlock *getBlockNoCreateNoEx(s16 y);
+	std::unique_ptr<MapBlock> createBlankBlockNoInsert(s16 y);
+	MapBlock *createBlankBlock(s16 y);
 
-	void insertBlock(MapBlock *block);
+	void insertBlock(std::unique_ptr<MapBlock> block);
 
 	void deleteBlock(MapBlock *block);
 
+	// Remove a block from the map and the sector without deleting it
+	// Returns an owning ptr to block.
+	std::unique_ptr<MapBlock> detachBlock(MapBlock *block);
+
+	// This makes a copy of the internal collection.
+	// Prefer getBlocks() if possible.
 	void getBlocks(MapBlockVect &dest);
+
+	// Get access to the internal collection
+	// This is explicitly only allowed on a const object since modifying anything while iterating is unsafe.
+	// The caller needs to make sure that this does not happen.
+	const auto &getBlocks() const { return m_blocks; }
+	const auto &getBlocks() = delete;
 
 	bool empty() const { return m_blocks.empty(); }
 
@@ -66,7 +78,7 @@ public:
 protected:
 
 	// The pile of MapBlocks
-	std::unordered_map<s16, MapBlock*> m_blocks;
+	std::unordered_map<s16, std::unique_ptr<MapBlock>> m_blocks;
 
 	Map *m_parent;
 	// Position on parent (in MapBlock widths)

@@ -18,10 +18,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "object_properties.h"
+#include "irrlicht_changes/printing.h"
 #include "irrlichttypes_bloated.h"
 #include "exceptions.h"
 #include "util/serialize.h"
-#include "util/basic_macros.h"
 #include <sstream>
 
 static const video::SColor NULL_BGCOLOR{0, 1, 1, 1};
@@ -32,17 +32,17 @@ ObjectProperties::ObjectProperties()
 	colors.emplace_back(255,255,255,255);
 }
 
-std::string ObjectProperties::dump()
+std::string ObjectProperties::dump() const
 {
 	std::ostringstream os(std::ios::binary);
 	os << "hp_max=" << hp_max;
 	os << ", breath_max=" << breath_max;
 	os << ", physical=" << physical;
 	os << ", collideWithObjects=" << collideWithObjects;
-	os << ", collisionbox=" << PP(collisionbox.MinEdge) << "," << PP(collisionbox.MaxEdge);
+	os << ", collisionbox=" << collisionbox.MinEdge << "," << collisionbox.MaxEdge;
 	os << ", visual=" << visual;
 	os << ", mesh=" << mesh;
-	os << ", visual_size=" << PP(visual_size);
+	os << ", visual_size=" << visual_size;
 	os << ", textures=[";
 	for (const std::string &texture : textures) {
 		os << "\"" << texture << "\" ";
@@ -54,8 +54,8 @@ std::string ObjectProperties::dump()
 			<< color.getGreen() << "," << color.getBlue() << "\" ";
 	}
 	os << "]";
-	os << ", spritediv=" << PP2(spritediv);
-	os << ", initial_sprite_basepos=" << PP2(initial_sprite_basepos);
+	os << ", spritediv=" << spritediv;
+	os << ", initial_sprite_basepos=" << initial_sprite_basepos;
 	os << ", is_visible=" << is_visible;
 	os << ", makes_footstep_sound=" << makes_footstep_sound;
 	os << ", automatic_rotate="<< automatic_rotate;
@@ -71,8 +71,9 @@ std::string ObjectProperties::dump()
 	else
 		os << ", nametag_bgcolor=null ";
 
-	os << ", selectionbox=" << PP(selectionbox.MinEdge) << "," << PP(selectionbox.MaxEdge);
-	os << ", pointable=" << pointable;
+	os << ", selectionbox=" << selectionbox.MinEdge << "," << selectionbox.MaxEdge;
+	os << ", rotate_selectionbox=" << rotate_selectionbox;
+	os << ", pointable=" << Pointabilities::toStringPointabilityType(pointable);
 	os << ", static_save=" << static_save;
 	os << ", eye_height=" << eye_height;
 	os << ", zoom_fov=" << zoom_fov;
@@ -126,7 +127,7 @@ void ObjectProperties::serialize(std::ostream &os) const
 	writeV3F32(os, collisionbox.MaxEdge);
 	writeV3F32(os, selectionbox.MinEdge);
 	writeV3F32(os, selectionbox.MaxEdge);
-	writeU8(os, pointable);
+	Pointabilities::serializePointabilityType(os, pointable);
 	os << serializeString16(visual);
 	writeV3F32(os, visual_size);
 	writeU16(os, textures.size());
@@ -169,6 +170,7 @@ void ObjectProperties::serialize(std::ostream &os) const
 	else
 		writeARGB8(os, nametag_bgcolor.value());
 
+	writeU8(os, rotate_selectionbox);
 	// Add stuff only at the bottom.
 	// Never remove anything, because we don't want new versions of this
 }
@@ -186,7 +188,7 @@ void ObjectProperties::deSerialize(std::istream &is)
 	collisionbox.MaxEdge = readV3F32(is);
 	selectionbox.MinEdge = readV3F32(is);
 	selectionbox.MaxEdge = readV3F32(is);
-	pointable = readU8(is);
+	pointable = Pointabilities::deSerializePointabilityType(is);
 	visual = deSerializeString16(is);
 	visual_size = readV3F32(is);
 	textures.clear();
@@ -235,6 +237,11 @@ void ObjectProperties::deSerialize(std::istream &is)
 		if (bgcolor != NULL_BGCOLOR)
 			nametag_bgcolor = bgcolor;
 		else
-			nametag_bgcolor = nullopt;
+			nametag_bgcolor = std::nullopt;
+
+		tmp = readU8(is);
+		if (is.eof())
+			return;
+		rotate_selectionbox = tmp;
 	} catch (SerializationError &e) {}
 }

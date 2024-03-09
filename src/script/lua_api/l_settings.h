@@ -27,7 +27,6 @@ class Settings;
 class LuaSettings : public ModApiBase
 {
 private:
-	static const char className[];
 	static const luaL_Reg methods[];
 
 	// garbage collector
@@ -60,6 +59,9 @@ private:
 	// get_names(self) -> {key1, ...}
 	static int l_get_names(lua_State *L);
 
+	// has(self, key) -> boolean
+	static int l_has(lua_State *L);
+
 	// write(self) -> success
 	static int l_write(lua_State *L);
 
@@ -82,7 +84,7 @@ public:
 	// Creates a LuaSettings and leaves it on top of the stack
 	static int create_object(lua_State *L);
 
-	static LuaSettings *checkobject(lua_State *L, int narg);
-
 	static void Register(lua_State *L);
+
+	static const char className[];
 };

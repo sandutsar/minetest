@@ -25,6 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string>
 #include "irrlichttypes_extrabloated.h"
 #include "debug.h"
+#include "client/shader.h"
 #include "client/render/core.h"
 // include the shadow mapper classes too
 #include "client/shadows/dynamicshadowsrender.h"
@@ -43,9 +44,40 @@ class Minimap;
 
 class RenderingCore;
 
+// Instead of a mechanism to disable fog we just set it to be really far away
+#define FOG_RANGE_ALL (100000 * BS)
+
+/* Helpers */
+
+struct FpsControl {
+	FpsControl() : last_time(0), busy_time(0), sleep_time(0) {}
+
+	void reset();
+
+	void limit(IrrlichtDevice *device, f32 *dtime, bool assume_paused = false);
+
+	u32 getBusyMs() const { return busy_time / 1000; }
+
+	// all values in microseconds (us)
+	u64 last_time, busy_time, sleep_time;
+};
+
+// Populates fogColor, fogDistance, fogShadingParameter with values from Irrlicht
+class FogShaderConstantSetterFactory : public IShaderConstantSetterFactory
+{
+public:
+	FogShaderConstantSetterFactory() {};
+	virtual IShaderConstantSetter *create();
+};
+
+/* Rendering engine class */
+
 class RenderingEngine
 {
 public:
+	static const video::SColor MENU_SKY_COLOR;
+	static const float BASE_BLOOM_STRENGTH;
+
 	RenderingEngine(IEventReceiver *eventReceiver);
 	~RenderingEngine();
 
@@ -55,17 +87,19 @@ public:
 
 	static const VideoDriverInfo &getVideoDriverInfo(irr::video::E_DRIVER_TYPE type);
 	static float getDisplayDensity();
-	static v2u32 getDisplaySize();
 
-	bool setupTopLevelWindow(const std::string &name);
-	void setupTopLevelXorgWindow(const std::string &name);
+	bool setupTopLevelWindow();
 	bool setWindowIcon();
-	bool setXorgWindowIconFromPath(const std::string &icon_file);
-	static bool print_video_modes();
 	void cleanupMeshCache();
 
 	void removeMesh(const scene::IMesh* mesh);
 
+	/**
+	 * This takes 3d_mode into account - side-by-side will return a
+	 * halved horizontal size.
+	 *
+	 * @return "window" size
+	 */
 	static v2u32 getWindowSize()
 	{
 		sanity_check(s_singleton);
@@ -94,11 +128,6 @@ public:
 		return s_singleton->m_device;
 	}
 
-	u32 get_timer_time()
-	{
-		return m_device->getTimer()->getTime();
-	}
-
 	gui::IGUIEnvironment *get_gui_env()
 	{
 		return m_device->getGUIEnvironment();
@@ -106,11 +135,10 @@ public:
 
 	void draw_load_screen(const std::wstring &text,
 			gui::IGUIEnvironment *guienv, ITextureSource *tsrc,
-			float dtime = 0, int percent = 0, bool clouds = true);
+			float dtime = 0, int percent = 0, bool sky = true);
 
-	void draw_menu_scene(gui::IGUIEnvironment *guienv, float dtime, bool clouds);
 	void draw_scene(video::SColor skycolor, bool show_hud,
-			bool show_minimap, bool draw_wield_tool, bool draw_crosshair);
+			bool draw_wield_tool, bool draw_crosshair);
 
 	void initialize(Client *client, Hud *hud);
 	void finalize();
@@ -128,6 +156,10 @@ public:
 		return nullptr;
 	}
 	static std::vector<irr::video::E_DRIVER_TYPE> getSupportedVideoDrivers();
+
+	static void autosaveScreensizeAndCo(
+			const irr::core::dimension2d<u32> initial_screen_size,
+			const bool initial_window_maximized);
 
 private:
 	v2u32 _getWindowSize() const;

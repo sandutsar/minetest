@@ -1,7 +1,8 @@
 /*
    CGUITTFont FreeType class for Irrlicht
    Copyright (c) 2009-2010 John Norman
-   Copyright (c) 2016 Nathanaël Courant
+   Copyright (c) 2016 Nathanaëlle Courant
+   Copyright (c) 2023 Caleb Butler
 
    This software is provided 'as-is', without any express or implied
    warranty. In no event will the authors be held liable for any
@@ -34,8 +35,9 @@
 #include <irrlicht.h>
 #include <ft2build.h>
 #include <vector>
-#include <irrUString.h>
+#include <map>
 #include "util/enriched_string.h"
+#include "util/basic_macros.h"
 #include FT_FREETYPE_H
 
 namespace irr
@@ -45,23 +47,34 @@ namespace gui
 	struct SGUITTFace;
 	class CGUITTFont;
 
-	//! Class to assist in deleting glyphs.
-	class CGUITTAssistDelete
-	{
-		public:
-			template <class T, typename TAlloc>
-			static void Delete(core::array<T, TAlloc>& a)
-			{
-				TAlloc allocator;
-				allocator.deallocate(a.pointer());
-			}
-	};
-
 	//! Structure representing a single TrueType glyph.
 	struct SGUITTGlyph
 	{
 		//! Constructor.
-		SGUITTGlyph() : isLoaded(false), glyph_page(0), surface(0), parent(0) {}
+		SGUITTGlyph() :
+			isLoaded(false),
+			glyph_page(0),
+			source_rect(),
+			offset(),
+			advance(),
+			surface(0),
+			parent(0)
+		{}
+
+		DISABLE_CLASS_COPY(SGUITTGlyph);
+
+		//! This class would be trivially copyable except for the reference count on `surface`.
+		SGUITTGlyph(SGUITTGlyph &&other) :
+			isLoaded(other.isLoaded),
+			glyph_page(other.glyph_page),
+			source_rect(other.source_rect),
+			offset(other.offset),
+			advance(other.advance),
+			surface(other.surface),
+			parent(other.parent)
+		{
+			other.surface = 0;
+		}
 
 		//! Destructor.
 		~SGUITTGlyph() { unload(); }
@@ -125,10 +138,8 @@ namespace gui
 
 				bool flgmip = driver->getTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS);
 				driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
-#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR > 8
 				bool flgcpy = driver->getTextureCreationFlag(video::ETCF_ALLOW_MEMORY_COPY);
 				driver->setTextureCreationFlag(video::ETCF_ALLOW_MEMORY_COPY, true);
-#endif
 
 				// Set the texture color format.
 				switch (pixel_mode)
@@ -144,9 +155,8 @@ namespace gui
 
 				// Restore our texture creation flags.
 				driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, flgmip);
-#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR > 8
 				driver->setTextureCreationFlag(video::ETCF_ALLOW_MEMORY_COPY, flgcpy);
-#endif
+
 				return texture ? true : false;
 			}
 
@@ -219,9 +229,6 @@ namespace gui
 			//! \param transparency set the use_transparency flag
 			//! \return Returns a pointer to a CGUITTFont.  Will return 0 if the font failed to load.
 			static CGUITTFont* createTTFont(IGUIEnvironment *env, const io::path& filename, const u32 size, const bool antialias = true, const bool transparency = true, const u32 shadow = 0, const u32 shadow_alpha = 255);
-			static CGUITTFont* createTTFont(IrrlichtDevice *device, const io::path& filename, const u32 size, const bool antialias = true, const bool transparency = true);
-			static CGUITTFont* create(IGUIEnvironment *env, const io::path& filename, const u32 size, const bool antialias = true, const bool transparency = true);
-			static CGUITTFont* create(IrrlichtDevice *device, const io::path& filename, const u32 size, const bool antialias = true, const bool transparency = true);
 
 			//! Destructor
 			virtual ~CGUITTFont();
@@ -279,11 +286,9 @@ namespace gui
 
 			//! Returns the dimension of a text string.
 			virtual core::dimension2d<u32> getDimension(const wchar_t* text) const;
-			virtual core::dimension2d<u32> getDimension(const core::ustring& text) const;
 
 			//! Calculates the index of the character in the text which is on a specific position.
 			virtual s32 getCharacterFromPos(const wchar_t* text, s32 pixel_x) const;
-			virtual s32 getCharacterFromPos(const core::ustring& text, s32 pixel_x) const;
 
 			//! Sets global kerning width for the font.
 			virtual void setKerningWidth(s32 kerning);
@@ -293,14 +298,13 @@ namespace gui
 
 			//! Gets kerning values (distance between letters) for the font. If no parameters are provided,
 			virtual s32 getKerningWidth(const wchar_t* thisLetter=0, const wchar_t* previousLetter=0) const;
-			virtual s32 getKerningWidth(const uchar32_t thisLetter=0, const uchar32_t previousLetter=0) const;
+			virtual s32 getKerningWidth(const char32_t thisLetter=0, const char32_t previousLetter=0) const;
 
 			//! Returns the distance between letters
 			virtual s32 getKerningHeight() const;
 
 			//! Define which characters should not be drawn by the font.
 			virtual void setInvisibleCharacters(const wchar_t *s);
-			virtual void setInvisibleCharacters(const core::ustring& s);
 
 			//! Get the last glyph page if there's still available slots.
 			//! If not, it will return zero.
@@ -320,7 +324,7 @@ namespace gui
 			//! Create corresponding character's software image copy from the font,
 			//! so you can use this data just like any ordinary video::IImage.
 			//! \param ch The character you need
-			virtual video::IImage* createTextureFromChar(const uchar32_t& ch);
+			virtual video::IImage* createTextureFromChar(const char32_t& ch);
 
 			//! This function is for debugging mostly. If the page doesn't exist it returns zero.
 			//! \param page_index Simply return the texture handle of a given page index.
@@ -345,10 +349,18 @@ namespace gui
 		private:
 			// Manages the FreeType library.
 			static FT_Library c_library;
-			static core::map<io::path, SGUITTFace*> c_faces;
+			static std::map<io::path, SGUITTFace*> c_faces;
 			static bool c_libraryLoaded;
 			static scene::IMesh* shared_plane_ptr_;
 			static scene::SMesh  shared_plane_;
+
+			// Helper functions for the same-named public member functions above
+			// (Since std::u32string is nicer to work with than wchar_t *)
+			core::dimension2d<u32> getDimension(const std::u32string& text) const;
+			s32 getCharacterFromPos(const std::u32string& text, s32 pixel_x) const;
+
+			// Helper function for the above helper functions :P
+			std::u32string convertWCharToU32String(const wchar_t* const) const;
 
 			CGUITTFont(IGUIEnvironment *env);
 			bool load(const io::path& filename, const u32 size, const bool antialias, const bool transparency);
@@ -364,13 +376,13 @@ namespace gui
 				else load_flags |= FT_LOAD_TARGET_NORMAL;
 			}
 			u32 getWidthFromCharacter(wchar_t c) const;
-			u32 getWidthFromCharacter(uchar32_t c) const;
+			u32 getWidthFromCharacter(char32_t c) const;
 			u32 getHeightFromCharacter(wchar_t c) const;
-			u32 getHeightFromCharacter(uchar32_t c) const;
+			u32 getHeightFromCharacter(char32_t c) const;
 			u32 getGlyphIndexByChar(wchar_t c) const;
-			u32 getGlyphIndexByChar(uchar32_t c) const;
+			u32 getGlyphIndexByChar(char32_t c) const;
 			core::vector2di getKerning(const wchar_t thisLetter, const wchar_t previousLetter) const;
-			core::vector2di getKerning(const uchar32_t thisLetter, const uchar32_t previousLetter) const;
+			core::vector2di getKerning(const char32_t thisLetter, const char32_t previousLetter) const;
 			core::dimension2d<u32> getDimensionUntilEndOfLine(const wchar_t* p) const;
 
 			void createSharedPlane();
@@ -388,7 +400,7 @@ namespace gui
 
 			s32 GlobalKerningWidth;
 			s32 GlobalKerningHeight;
-			core::ustring Invisible;
+			std::u32string Invisible;
 			u32 shadow_offset;
 			u32 shadow_alpha;
 

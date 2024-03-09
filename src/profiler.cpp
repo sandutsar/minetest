@@ -50,6 +50,9 @@ ScopeProfiler::~ScopeProfiler()
 		case SPT_GRAPH_ADD:
 			m_profiler->graphAdd(m_name, duration);
 			break;
+		case SPT_MAX:
+			m_profiler->max(m_name, duration);
+			break;
 		}
 	}
 	delete m_timer;
@@ -64,7 +67,7 @@ void Profiler::add(const std::string &name, float value)
 {
 	MutexAutoLock lock(m_mutex);
 	{
-		/* No average shall have been used; mark add used as -2 */
+		/* No average shall have been used; mark add/max used as -2 */
 		std::map<std::string, int>::iterator n = m_avgcounts.find(name);
 		if (n == m_avgcounts.end()) {
 			m_avgcounts[name] = -2;
@@ -80,6 +83,29 @@ void Profiler::add(const std::string &name, float value)
 			m_data[name] = value;
 		else
 			n->second += value;
+	}
+}
+
+void Profiler::max(const std::string &name, float value)
+{
+	MutexAutoLock lock(m_mutex);
+	{
+		/* No average shall have been used; mark add/max used as -2 */
+		auto n = m_avgcounts.find(name);
+		if (n == m_avgcounts.end()) {
+			m_avgcounts[name] = -2;
+		} else {
+			if (n->second == -1)
+				n->second = -2;
+			assert(n->second == -2);
+		}
+	}
+	{
+		auto n = m_data.find(name);
+		if (n == m_data.end())
+			m_data[name] = value;
+		else if (value > n->second)
+			n->second = value;
 	}
 }
 
@@ -137,7 +163,7 @@ int Profiler::print(std::ostream &o, u32 page, u32 pagecount)
 {
 	GraphValues values;
 	getPage(values, page, pagecount);
-	char num_buf[50];
+	char buffer[50];
 
 	for (const auto &i : values) {
 		o << "  " << i.first << " ";
@@ -146,16 +172,17 @@ int Profiler::print(std::ostream &o, u32 page, u32 pagecount)
 			continue;
 		}
 
-		s32 space = 44 - i.first.size();
-		for (s32 j = 0; j < space; j++) {
-			if ((j & 1) && j < space - 1)
-				o << ".";
-			else
-				o << " ";
+		{
+			// Padding
+			s32 space = std::max(0, 44 - (s32)i.first.size());
+			memset(buffer, '_', space);
+			buffer[space] = '\0';
+			o << buffer;
 		}
-		porting::mt_snprintf(num_buf, sizeof(num_buf), "% 4ix % 3g",
-				getAvgCount(i.first), i.second);
-		o << num_buf << std::endl;
+
+		porting::mt_snprintf(buffer, sizeof(buffer), "% 5ix % 7g",
+				getAvgCount(i.first), floor(i.second * 1000.0) / 1000.0);
+		o << buffer << std::endl;
 	}
 	return values.size();
 }

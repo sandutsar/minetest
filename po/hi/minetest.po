@@ -1,15 +1,10 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the minetest package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: minetest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-27 19:42+0100\n"
-"PO-Revision-Date: 2020-10-06 14:26+0000\n"
-"Last-Translator: Eyekay49 <satvikpatwardhan@gmail.com>\n"
+"POT-Creation-Date: 2023-12-03 18:48+0100\n"
+"PO-Revision-Date: 2023-11-17 00:07+0000\n"
+"Last-Translator: Ritwik <ritwikraghav14@gmail.com>\n"
 "Language-Team: Hindi <https://hosted.weblate.org/projects/minetest/minetest/"
 "hi/>\n"
 "Language: hi\n"
@@ -17,82 +12,78 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.3-dev\n"
+"X-Generator: Weblate 5.2\n"
 
 #: builtin/client/chatcommands.lua
 msgid "Clear the out chat queue"
-msgstr ""
+msgstr "बातचीत कतार साफ करें"
 
 #: builtin/client/chatcommands.lua
 msgid "Empty command."
-msgstr ""
+msgstr "रिक्त आदेश।"
 
 #: builtin/client/chatcommands.lua
-#, fuzzy
 msgid "Exit to main menu"
-msgstr "बंद करके मेनू पर जाएं"
+msgstr "वापस मुख्य मेन्यू पर जायें"
 
 #: builtin/client/chatcommands.lua
-#, fuzzy
 msgid "Invalid command: "
-msgstr "लोकल कमांड"
+msgstr "अमान्य आदेश - "
 
 #: builtin/client/chatcommands.lua
 msgid "Issued command: "
-msgstr ""
+msgstr "निर्गत आदेश - "
 
 #: builtin/client/chatcommands.lua
-#, fuzzy
 msgid "List online players"
-msgstr "एक-खिलाडी"
+msgstr "ऑनलाइन खिलाड़ियों को सूचिबद्ध करें"
 
 #: builtin/client/chatcommands.lua
-#, fuzzy
 msgid "Online players: "
-msgstr "एक-खिलाडी"
+msgstr "ऑनलाइन खिलाड़ी - "
 
 #: builtin/client/chatcommands.lua
 msgid "The out chat queue is now empty."
-msgstr ""
+msgstr "बातचीत कतार अब साफ है।"
 
 #: builtin/client/chatcommands.lua
 msgid "This command is disabled by server."
-msgstr ""
+msgstr "यह आदेश सर्वर द्वारा अक्षम किया गया है।"
 
 #: builtin/client/death_formspec.lua src/client/game.cpp
 msgid "Respawn"
-msgstr "वापस ज़िंदा होएं"
+msgstr "पुनः जीवित हों"
 
 #: builtin/client/death_formspec.lua src/client/game.cpp
 msgid "You died"
 msgstr "आपकी मौत हो गयी"
 
 #: builtin/common/chatcommands.lua
-#, fuzzy
 msgid "Available commands:"
-msgstr "लोकल कमांड"
+msgstr "उपलब्ध आदेश :"
 
 #: builtin/common/chatcommands.lua
-#, fuzzy
 msgid "Available commands: "
-msgstr "लोकल कमांड"
+msgstr "उपलब्ध आदेश - "
 
 #: builtin/common/chatcommands.lua
 msgid "Command not available: "
-msgstr ""
+msgstr "अनुपलब्ध आदेश - "
 
 #: builtin/common/chatcommands.lua
 msgid "Get help for commands"
-msgstr ""
+msgstr "आदेशों से जुड़ी सहायता पायें"
 
 #: builtin/common/chatcommands.lua
 msgid ""
 "Use '.help <cmd>' to get more information, or '.help all' to list everything."
 msgstr ""
+"अधिक जानकारी पाने के लिये '.help <cmd>' का प्रयोग करें या '.help all' द्वारा पूर्ण "
+"सूची देखें।"
 
 #: builtin/common/chatcommands.lua
 msgid "[all | <cmd>]"
-msgstr ""
+msgstr "[सभी | <cmd>]"
 
 #: builtin/fstk/dialog.lua builtin/fstk/ui.lua src/gui/modalMenu.cpp
 msgid "OK"
@@ -100,91 +91,287 @@ msgstr "ठीक है"
 
 #: builtin/fstk/ui.lua
 msgid "<none available>"
-msgstr ""
+msgstr "<अनुपलब्ध>"
 
 #: builtin/fstk/ui.lua
 msgid "An error occurred in a Lua script:"
-msgstr "Lua कोड में यह परेशानी हुई :"
+msgstr "Lua स्क्रिप्ट में एक त्रुटि हुई :"
 
 #: builtin/fstk/ui.lua
 msgid "An error occurred:"
-msgstr "एक खराबी हो गयी :"
+msgstr "एक त्रुटि हुई :"
 
 #: builtin/fstk/ui.lua
 msgid "Main menu"
-msgstr "मुख्य पृष्ठ"
+msgstr "मुख्य मेन्यु"
 
 #: builtin/fstk/ui.lua
 msgid "Reconnect"
-msgstr "वापस कनेक्ट करें"
+msgstr "पुनः जुड़ें"
 
 #: builtin/fstk/ui.lua
 msgid "The server has requested a reconnect:"
-msgstr "सर्वर वापस कनेक्ट करना चाहता है :"
+msgstr "सर्वर ने पुनः जुड़ने का अनुरोध किया है :"
 
 #: builtin/mainmenu/common.lua
 msgid "Protocol version mismatch. "
-msgstr "प्रोटोकॉल संख्या एक नहीं है। "
+msgstr "प्रोटोकॉल संस्करण बेमेल है। "
 
 #: builtin/mainmenu/common.lua
 msgid "Server enforces protocol version $1. "
-msgstr "सर्वर केवल प्रोटोकॉल $1 लेता है। "
+msgstr "सर्वर $1 प्रोटोकॉल संस्करण की बाध्यता करता है। "
 
 #: builtin/mainmenu/common.lua
 msgid "Server supports protocol versions between $1 and $2. "
-msgstr "सर्वर केवल प्रोटोकॉल $1 से $2 ही लेता है। "
+msgstr "सर्वर $1 से $2 के बीच के प्रोटोकॉल संस्करणों से सहयोग करता है। "
 
 #: builtin/mainmenu/common.lua
 msgid "We only support protocol version $1."
-msgstr "हम केवल प्रोटोकॉल $1 ही लेते हैं।"
+msgstr "हम केवल $1 प्रोटोकॉल संस्करण से सहयोग करते हैं।"
 
 #: builtin/mainmenu/common.lua
 msgid "We support protocol versions between version $1 and $2."
-msgstr "हम प्रोटोकॉल $1 से $2 ही लेते हैं।"
+msgstr "हम $1 और $2 के बीच के प्रोटोकॉल संस्करणों से सहयोग करते हैं।"
 
-#: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/dlg_contentstore.lua
-#: builtin/mainmenu/dlg_create_world.lua
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "\"$1\" already exists. Would you like to overwrite it?"
+msgstr "\"$1\" पहले से मौजूद है। क्या आप इसे अधिलेखित करना चाहेंगे?"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "$1 and $2 dependencies will be installed."
+msgstr "$1 और $2 निर्भरतायें स्थापित की जायेंगी।"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "$1 by $2"
+msgstr ""
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid ""
+"$1 downloading,\n"
+"$2 queued"
+msgstr ""
+"$1 डाउनलोड हो रहा है,\n"
+"$2 कतारबद्ध"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "$1 downloading..."
+msgstr "$1 डाउनलोड हो रहा है ..."
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "$1 required dependencies could not be found."
+msgstr "$1 आवश्यक निर्भरतायें नहीं मिल सकीं।"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "$1 will be installed, and $2 dependencies will be skipped."
+msgstr "$1 संस्थापित किया जायेगा, और $2 निर्भरतायें छोड़ दी जायेंगी।"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "All packages"
+msgstr "सभी संदूक"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Already installed"
+msgstr "पहले ही संस्थापित है"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Back to Main Menu"
+msgstr "वापस मुख्य पृष्ठ पर जाएं"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Base Game:"
+msgstr "मूल खेल :"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+#: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/dlg_create_world.lua
 #: builtin/mainmenu/dlg_delete_content.lua
-#: builtin/mainmenu/dlg_delete_world.lua
+#: builtin/mainmenu/dlg_delete_world.lua builtin/mainmenu/dlg_register.lua
 #: builtin/mainmenu/dlg_rename_modpack.lua
-#: builtin/mainmenu/dlg_settings_advanced.lua src/client/keycode.cpp
-#: src/gui/guiConfirmRegistration.cpp src/gui/guiKeyChangeMenu.cpp
-#: src/gui/guiPasswordChange.cpp
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
+#: src/gui/guiKeyChangeMenu.cpp src/gui/guiPasswordChange.cpp
 msgid "Cancel"
-msgstr "रोकें"
+msgstr "रद्द करें"
 
-#: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/dlg_contentstore.lua
-#: builtin/mainmenu/tab_content.lua
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "ContentDB is not available when Minetest was compiled without cURL"
+msgstr "cURL के बिना माइनटेस्ट संकलित किये जाने के कारण ContentDB उपलब्ध नहीं है"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+#: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/tab_content.lua
 msgid "Dependencies:"
-msgstr "निर्भरताएं :"
+msgstr "निर्भरतायें :"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Downloading..."
+msgstr "डाउनलोड हो रहा है ..."
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Error installing \"$1\": $2"
+msgstr ""
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+#, fuzzy
+msgid "Failed to download \"$1\""
+msgstr "$1 डाउनलोड विफल"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Failed to download $1"
+msgstr "$1 डाउनलोड विफल"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+#, fuzzy
+msgid "Failed to extract \"$1\" (unsupported file type or broken archive)"
+msgstr "संस्थापन : असमर्थित फाइल प्रकार या विकृत अभिलेख"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Games"
+msgstr "खेल"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Install"
+msgstr "संस्थापित करें"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Install $1"
+msgstr "$1 संस्थापित करें"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Install missing dependencies"
+msgstr "अनुपस्थित निर्भरतायें संस्थापित करें"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+#: builtin/mainmenu/serverlistmgr.lua src/client/game.cpp
+msgid "Loading..."
+msgstr "लोड हो रहा है ..."
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Mods"
+msgstr "माॅड"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "No packages could be retrieved"
+msgstr "कोई संदूक प्राप्त नहीं किया जा सका"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+#: builtin/mainmenu/settings/dlg_settings.lua
+msgid "No results"
+msgstr "परिणाम शून्य"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "No updates"
+msgstr "अद्यतन अनुपलब्ध"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Not found"
+msgstr "नहीं मिला"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Overwrite"
+msgstr "ऊपर लिखें"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Please check that the base game is correct."
+msgstr "जाँच लें कि मूल खेल शुद्ध है।"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Queued"
+msgstr "कतारबद्ध"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Texture packs"
+msgstr "कला संकुल"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "The package $1 was not found."
+msgstr ""
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+#: builtin/mainmenu/tab_content.lua
+msgid "Uninstall"
+msgstr "हटाऐं"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+#: builtin/mainmenu/tab_content.lua
+msgid "Update"
+msgstr "अद्यतन करें"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "Update All [$1]"
+msgstr "सब अद्यतन करें [$1]"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "View more information in a web browser"
+msgstr "वेब विचरक में अतिरिक्त जानकारी पायें"
+
+#: builtin/mainmenu/content/dlg_contentstore.lua
+msgid "You need to install a game before you can install a mod"
+msgstr ""
+
+#: builtin/mainmenu/content/pkgmgr.lua
+msgid "$1 (Enabled)"
+msgstr "($1) चालू"
+
+#: builtin/mainmenu/content/pkgmgr.lua
+msgid "$1 mods"
+msgstr "$1 यह सब मॉड"
+
+#: builtin/mainmenu/content/pkgmgr.lua
+msgid "Failed to install $1 to $2"
+msgstr "$2 में $1 को इन्स्टाल नहीं किया जा सका"
+
+#: builtin/mainmenu/content/pkgmgr.lua
+#, fuzzy
+msgid "Install: Unable to find suitable folder name for $1"
+msgstr "माॅड इन्स्टाल: माॅडपैक $1 के लिए सही फोल्डर नहीं ढूंढा जा सका"
+
+#: builtin/mainmenu/content/pkgmgr.lua
+#, fuzzy
+msgid "Unable to find a valid mod, modpack, or game"
+msgstr "सही माॅड या माॅडपैक नहीं ढूंढ पाया गया"
+
+#: builtin/mainmenu/content/pkgmgr.lua
+#, fuzzy
+msgid "Unable to install a $1 as a $2"
+msgstr "मॉड को $1 के रूप में इन्स्टाल नहीं किया जा सका"
+
+#: builtin/mainmenu/content/pkgmgr.lua
+msgid "Unable to install a $1 as a texture pack"
+msgstr "$1 कला संकुल के रूप में इन्स्टाल नहीं किया जा सका"
+
+#: builtin/mainmenu/dlg_config_world.lua
+msgid "(Enabled, has error)"
+msgstr "(सक्षम, त्रुटि है)"
+
+#: builtin/mainmenu/dlg_config_world.lua
+msgid "(Unsatisfied)"
+msgstr "(असंतुष्ट)"
 
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "Disable all"
-msgstr "प्रत्येक रोकें"
+msgstr "सब अक्षम करें"
 
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "Disable modpack"
-msgstr "माॅडपैक रोकें"
+msgstr "माॅडपैक अक्षम करें"
 
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "Enable all"
-msgstr "प्रत्येक चालू करें"
+msgstr "सब सक्षम करें"
 
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "Enable modpack"
-msgstr "माॅडपैक चालू करें"
+msgstr "माॅडपैक सक्षम करें"
 
 #: builtin/mainmenu/dlg_config_world.lua
 msgid ""
 "Failed to enable mod \"$1\" as it contains disallowed characters. Only "
 "characters [a-z0-9_] are allowed."
 msgstr ""
-"मना किए गए वर्णों के कारण माॅड \"$1\" चालू नहीं हो सका। कृपया [a-z0-9] अंग्रेजी वर्ण का "
-"ही प्रयोग करें।"
+"अस्वीकृत अक्षरों के कारण माॅड \"$1\" सक्षम नहीं हो सका। केवल [a-z0-9] अक्षरों का ही "
+"प्रयोग करें।"
 
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "Find More Mods"
-msgstr "और मोड खोजें"
+msgstr "अधिक मॉड खोजें"
 
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "Mod:"
@@ -192,187 +379,49 @@ msgstr "माॅड :"
 
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No (optional) dependencies"
-msgstr "कोई (अनावश्यक) निर्भरताएं नहीं हैं"
+msgstr "(वैकल्पिक) निर्भरतायें नहीं हैं"
 
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No game description provided."
-msgstr "खेल ने अपने बारे में कुछ नहीं बताया।"
+msgstr "खेल का विवरण उपलब्ध नहीं है।"
 
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No hard dependencies"
-msgstr "कोई आवश्यक निर्भरताएं नहीं"
+msgstr "आवश्यक निर्भरताएं नहीं हैं"
 
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No modpack description provided."
-msgstr "माॅडपैक ने अपने बारे में कुछ नहीं बताया।"
+msgstr "माॅडपैक विवरण उपलब्ध नहीं है।"
 
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No optional dependencies"
-msgstr "कोई अनावश्यक निर्भरताएं नहीं"
+msgstr "वैकल्पिक निर्भरतायें नहीं हैं"
 
 #: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/tab_content.lua
 msgid "Optional dependencies:"
-msgstr "अनावश्यक निर्भरताएं :"
+msgstr "वैकल्पिक निर्भरतायें :"
 
 #: builtin/mainmenu/dlg_config_world.lua
-#: builtin/mainmenu/dlg_settings_advanced.lua src/gui/guiKeyChangeMenu.cpp
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Save"
-msgstr "सेव करें"
+msgstr "सहेजें"
 
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "World:"
-msgstr "दुनिया :"
+msgstr "विश्व :"
 
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "enabled"
-msgstr "चालू"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "\"$1\" already exists. Would you like to overwrite it?"
-msgstr ""
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "$1 and $2 dependencies will be installed."
-msgstr ""
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "$1 by $2"
-msgstr ""
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid ""
-"$1 downloading,\n"
-"$2 queued"
-msgstr ""
-
-#: builtin/mainmenu/dlg_contentstore.lua
-#, fuzzy
-msgid "$1 downloading..."
-msgstr "लोड हो रहा है ..."
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "$1 required dependencies could not be found."
-msgstr ""
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "$1 will be installed, and $2 dependencies will be skipped."
-msgstr ""
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "All packages"
-msgstr "सभी पैकेज"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-#, fuzzy
-msgid "Already installed"
-msgstr "की पहले से इस्तेमाल में है"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "Back to Main Menu"
-msgstr "वापस मुख्य पृष्ठ पर जाएं"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-#, fuzzy
-msgid "Base Game:"
-msgstr "खेल चलाएं"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "ContentDB is not available when Minetest was compiled without cURL"
-msgstr "cURL के बगैर कंपाइल होने के कारण Content DB उपलब्ध नहीं है"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "Downloading..."
-msgstr "लोड हो रहा है ..."
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "Failed to download $1"
-msgstr "$1 का डाऊनलोड असफल हुआ"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Games"
-msgstr "अनेक खेल"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "Install"
-msgstr "इन्स्टाल करें"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-#, fuzzy
-msgid "Install $1"
-msgstr "इन्स्टाल करें"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-#, fuzzy
-msgid "Install missing dependencies"
-msgstr "अनावश्यक निर्भरताएं :"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-#, fuzzy
-msgid "Install: Unsupported file type or broken archive"
-msgstr "इन्स्टाल : \"$1\" का फाईल टाईप अंजान है याफिर आरकाइव खराब है"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Mods"
-msgstr "माॅड"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "No packages could be retrieved"
-msgstr "कोई पैकेज नहीं ला पाया गया"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "No results"
-msgstr "कुछ नहीं मिला"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-#, fuzzy
-msgid "No updates"
-msgstr "नया संस्करण इन्स्टाल करें"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "Not found"
-msgstr ""
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "Overwrite"
-msgstr ""
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "Please check that the base game is correct."
-msgstr ""
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "Queued"
-msgstr ""
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "Texture packs"
-msgstr "कला संकुल"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "Uninstall"
-msgstr "हटाऐं"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "Update"
-msgstr "नया संस्करण इन्स्टाल करें"
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "Update All [$1]"
-msgstr ""
-
-#: builtin/mainmenu/dlg_contentstore.lua
-msgid "View more information in a web browser"
-msgstr ""
+msgstr "सक्षम"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "A world named \"$1\" already exists"
-msgstr "\"$1\" नामक दुनिया पहले से ही है"
+msgstr "\"$1\" नामक विश्व पहले से ही है"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Additional terrain"
-msgstr "अतिरिक्त भूमि"
+msgstr "अतिरिक्त भूभाग"
 
 #: builtin/mainmenu/dlg_create_world.lua src/settings_translation_file.cpp
 msgid "Altitude chill"
@@ -380,39 +429,35 @@ msgstr "ऊंचाई की ठंडक"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Altitude dry"
-msgstr "ऊंचाई का सूखापन"
+msgstr "ऊंचाई की शुष्कता"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Biome blending"
-msgstr "बायोम परिवर्तन नज़र न आना (Biome Blending)"
+msgstr "जीवोम सम्मिश्रण"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Biomes"
-msgstr "बायोम"
+msgstr "जीवोम"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Caverns"
-msgstr "गुफाएं"
+msgstr "कंदरायें"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Caves"
-msgstr "गुफाएं"
+msgstr "गुफायें"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Create"
-msgstr "बनाइए"
+msgstr "बनायें"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Decorations"
-msgstr "सजावट"
+msgstr "अलंकृतियाँ"
 
 #: builtin/mainmenu/dlg_create_world.lua
-msgid "Download a game, such as Minetest Game, from minetest.net"
-msgstr "मैनटेस्ट खेल जैसे अन्य खेल minetest.net से डाऊनलोड किए जा सकते हैं"
-
-#: builtin/mainmenu/dlg_create_world.lua
-msgid "Download one from minetest.net"
-msgstr "आप किसी भी खेल को minetest.net से डाऊनलोड कर सकते हैं"
+msgid "Development Test is meant for developers."
+msgstr "विकाशन परीक्षण विकासकों के लिये है।"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Dungeons"
@@ -420,27 +465,23 @@ msgstr "कालकोठरियां"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Flat terrain"
-msgstr "समतल भूमि"
+msgstr "समतल भूभाग"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Floating landmasses in the sky"
-msgstr "आसमान में तैरते हुए भूमि-खंड"
+msgstr "आकाश में तैरते भू-खंड"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Floatlands (experimental)"
-msgstr "फ्लोटलैंड्स (आसमान में तैरते हुए भूमि-खंड) (प्रायोगिक)"
-
-#: builtin/mainmenu/dlg_create_world.lua src/settings_translation_file.cpp
-msgid "Game"
-msgstr "खेल"
+msgstr "प्लवभूमि (प्रायोगिक)"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Generate non-fractal terrain: Oceans and underground"
-msgstr "Non-fractal भूमि तैयार हो : समुद्र व भूमि के नीचे"
+msgstr "अखंडित भूभाग उपजायें : समुद्र और भूमिगत"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Hills"
-msgstr "छोटे पहाड़"
+msgstr "पहाड़ियाँ"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Humid rivers"
@@ -449,6 +490,10 @@ msgstr "नम नदियाँ"
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Increases humidity around rivers"
 msgstr "नदियों के आसपास नमी बढ़ाता है"
+
+#: builtin/mainmenu/dlg_create_world.lua
+msgid "Install another game"
+msgstr "अन्य खेल संस्थापित करें"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Lakes"
@@ -460,31 +505,31 @@ msgstr "कम आर्द्रता और उच्च गर्मी क�
 
 #: builtin/mainmenu/dlg_create_world.lua src/settings_translation_file.cpp
 msgid "Mapgen"
-msgstr "नक्शा स्रोत"
+msgstr "मानचित्र जनित्र"
 
 #: builtin/mainmenu/dlg_create_world.lua src/settings_translation_file.cpp
 msgid "Mapgen flags"
-msgstr ""
+msgstr "मानचित्र जनित्र पताकायें"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Mapgen-specific flags"
-msgstr ""
+msgstr "मानचित्र जनित्र विशिष्ट पताकायें"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Mountains"
-msgstr "पहाड़ों"
+msgstr "पर्वत"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Mud flow"
-msgstr "कीचड़ का बहाव"
+msgstr "पंक प्रवाह"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Network of tunnels and caves"
-msgstr "सुरंगों और गुफाओं का नेटवर्क"
+msgstr "सुरंगों और गुफाओं का संजाल"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "No game selected"
-msgstr "कोई खेल चूना नहीं गया है"
+msgstr "कोई खेल चुना नहीं गया है"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Reduces heat with altitude"
@@ -503,23 +548,23 @@ msgid "Sea level rivers"
 msgstr "समुद्र तल की नदियाँ"
 
 #: builtin/mainmenu/dlg_create_world.lua
-#: builtin/mainmenu/dlg_settings_advanced.lua
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
 msgid "Seed"
 msgstr "बीज"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Smooth transition between biomes"
-msgstr "बायोम के बीच में धीरे-धीरे परिवर्तन"
+msgstr "जीवोमों के बीच सहज परिवर्तन"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid ""
 "Structures appearing on the terrain (no effect on trees and jungle grass "
 "created by v6)"
-msgstr "भूमि पर बनावटें (v6 के पेड़ व जंगली घास पर कोई असर नहीं)"
+msgstr "भूभाग पर दिखती संरचनायें (v6 द्वारा निर्मित पेड़ों व जंगली घास पर कोई असर नहीं)"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Structures appearing on the terrain, typically trees and plants"
-msgstr "इलाके में दिखने वाली संरचनाएं, आमतौर पर पेड़-पौधे"
+msgstr "भूभाग पर दिखती संरचनायें, विशेषतः पेड़-पौधे"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Temperate, Desert"
@@ -531,58 +576,107 @@ msgstr "शीतोष्ण, रेगिस्तान, जंगल"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Temperate, Desert, Jungle, Tundra, Taiga"
-msgstr "शीतोष्ण, रेगिस्तान, जंगल, टुंड्रा, तायगा"
+msgstr "शीतोष्ण, रेगिस्तान, जंगल, टुंड्रा, टैगा"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Terrain surface erosion"
-msgstr "इलाके की सतह का कटाव"
+msgstr "भूभाग सतही क्षरण"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Trees and jungle grass"
-msgstr "पेड़ और जंगल की घास"
+msgstr "पेड़ और जंगली घास"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Vary river depth"
-msgstr "नदी की गहराईयों में अंतर"
+msgstr "नदी की गहराई में परिवर्तन करें"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Very large caverns deep in the underground"
-msgstr ""
-
-#: builtin/mainmenu/dlg_create_world.lua
-msgid "Warning: The Development Test is meant for developers."
-msgstr ""
-"चेतावनी : न्यूनतम विकास खेल (Minimal development test) खेल बनाने वालों के लिए है।"
+msgstr "भूगर्भ में स्थित अतिविशाल कंदरायें"
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "World name"
-msgstr "दुनिया का नाम"
-
-#: builtin/mainmenu/dlg_create_world.lua
-msgid "You have no games installed."
-msgstr "आपने कोई खेल इन्स्टाल नहीं किया है।"
+msgstr "विश्व का नाम"
 
 #: builtin/mainmenu/dlg_delete_content.lua
 msgid "Are you sure you want to delete \"$1\"?"
-msgstr "क्या आप सचमुच \"$1\" को रद्द करना चाहते हैं?"
+msgstr "क्या आप सचमुच \"$1\" को हटाना चाहते हैं?"
 
 #: builtin/mainmenu/dlg_delete_content.lua
 #: builtin/mainmenu/dlg_delete_world.lua builtin/mainmenu/tab_local.lua
-#: src/client/keycode.cpp
 msgid "Delete"
-msgstr "रद्द करें"
+msgstr "हटायें"
 
 #: builtin/mainmenu/dlg_delete_content.lua
 msgid "pkgmgr: failed to delete \"$1\""
-msgstr "pkgmgr: \"$1\" रद्द नहीं किया जा सका"
+msgstr "pkgmgr: \"$1\" हटाया नहीं जा सका"
 
 #: builtin/mainmenu/dlg_delete_content.lua
 msgid "pkgmgr: invalid path \"$1\""
-msgstr "pkgmgr: \"$1\" फाईल पार गलत है"
+msgstr "pkgmgr: \"$1\" अमान्य पथ"
 
 #: builtin/mainmenu/dlg_delete_world.lua
 msgid "Delete World \"$1\"?"
-msgstr "दुनिया रद्द करें?"
+msgstr "\"$1\" विश्व हटायें?"
+
+#: builtin/mainmenu/dlg_register.lua src/gui/guiPasswordChange.cpp
+msgid "Confirm Password"
+msgstr "कूटशब्द की पुष्टि करें"
+
+#: builtin/mainmenu/dlg_register.lua
+msgid "Joining $1"
+msgstr "$1 से जुड़ रहा है"
+
+#: builtin/mainmenu/dlg_register.lua
+msgid "Missing name"
+msgstr ""
+
+#: builtin/mainmenu/dlg_register.lua builtin/mainmenu/tab_local.lua
+#: builtin/mainmenu/tab_online.lua
+msgid "Name"
+msgstr ""
+
+#: builtin/mainmenu/dlg_register.lua builtin/mainmenu/tab_local.lua
+#: builtin/mainmenu/tab_online.lua
+#, fuzzy
+msgid "Password"
+msgstr "नया पासवर्ड"
+
+#: builtin/mainmenu/dlg_register.lua
+#, fuzzy
+msgid "Passwords do not match"
+msgstr "पासवर्ड अलग-अलग हैं!"
+
+#: builtin/mainmenu/dlg_register.lua builtin/mainmenu/tab_online.lua
+#, fuzzy
+msgid "Register"
+msgstr "पंजीकरण व खेलें"
+
+#: builtin/mainmenu/dlg_reinstall_mtg.lua
+msgid "Dismiss"
+msgstr ""
+
+#: builtin/mainmenu/dlg_reinstall_mtg.lua
+msgid ""
+"For a long time, the Minetest engine shipped with a default game called "
+"\"Minetest Game\". Since Minetest 5.8.0, Minetest ships without a default "
+"game."
+msgstr ""
+
+#: builtin/mainmenu/dlg_reinstall_mtg.lua
+msgid ""
+"If you want to continue playing in your Minetest Game worlds, you need to "
+"reinstall Minetest Game."
+msgstr ""
+
+#: builtin/mainmenu/dlg_reinstall_mtg.lua
+msgid "Minetest Game is no longer installed by default"
+msgstr ""
+
+#: builtin/mainmenu/dlg_reinstall_mtg.lua
+#, fuzzy
+msgid "Reinstall Minetest Game"
+msgstr "अन्य खेल संस्थापित करें"
 
 #: builtin/mainmenu/dlg_rename_modpack.lua
 msgid "Accept"
@@ -598,181 +692,37 @@ msgid ""
 "override any renaming here."
 msgstr "modpack.conf फाईल में इस माॅडपैक को जो नाम दिया गया है वही माना जाएगा।"
 
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "(No description of setting given)"
-msgstr "(सेटिंग के बारे में कुछ नहीं बताया गया है)"
+#: builtin/mainmenu/dlg_version_info.lua
+msgid "A new $1 version is available"
+msgstr "एक नया $1 संस्करण उपलब्ध है"
 
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "2D Noise"
-msgstr "द्वि आयामी नॉइस"
+#: builtin/mainmenu/dlg_version_info.lua
+msgid ""
+"Installed version: $1\n"
+"New version: $2\n"
+"Visit $3 to find out how to get the newest version and stay up to date with "
+"features and bugfixes."
+msgstr ""
+"संस्थापित संस्करण : $1\n"
+"नया संस्करण : $2\n"
+"नया संस्करण पाने और विशेषताओं और त्रुटि-सुधारों के साथ अद्यतन करने का तरीका जानने के लिये "
+"$3 पर जायें।"
 
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "< Back to Settings page"
-msgstr "वापस सेटिंग पृष्ठ पर जाएं"
+#: builtin/mainmenu/dlg_version_info.lua
+msgid "Later"
+msgstr "बाद में"
 
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Browse"
-msgstr "ढूंढें"
+#: builtin/mainmenu/dlg_version_info.lua
+msgid "Never"
+msgstr "कभी नहीं"
 
-#: builtin/mainmenu/dlg_settings_advanced.lua builtin/mainmenu/tab_settings.lua
-msgid "Disabled"
-msgstr "रुका हुआ"
+#: builtin/mainmenu/dlg_version_info.lua
+msgid "Visit website"
+msgstr "जालस्थल पर जायें"
 
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Edit"
-msgstr "बदलें"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Enabled"
-msgstr "चालू"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Lacunarity"
-msgstr "लैकुनारिटी"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Octaves"
-msgstr "सप्टक (आक्टेव)"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua src/settings_translation_file.cpp
-msgid "Offset"
-msgstr "आफसेट"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-#, fuzzy
-msgid "Persistence"
-msgstr "हठ (पर्सिस्टेन्स)"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Please enter a valid integer."
-msgstr "कृपया एक पूर्णांक (integer) भरें।"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Please enter a valid number."
-msgstr "कृपया एक अंक भरें।"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Restore Default"
-msgstr "मूल चुनें"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua src/settings_translation_file.cpp
-msgid "Scale"
-msgstr "स्केल"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua builtin/mainmenu/tab_online.lua
-msgid "Search"
-msgstr "ढूंढें"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Select directory"
-msgstr "फाईल पाथ चुनें"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Select file"
-msgstr "फाईल चुनें"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Show technical names"
-msgstr "तकनीकी नाम देखें"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "The value must be at least $1."
-msgstr "इसका मूल्य कम-से-कम $1 होना चाहिए।"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "The value must not be larger than $1."
-msgstr "इसका मूल्य $1 से अधिक नहीं होना चाहिए।"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "X"
-msgstr "एक्स"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "X spread"
-msgstr "X स्प्रेड"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Y"
-msgstr "वाई"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Y spread"
-msgstr "Y स्प्रेड"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Z"
-msgstr "जेड"
-
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Z spread"
-msgstr "Z स्प्रेड"
-
-#. ~ "absvalue" is a noise parameter flag.
-#. It is short for "absolute value".
-#. It can be enabled in noise settings in
-#. main menu -> "All Settings".
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "absvalue"
-msgstr "एब्सोल्यूट वैल्यू"
-
-#. ~ "defaults" is a noise parameter flag.
-#. It describes the default processing options
-#. for noise settings in main menu -> "All Settings".
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "defaults"
-msgstr "डीफाल्ट"
-
-#. ~ "eased" is a noise parameter flag.
-#. It is used to make the map smoother and
-#. can be enabled in noise settings in
-#. main menu -> "All Settings".
-#: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "eased"
-msgstr "आरामदायक (ईज़्ड)"
-
-#: builtin/mainmenu/pkgmgr.lua
-msgid "$1 (Enabled)"
-msgstr "($1) चालू"
-
-#: builtin/mainmenu/pkgmgr.lua
-msgid "$1 mods"
-msgstr "$1 यह सब मॉड"
-
-#: builtin/mainmenu/pkgmgr.lua
-msgid "Failed to install $1 to $2"
-msgstr "$2 में $1 को इन्स्टाल नहीं किया जा सका"
-
-#: builtin/mainmenu/pkgmgr.lua
-msgid "Install Mod: Unable to find real mod name for: $1"
-msgstr "इन्स्टाल मॉड: $1 का असल नाम नहीं जान पाया गया"
-
-#: builtin/mainmenu/pkgmgr.lua
-msgid "Install Mod: Unable to find suitable folder name for modpack $1"
-msgstr "माॅड इन्स्टाल: माॅडपैक $1 के लिए सही फोल्डर नहीं ढूंढा जा सका"
-
-#: builtin/mainmenu/pkgmgr.lua
-msgid "Unable to find a valid mod or modpack"
-msgstr "सही माॅड या माॅडपैक नहीं ढूंढ पाया गया"
-
-#: builtin/mainmenu/pkgmgr.lua
-msgid "Unable to install a $1 as a texture pack"
-msgstr "$1 कला संकुल के रूप में इन्स्टाल नहीं किया जा सका"
-
-#: builtin/mainmenu/pkgmgr.lua
-msgid "Unable to install a game as a $1"
-msgstr "खेल को $1 के रूप में इन्स्टाल नहीं किया जा सका"
-
-#: builtin/mainmenu/pkgmgr.lua
-msgid "Unable to install a mod as a $1"
-msgstr "मॉड को $1 के रूप में इन्स्टाल नहीं किया जा सका"
-
-#: builtin/mainmenu/pkgmgr.lua
-msgid "Unable to install a modpack as a $1"
-msgstr "माॅडपैक को $1 के रूप में इन्स्टाल नहीं किया जा सका"
-
-#: builtin/mainmenu/serverlistmgr.lua src/client/game.cpp
-msgid "Loading..."
-msgstr "लोड हो रहा है ..."
+#: builtin/mainmenu/init.lua
+msgid "Settings"
+msgstr "सेटिंग"
 
 #: builtin/mainmenu/serverlistmgr.lua
 #, fuzzy
@@ -783,9 +733,206 @@ msgstr "क्लाइंट की तरफ से स्क्रिप्�
 msgid "Try reenabling public serverlist and check your internet connection."
 msgstr "सार्वजनिक सर्वर शृंखला (सर्वर लिस्ट) को 'हां' करें और इंटरनेट कनेक्शन जांचें।"
 
+#: builtin/mainmenu/settings/components.lua
+msgid "Browse"
+msgstr "ढूंढें"
+
+#: builtin/mainmenu/settings/components.lua
+msgid "Edit"
+msgstr "बदलें"
+
+#: builtin/mainmenu/settings/components.lua
+msgid "Select directory"
+msgstr "फाईल पाथ चुनें"
+
+#: builtin/mainmenu/settings/components.lua
+msgid "Select file"
+msgstr "फाईल चुनें"
+
+#: builtin/mainmenu/settings/components.lua
+#, fuzzy
+msgid "Set"
+msgstr "सिलेक्ट"
+
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
+msgid "(No description of setting given)"
+msgstr "(सेटिंग के बारे में कुछ नहीं बताया गया है)"
+
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
+msgid "2D Noise"
+msgstr "द्वि आयामी नॉइस"
+
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
+msgid "Lacunarity"
+msgstr "लैकुनारिटी"
+
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
+msgid "Octaves"
+msgstr "सप्टक (आक्टेव)"
+
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
+#: src/settings_translation_file.cpp
+msgid "Offset"
+msgstr "आफसेट"
+
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
+#, fuzzy
+msgid "Persistence"
+msgstr "हठ (पर्सिस्टेन्स)"
+
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
+#: src/settings_translation_file.cpp
+msgid "Scale"
+msgstr "स्केल"
+
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
+msgid "X spread"
+msgstr "X स्प्रेड"
+
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
+msgid "Y spread"
+msgstr "Y स्प्रेड"
+
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
+msgid "Z spread"
+msgstr "Z स्प्रेड"
+
+#. ~ "absvalue" is a noise parameter flag.
+#. It is short for "absolute value".
+#. It can be enabled in noise settings in
+#. the settings menu.
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
+msgid "absvalue"
+msgstr "एब्सोल्यूट वैल्यू"
+
+#. ~ "defaults" is a noise parameter flag.
+#. It describes the default processing options
+#. for noise settings in the settings menu.
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
+msgid "defaults"
+msgstr "डीफाल्ट"
+
+#. ~ "eased" is a noise parameter flag.
+#. It is used to make the map smoother and
+#. can be enabled in noise settings in
+#. the settings menu.
+#: builtin/mainmenu/settings/dlg_change_mapgen_flags.lua
+msgid "eased"
+msgstr "आरामदायक (ईज़्ड)"
+
+#: builtin/mainmenu/settings/dlg_settings.lua
+msgid "(Use system language)"
+msgstr ""
+
+#: builtin/mainmenu/settings/dlg_settings.lua
+msgid "Accessibility"
+msgstr ""
+
+#: builtin/mainmenu/settings/dlg_settings.lua
+msgid "Back"
+msgstr "पीछे"
+
+#: builtin/mainmenu/settings/dlg_settings.lua src/client/game.cpp
+msgid "Change Keys"
+msgstr "की बदलें"
+
+#: builtin/mainmenu/settings/dlg_settings.lua src/gui/guiKeyChangeMenu.cpp
+#: src/settings_translation_file.cpp
+msgid "Chat"
+msgstr "बातें"
+
+#: builtin/mainmenu/settings/dlg_settings.lua builtin/mainmenu/tab_online.lua
+msgid "Clear"
+msgstr "खाली करें"
+
+#: builtin/mainmenu/settings/dlg_settings.lua src/settings_translation_file.cpp
+msgid "Controls"
+msgstr "कंट्रोल्स"
+
+#: builtin/mainmenu/settings/dlg_settings.lua src/settings_translation_file.cpp
+msgid "General"
+msgstr ""
+
+#: builtin/mainmenu/settings/dlg_settings.lua
+#, fuzzy
+msgid "Movement"
+msgstr "तेज चलन"
+
+#: builtin/mainmenu/settings/dlg_settings.lua
+#, fuzzy
+msgid "Reset setting to default"
+msgstr "मूल चुनें"
+
+#: builtin/mainmenu/settings/dlg_settings.lua
+msgid "Reset setting to default ($1)"
+msgstr ""
+
+#: builtin/mainmenu/settings/dlg_settings.lua builtin/mainmenu/tab_online.lua
+msgid "Search"
+msgstr "ढूंढें"
+
+#: builtin/mainmenu/settings/dlg_settings.lua
+msgid "Show advanced settings"
+msgstr ""
+
+#: builtin/mainmenu/settings/dlg_settings.lua
+msgid "Show technical names"
+msgstr "तकनीकी नाम देखें"
+
+#: builtin/mainmenu/settings/settingtypes.lua
+msgid "Client Mods"
+msgstr "ग्राहक Mods"
+
+#: builtin/mainmenu/settings/settingtypes.lua
+#, fuzzy
+msgid "Content: Games"
+msgstr "वस्तुएं"
+
+#: builtin/mainmenu/settings/settingtypes.lua
+#, fuzzy
+msgid "Content: Mods"
+msgstr "वस्तुएं"
+
+#: builtin/mainmenu/settings/shadows_component.lua
+msgid "(The game will need to enable shadows as well)"
+msgstr ""
+
+#: builtin/mainmenu/settings/shadows_component.lua
+msgid "Custom"
+msgstr ""
+
+#: builtin/mainmenu/settings/shadows_component.lua
+msgid "Disabled"
+msgstr "रुका हुआ"
+
+#: builtin/mainmenu/settings/shadows_component.lua
+#: src/settings_translation_file.cpp
+msgid "Dynamic shadows"
+msgstr ""
+
+#: builtin/mainmenu/settings/shadows_component.lua
+msgid "High"
+msgstr ""
+
+#: builtin/mainmenu/settings/shadows_component.lua
+msgid "Low"
+msgstr ""
+
+#: builtin/mainmenu/settings/shadows_component.lua
+msgid "Medium"
+msgstr ""
+
+#: builtin/mainmenu/settings/shadows_component.lua
+msgid "Very High"
+msgstr ""
+
+#: builtin/mainmenu/settings/shadows_component.lua
+msgid "Very Low"
+msgstr ""
+
 #: builtin/mainmenu/tab_about.lua
 msgid "About"
-msgstr ""
+msgstr "जानकारी"
 
 #: builtin/mainmenu/tab_about.lua
 msgid "Active Contributors"
@@ -798,6 +945,14 @@ msgstr ""
 #: builtin/mainmenu/tab_about.lua
 msgid "Core Developers"
 msgstr "मुख्य डेवेलपर"
+
+#: builtin/mainmenu/tab_about.lua
+msgid "Core Team"
+msgstr ""
+
+#: builtin/mainmenu/tab_about.lua
+msgid "Irrlicht device:"
+msgstr ""
 
 #: builtin/mainmenu/tab_about.lua
 #, fuzzy
@@ -818,8 +973,17 @@ msgstr "पूर्व सहायक"
 msgid "Previous Core Developers"
 msgstr "पूर्व मुख्य डेवेलपर"
 
+#: builtin/mainmenu/tab_about.lua
+msgid "Share debug log"
+msgstr ""
+
 #: builtin/mainmenu/tab_content.lua
 msgid "Browse online content"
+msgstr "नेट पर वस्तुएं ढूंढें"
+
+#: builtin/mainmenu/tab_content.lua
+#, fuzzy
+msgid "Browse online content [$1]"
 msgstr "नेट पर वस्तुएं ढूंढें"
 
 #: builtin/mainmenu/tab_content.lua
@@ -827,12 +991,13 @@ msgid "Content"
 msgstr "वस्तुएं"
 
 #: builtin/mainmenu/tab_content.lua
-msgid "Disable Texture Pack"
-msgstr "कला संकुल रोकें"
+#, fuzzy
+msgid "Content [$1]"
+msgstr "वस्तुएं"
 
 #: builtin/mainmenu/tab_content.lua
-msgid "Information:"
-msgstr "जानकारी :"
+msgid "Disable Texture Pack"
+msgstr "कला संकुल रोकें"
 
 #: builtin/mainmenu/tab_content.lua
 msgid "Installed Packages:"
@@ -851,8 +1016,9 @@ msgid "Rename"
 msgstr "नाम बदलें"
 
 #: builtin/mainmenu/tab_content.lua
-msgid "Uninstall Package"
-msgstr "पैकेज हटाएं"
+#, fuzzy
+msgid "Update available?"
+msgstr "<अनुपलब्ध>"
 
 #: builtin/mainmenu/tab_content.lua
 msgid "Use Texture Pack"
@@ -883,11 +1049,11 @@ msgid "Host Server"
 msgstr "सर्वर चलाएं"
 
 #: builtin/mainmenu/tab_local.lua
-msgid "Install games from ContentDB"
-msgstr ""
+msgid "Install a game"
+msgstr "एक खेल संस्थापित करें"
 
-#: builtin/mainmenu/tab_local.lua builtin/mainmenu/tab_online.lua
-msgid "Name"
+#: builtin/mainmenu/tab_local.lua
+msgid "Install games from ContentDB"
 msgstr ""
 
 #: builtin/mainmenu/tab_local.lua
@@ -897,11 +1063,6 @@ msgstr "नया"
 #: builtin/mainmenu/tab_local.lua
 msgid "No world created or selected!"
 msgstr "कोई दुनिया उपस्थित या चुनी गयी नहीं है !"
-
-#: builtin/mainmenu/tab_local.lua builtin/mainmenu/tab_online.lua
-#, fuzzy
-msgid "Password"
-msgstr "नया पासवर्ड"
 
 #: builtin/mainmenu/tab_local.lua
 msgid "Play Game"
@@ -928,18 +1089,14 @@ msgstr "सर्वर पोर्ट"
 msgid "Start Game"
 msgstr "खेल शुरू करें"
 
+#: builtin/mainmenu/tab_local.lua
+msgid "You have no games installed."
+msgstr "आपके पास कोई खेल संस्थापित नहीं है।"
+
 #: builtin/mainmenu/tab_online.lua
 #, fuzzy
 msgid "Address"
 msgstr "- एड्रेस : "
-
-#: builtin/mainmenu/tab_online.lua src/client/keycode.cpp
-msgid "Clear"
-msgstr "खाली करें"
-
-#: builtin/mainmenu/tab_online.lua
-msgid "Connect"
-msgstr "कनेक्ट करें"
 
 #: builtin/mainmenu/tab_online.lua
 msgid "Creative mode"
@@ -950,10 +1107,6 @@ msgstr "असीमित संसाधन"
 #, fuzzy
 msgid "Damage / PvP"
 msgstr "- हानि : "
-
-#: builtin/mainmenu/tab_online.lua
-msgid "Del. Favorite"
-msgstr "पसंद हटाएं"
 
 #: builtin/mainmenu/tab_online.lua
 #, fuzzy
@@ -967,6 +1120,10 @@ msgstr ""
 #: builtin/mainmenu/tab_online.lua
 msgid "Join Game"
 msgstr "खेल में शामिल होएं"
+
+#: builtin/mainmenu/tab_online.lua
+msgid "Login"
+msgstr ""
 
 #: builtin/mainmenu/tab_online.lua
 msgid "Ping"
@@ -983,177 +1140,18 @@ msgstr ""
 
 #: builtin/mainmenu/tab_online.lua
 #, fuzzy
+msgid "Remove favorite"
+msgstr "पसंद हटाएं"
+
+#: builtin/mainmenu/tab_online.lua
+#, fuzzy
 msgid "Server Description"
 msgstr "सर्वर पोर्ट"
 
-#: builtin/mainmenu/tab_settings.lua
-msgid "2x"
-msgstr "दुग्ना"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "3D Clouds"
-msgstr "त्रिविम दृश्यन बादल"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "4x"
-msgstr "चार गुना"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "8x"
-msgstr "आठ गुना"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "All Settings"
-msgstr "सभी सेटिंग देखें"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Antialiasing:"
-msgstr "ऐन्टी एलियासिंग :"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Autosave Screen Size"
-msgstr "स्क्रीन परिमाण स्वयं सेव हो"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Bilinear Filter"
-msgstr "द्विरेखिय फिल्टर"
-
-#: builtin/mainmenu/tab_settings.lua src/client/game.cpp
-msgid "Change Keys"
-msgstr "की बदलें"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Connected Glass"
-msgstr "जुडे शिशे"
-
-#: builtin/mainmenu/tab_settings.lua src/settings_translation_file.cpp
-msgid "Dynamic shadows"
-msgstr ""
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Dynamic shadows: "
-msgstr ""
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Fancy Leaves"
-msgstr "रोचक पत्ते"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "High"
-msgstr ""
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Low"
-msgstr ""
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Medium"
-msgstr ""
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Mipmap"
-msgstr "मिपमैप"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Mipmap + Aniso. Filter"
-msgstr "मिपमैप व अनीसो. फिल्टर"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "No Filter"
-msgstr "कोई फिल्टर नहीं"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "No Mipmap"
-msgstr "मिपमैप नहीं हो"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Node Highlighting"
-msgstr "डिब्बें उजाले हों"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Node Outlining"
-msgstr "डिब्बों की रूपरेखा"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "None"
-msgstr "कुछ नहीं"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Opaque Leaves"
-msgstr "अपारदर्शी पत्ते"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Opaque Water"
-msgstr "अपारदर्शी पानी"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Particles"
-msgstr "कण"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Screen:"
-msgstr "स्क्रीन :"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Settings"
-msgstr "सेटिंग"
-
-#: builtin/mainmenu/tab_settings.lua src/settings_translation_file.cpp
-msgid "Shaders"
-msgstr "छाया बनावट"
-
-#: builtin/mainmenu/tab_settings.lua
+#: src/client/client.cpp
 #, fuzzy
-msgid "Shaders (experimental)"
-msgstr "फ्लोटलैंड्स (आसमान में तैरते हुए भूमि-खंड) (प्रायोगिक)"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Shaders (unavailable)"
-msgstr "छाया बनावट (अनुपलब्ध)"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Simple Leaves"
-msgstr "मामूली पत्ते"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Smooth Lighting"
-msgstr "चिकना उजाला"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Texturing:"
-msgstr "कला बनावट :"
-
-#: builtin/mainmenu/tab_settings.lua src/settings_translation_file.cpp
-msgid "Tone Mapping"
-msgstr "टोन मैपिंग"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Touchthreshold: (px)"
-msgstr "छूने की त्रिज्या : (px)"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Trilinear Filter"
-msgstr "त्रिरेखीय फिल्टर"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Ultra High"
-msgstr ""
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Very Low"
-msgstr ""
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Waving Leaves"
-msgstr "पत्ते लहराएं"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Waving Liquids"
-msgstr "पानी में लहरें बनें"
-
-#: builtin/mainmenu/tab_settings.lua
-msgid "Waving Plants"
-msgstr "पाैधे लहराएं"
+msgid "Connection aborted (protocol error?)."
+msgstr "कनेक्शन खराबी (समय अंत?)"
 
 #: src/client/client.cpp src/client/game.cpp
 msgid "Connection timed out."
@@ -1216,7 +1214,7 @@ msgstr "पासवर्ड फाईल नहीं खुला :- "
 msgid "Provided world path doesn't exist: "
 msgstr "दुनिया का फाईल पाथ नहीं है : "
 
-#: src/client/game.cpp
+#: src/client/game.cpp src/server.cpp
 msgid ""
 "\n"
 "Check debug.txt for details."
@@ -1227,14 +1225,6 @@ msgstr ""
 #: src/client/game.cpp
 msgid "- Address: "
 msgstr "- एड्रेस : "
-
-#: src/client/game.cpp
-msgid "- Creative Mode: "
-msgstr "- असीमित साधन "
-
-#: src/client/game.cpp
-msgid "- Damage: "
-msgstr "- हानि : "
 
 #: src/client/game.cpp
 msgid "- Mode: "
@@ -1300,8 +1290,9 @@ msgid "Camera update enabled"
 msgstr "कैमरा चालू"
 
 #: src/client/game.cpp
-msgid "Can't show block bounds (need 'basic_debug' privilege)"
-msgstr ""
+#, fuzzy
+msgid "Can't show block bounds (disabled by game or mod)"
+msgstr "खेल या मॉड़ के वजह से इस समय ज़ूम मना है"
 
 #: src/client/game.cpp
 msgid "Change Password"
@@ -1344,7 +1335,7 @@ msgid ""
 "- %s: move left\n"
 "- %s: move right\n"
 "- %s: jump/climb up\n"
-"- %s: dig/punch\n"
+"- %s: dig/punch/use\n"
 "- %s: place/use\n"
 "- %s: sneak/climb down\n"
 "- %s: drop item\n"
@@ -1367,6 +1358,35 @@ msgstr ""
 "- : माउस दाहिने : डाले / इस्तेमाल करें\n"
 "- : माउस पहिया : वस्तु चुनें\n"
 "- %s : बात करने के लिए\n"
+
+#: src/client/game.cpp
+#, fuzzy
+msgid ""
+"Controls:\n"
+"No menu open:\n"
+"- slide finger: look around\n"
+"- tap: place/use\n"
+"- long tap: dig/punch/use\n"
+"Menu/inventory open:\n"
+"- double tap (outside):\n"
+" --> close\n"
+"- touch stack, touch slot:\n"
+" --> move stack\n"
+"- touch&drag, tap 2nd finger\n"
+" --> place single item to slot\n"
+msgstr ""
+"आम कंट्रोल्स :\n"
+"कोई मेनू खुला नहीं है :\n"
+"-एक बार टैप : बटन दबेगा\n"
+"-दो टॉप: डालना/ इस्तेमाल करना\n"
+"-उंगली फिसलाना : मुड़ना\n"
+"कोई मेनू या वस्तु सूची खुली है :\n"
+"-बाहर दो बार टैप :\n"
+"--> बंद\n"
+"- ढेर छूएं, स्थान छूएं\n"
+"--> ढेर का स्थान बदलने के लिए\n"
+"- छुए व खींचे, दूसरी उंगली से टैप करें\n"
+"--> एक वस्तु स्थान में डालें\n"
 
 #: src/client/game.cpp
 #, c-format
@@ -1394,40 +1414,9 @@ msgid "Debug info, profiler graph, and wireframe hidden"
 msgstr "डीबग जानकारी, प्रोफाइलर व रूपरेखा गायब"
 
 #: src/client/game.cpp
-msgid ""
-"Default Controls:\n"
-"No menu visible:\n"
-"- single tap: button activate\n"
-"- double tap: place/use\n"
-"- slide finger: look around\n"
-"Menu/Inventory visible:\n"
-"- double tap (outside):\n"
-" -->close\n"
-"- touch stack, touch slot:\n"
-" --> move stack\n"
-"- touch&drag, tap 2nd finger\n"
-" --> place single item to slot\n"
-msgstr ""
-"आम कंट्रोल्स :\n"
-"कोई मेनू खुला नहीं है :\n"
-"-एक बार टैप : बटन दबेगा\n"
-"-दो टॉप: डालना/ इस्तेमाल करना\n"
-"-उंगली फिसलाना : मुड़ना\n"
-"कोई मेनू या वस्तु सूची खुली है :\n"
-"-बाहर दो बार टैप :\n"
-"--> बंद\n"
-"- ढेर छूएं, स्थान छूएं\n"
-"--> ढेर का स्थान बदलने के लिए\n"
-"- छुए व खींचे, दूसरी उंगली से टैप करें\n"
-"--> एक वस्तु स्थान में डालें\n"
-
-#: src/client/game.cpp
-msgid "Disabled unlimited viewing range"
-msgstr "दृष्टि सीमित"
-
-#: src/client/game.cpp
-msgid "Enabled unlimited viewing range"
-msgstr "दृष्टि असीमित"
+#, fuzzy, c-format
+msgid "Error creating client: %s"
+msgstr "क्लाइंट बनाया जा रहा है ..."
 
 #: src/client/game.cpp
 msgid "Exit to Menu"
@@ -1593,20 +1582,50 @@ msgstr ""
 msgid "Unable to listen on %s because IPv6 is disabled"
 msgstr ""
 
-#: src/client/game.cpp src/unittest/test_gettext.cpp
+#: src/client/game.cpp
+#, fuzzy
+msgid "Unlimited viewing range disabled"
+msgstr "दृष्टि असीमित"
+
+#: src/client/game.cpp
+#, fuzzy
+msgid "Unlimited viewing range enabled"
+msgstr "दृष्टि असीमित"
+
+#: src/client/game.cpp
+msgid "Unlimited viewing range enabled, but forbidden by game or mod"
+msgstr ""
+
+#: src/client/game.cpp
+#, fuzzy, c-format
+msgid "Viewing changed to %d (the minimum)"
+msgstr "दृष्टि सीमा न्यूनतम : %d"
+
+#: src/client/game.cpp
+#, c-format
+msgid "Viewing changed to %d (the minimum), but limited to %d by game or mod"
+msgstr ""
+
+#: src/client/game.cpp
 #, c-format
 msgid "Viewing range changed to %d"
 msgstr "दृष्टि सीमा बदलकर %d है"
 
 #: src/client/game.cpp
-#, c-format
-msgid "Viewing range is at maximum: %d"
-msgstr "दृष्टि सीमा अधिकतम : %d"
+#, fuzzy, c-format
+msgid "Viewing range changed to %d (the maximum)"
+msgstr "दृष्टि सीमा बदलकर %d है"
 
 #: src/client/game.cpp
 #, c-format
-msgid "Viewing range is at minimum: %d"
-msgstr "दृष्टि सीमा न्यूनतम : %d"
+msgid ""
+"Viewing range changed to %d (the maximum), but limited to %d by game or mod"
+msgstr ""
+
+#: src/client/game.cpp
+#, fuzzy, c-format
+msgid "Viewing range changed to %d, but limited to %d by game or mod"
+msgstr "दृष्टि सीमा बदलकर %d है"
 
 #: src/client/game.cpp
 #, c-format
@@ -1624,6 +1643,11 @@ msgstr "खेल या मॉड़ के वजह से इस समय �
 #: src/client/game.cpp
 msgid "ok"
 msgstr "ठीक है"
+
+#: src/client/gameui.cpp
+#, fuzzy
+msgid "Chat currently disabled by game or mod"
+msgstr "खेल या मॉड़ के वजह से इस समय ज़ूम मना है"
 
 #: src/client/gameui.cpp
 msgid "Chat hidden"
@@ -1658,17 +1682,33 @@ msgstr "एप्स"
 msgid "Backspace"
 msgstr "बैकस्पेस"
 
+#. ~ Usually paired with the Pause key
+#: src/client/keycode.cpp
+msgid "Break Key"
+msgstr ""
+
 #: src/client/keycode.cpp
 msgid "Caps Lock"
 msgstr "कैप्स लाक"
 
 #: src/client/keycode.cpp
-msgid "Control"
+#, fuzzy
+msgid "Clear Key"
+msgstr "खाली करें"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Control Key"
 msgstr "कंट्रोल"
 
 #: src/client/keycode.cpp
-msgid "Down"
-msgstr "नीचे"
+#, fuzzy
+msgid "Delete Key"
+msgstr "हटायें"
+
+#: src/client/keycode.cpp
+msgid "Down Arrow"
+msgstr ""
 
 #: src/client/keycode.cpp
 msgid "End"
@@ -1714,9 +1754,10 @@ msgstr "आई एम ई नानकन्वर्ट"
 msgid "Insert"
 msgstr "इन्सर्ट"
 
-#: src/client/keycode.cpp src/gui/guiKeyChangeMenu.cpp
-msgid "Left"
-msgstr "बायां"
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Arrow"
+msgstr "बायां कंट्रोल"
 
 #: src/client/keycode.cpp
 msgid "Left Button"
@@ -1740,7 +1781,8 @@ msgstr "लेफ्ट विंडोज"
 
 #. ~ Key name, common on Windows keyboards
 #: src/client/keycode.cpp
-msgid "Menu"
+#, fuzzy
+msgid "Menu Key"
 msgstr "मेनू (कीबोर्ड)"
 
 #: src/client/keycode.cpp
@@ -1816,15 +1858,19 @@ msgid "OEM Clear"
 msgstr "ओ ई एम क्लीयर"
 
 #: src/client/keycode.cpp
-msgid "Page down"
+#, fuzzy
+msgid "Page Down"
 msgstr "पेज डाऊन"
 
 #: src/client/keycode.cpp
-msgid "Page up"
+#, fuzzy
+msgid "Page Up"
 msgstr "पेज अप"
 
+#. ~ Usually paired with the Break key
 #: src/client/keycode.cpp
-msgid "Pause"
+#, fuzzy
+msgid "Pause Key"
 msgstr "पॉज़"
 
 #: src/client/keycode.cpp
@@ -1837,11 +1883,13 @@ msgid "Print"
 msgstr "प्रिन्ट बटन"
 
 #: src/client/keycode.cpp
-msgid "Return"
+#, fuzzy
+msgid "Return Key"
 msgstr "रिटर्न बटन"
 
-#: src/client/keycode.cpp src/gui/guiKeyChangeMenu.cpp
-msgid "Right"
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Arrow"
 msgstr "दाहिना"
 
 #: src/client/keycode.cpp
@@ -1874,7 +1922,8 @@ msgid "Select"
 msgstr "सिलेक्ट"
 
 #: src/client/keycode.cpp
-msgid "Shift"
+#, fuzzy
+msgid "Shift Key"
 msgstr "शिफ्ट"
 
 #: src/client/keycode.cpp
@@ -1894,8 +1943,8 @@ msgid "Tab"
 msgstr "टैब बटन"
 
 #: src/client/keycode.cpp
-msgid "Up"
-msgstr "ऊपर"
+msgid "Up Arrow"
+msgstr ""
 
 #: src/client/keycode.cpp
 msgid "X Button 1"
@@ -1905,8 +1954,9 @@ msgstr "X बटन १"
 msgid "X Button 2"
 msgstr "X बटन २"
 
-#: src/client/keycode.cpp src/gui/guiKeyChangeMenu.cpp
-msgid "Zoom"
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Zoom Key"
 msgstr "ज़ूम"
 
 #: src/client/minimap.cpp
@@ -1928,6 +1978,28 @@ msgstr "छोटा नक्शा जमीन मोड, 1 गुना ज�
 msgid "Minimap in texture mode"
 msgstr "छोटा नक्शा जमीन मोड, 1 गुना ज़ूम"
 
+#. ~ Error when a mod is missing dependencies. Ex: "Mod Title is missing: mod1, mod2, mod3"
+#: src/content/mod_configuration.cpp
+#, c-format
+msgid "%s is missing:"
+msgstr ""
+
+#: src/content/mod_configuration.cpp
+msgid ""
+"Install and enable the required mods, or disable the mods causing errors."
+msgstr ""
+
+#: src/content/mod_configuration.cpp
+msgid ""
+"Note: this may be caused by a dependency cycle, in which case try updating "
+"the mods."
+msgstr ""
+
+#: src/content/mod_configuration.cpp
+#, fuzzy
+msgid "Some mods have unsatisfied dependencies:"
+msgstr "आवश्यक निर्भरताएं नहीं हैं"
+
 #: src/gui/guiChatConsole.cpp
 #, fuzzy
 msgid "Failed to open webpage"
@@ -1936,29 +2008,6 @@ msgstr "$1 का डाऊनलोड असफल हुआ"
 #: src/gui/guiChatConsole.cpp
 msgid "Opening webpage"
 msgstr ""
-
-#: src/gui/guiConfirmRegistration.cpp src/gui/guiPasswordChange.cpp
-msgid "Passwords do not match!"
-msgstr "पासवर्ड अलग-अलग हैं!"
-
-#: src/gui/guiConfirmRegistration.cpp
-msgid "Register and Join"
-msgstr "पंजीकरण व खेलें"
-
-#: src/gui/guiConfirmRegistration.cpp src/unittest/test_gettext.cpp
-#, c-format
-msgid ""
-"You are about to join this server with the name \"%s\" for the first time.\n"
-"If you proceed, a new account using your credentials will be created on this "
-"server.\n"
-"Please retype your password and click 'Register and Join' to confirm account "
-"creation, or click 'Cancel' to abort."
-msgstr ""
-"आप \"%s\" नाम से इस सरवर में पहली बार आने वाले हैं। अगर आप आगे बढ़ते हैं तो आपके लिए इस "
-"सर्वर पर एक अकाउंट बनाया जाएगा।\n"
-"\n"
-"आगे बढ़ने ए लिखें कृपया अपने पासवर्ड को वापस लिखें और फिर 'पंजीकरण व खेलें' दबाएं, अथवा "
-"'रोकें' दबाएं।"
 
 #: src/gui/guiFormSpecMenu.cpp
 msgid "Proceed"
@@ -1992,10 +2041,6 @@ msgstr ""
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Change camera"
 msgstr "कैमरा बदलना"
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Chat"
-msgstr "बातें"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Command"
@@ -2046,8 +2091,12 @@ msgid "Key already in use"
 msgstr "की पहले से इस्तेमाल में है"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from minetest.conf)"
-msgstr "कीबोर्ड सेटिंग (अगर यह मेनू खराब हो जाए तो minetest.conf से सब कुछ खाली कर दें)"
+msgid "Keybindings."
+msgstr ""
+
+#: src/gui/guiKeyChangeMenu.cpp
+msgid "Left"
+msgstr "बायां"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"
@@ -2069,7 +2118,11 @@ msgstr "पिछली वस्तु"
 msgid "Range select"
 msgstr "दृष्टि सीमा चुनना"
 
-#: src/gui/guiKeyChangeMenu.cpp src/settings_translation_file.cpp
+#: src/gui/guiKeyChangeMenu.cpp
+msgid "Right"
+msgstr "दाहिना"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Screenshot"
 msgstr "स्क्रीनशॉट"
 
@@ -2110,6 +2163,10 @@ msgid "Toggle pitchmove"
 msgstr "पिच चलन"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Zoom"
+msgstr "ज़ूम"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "press key"
 msgstr "की दबाएं"
 
@@ -2118,16 +2175,16 @@ msgid "Change"
 msgstr "बदलें"
 
 #: src/gui/guiPasswordChange.cpp
-msgid "Confirm Password"
-msgstr "पासवर्ड दोबारा लिखें"
-
-#: src/gui/guiPasswordChange.cpp
 msgid "New Password"
 msgstr "नया पासवर्ड"
 
 #: src/gui/guiPasswordChange.cpp
 msgid "Old Password"
 msgstr "पुराना पासवर्ड"
+
+#: src/gui/guiPasswordChange.cpp
+msgid "Passwords do not match!"
+msgstr "पासवर्ड अलग-अलग हैं!"
 
 #: src/gui/guiVolumeChange.cpp
 msgid "Exit"
@@ -2142,12 +2199,6 @@ msgstr "चुप"
 msgid "Sound Volume: %d%%"
 msgstr "आवाज "
 
-#. ~ Imperative, as in "Enter/type in text".
-#. Don't forget the space.
-#: src/gui/modalMenu.cpp
-msgid "Enter "
-msgstr "डालें "
-
 #. ~ DO NOT TRANSLATE THIS LITERALLY!
 #. This is a special string which needs to contain the translation's
 #. language code (e.g. "de" for German).
@@ -2155,18 +2206,20 @@ msgstr "डालें "
 msgid "LANG_CODE"
 msgstr "hi"
 
-#: src/settings_translation_file.cpp
+#: src/network/clientpackethandler.cpp
 msgid ""
-"(Android) Fixes the position of virtual joystick.\n"
-"If disabled, virtual joystick will center to first-touch's position."
+"Name is not registered. To create an account on this server, click 'Register'"
 msgstr ""
 
-#: src/settings_translation_file.cpp
-msgid ""
-"(Android) Use virtual joystick to trigger \"Aux1\" button.\n"
-"If enabled, virtual joystick will also tap \"Aux1\" button when out of main "
-"circle."
-msgstr ""
+#: src/network/clientpackethandler.cpp
+#, fuzzy
+msgid "Name is taken. Please choose another name"
+msgstr "कृपया एक नाम चुनें!"
+
+#: src/server.cpp
+#, fuzzy, c-format
+msgid "%s while shutting down: "
+msgstr "शट डाउन हो रहा है ..."
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -2217,6 +2270,10 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "2D noise that locates the river valleys and channels."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "3D"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2271,11 +2328,10 @@ msgid ""
 "Currently supported:\n"
 "-    none: no 3d output.\n"
 "-    anaglyph: cyan/magenta color 3d.\n"
-"-    interlaced: odd/even line based polarisation screen support.\n"
+"-    interlaced: odd/even line based polarization screen support.\n"
 "-    topbottom: split screen top/bottom.\n"
 "-    sidebyside: split screen side by side.\n"
 "-    crossview: Cross-eyed 3d\n"
-"-    pageflip: quadbuffer based 3d.\n"
 "Note that the interlaced mode requires shaders to be enabled."
 msgstr ""
 
@@ -2330,13 +2386,6 @@ msgid "Active object send range"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid ""
-"Address to connect to.\n"
-"Leave this blank to start a local server.\n"
-"Note that the address field in the main menu overrides this setting."
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Adds particles when digging a node."
 msgstr ""
 
@@ -2361,6 +2410,11 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Admin name"
+msgstr "दुनिया का नाम"
+
+#: src/settings_translation_file.cpp
 msgid "Advanced"
 msgstr ""
 
@@ -2374,15 +2428,12 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Always fly and fast"
+#, fuzzy
+msgid "Always fly fast"
 msgstr "हमेशा उड़ान और तेज"
 
 #: src/settings_translation_file.cpp
 msgid "Ambient occlusion gamma"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Amount of messages a player may send per 10 seconds."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2400,6 +2451,16 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid "Announce to this serverlist."
 msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Anti-aliasing scale"
+msgstr "ऐन्टी एलियासिंग :"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Antialiasing method"
+msgstr "ऐन्टी एलियासिंग :"
 
 #: src/settings_translation_file.cpp
 msgid "Append item name"
@@ -2443,7 +2504,7 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Automatic forward key"
+msgid "Audio"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2455,25 +2516,13 @@ msgid "Automatically report to the serverlist."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Autosave screen size"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Autoscaling mode"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Aux1 key"
 msgstr ""
 
 #: src/settings_translation_file.cpp
 #, fuzzy
 msgid "Aux1 key for climbing/descending"
 msgstr "चलने उतरने के लिए स्पेशल की"
-
-#: src/settings_translation_file.cpp
-msgid "Backward key"
-msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Base ground level"
@@ -2484,8 +2533,9 @@ msgid "Base terrain height."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Basic"
-msgstr ""
+#, fuzzy
+msgid "Base texture size"
+msgstr "कला संकुल चालू करें"
 
 #: src/settings_translation_file.cpp
 msgid "Basic privileges"
@@ -2508,8 +2558,9 @@ msgid "Bind address"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Biome API temperature and humidity noise parameters"
-msgstr ""
+#, fuzzy
+msgid "Biome API"
+msgstr "जीवोम"
 
 #: src/settings_translation_file.cpp
 msgid "Biome noise"
@@ -2517,6 +2568,26 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Block send optimize distance"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Bloom"
+msgstr "पुष्पित होना"
+
+#: src/settings_translation_file.cpp
+msgid "Bloom Intensity"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Bloom Radius"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Bloom Strength Factor"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Bobbing"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2544,12 +2615,9 @@ msgid "Builtin"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid ""
-"Camera 'near clipping plane' distance in nodes, between 0 and 0.25\n"
-"Only works on GLES platforms. Most users will not need to change this.\n"
-"Increasing can reduce artifacting on weaker GPUs.\n"
-"0.1 = Default, 0.25 = Good value for weaker tablets."
-msgstr ""
+#, fuzzy
+msgid "Camera"
+msgstr "कैमरा बदलना"
 
 #: src/settings_translation_file.cpp
 msgid "Camera smoothing"
@@ -2558,10 +2626,6 @@ msgstr "केमरा चिकनाई"
 #: src/settings_translation_file.cpp
 msgid "Camera smoothing in cinematic mode"
 msgstr "सिनेमा मोड में केमरा चिकनाई"
-
-#: src/settings_translation_file.cpp
-msgid "Camera update toggle key"
-msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Cave noise"
@@ -2627,10 +2691,6 @@ msgid "Chat font size"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Chat key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Chat log level"
 msgstr ""
 
@@ -2651,28 +2711,12 @@ msgid "Chat message max length"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Chat toggle key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 #, fuzzy
 msgid "Chat weblinks"
 msgstr "बातें दिखाई देंगी"
 
 #: src/settings_translation_file.cpp
 msgid "Chunk size"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Cinematic mode"
-msgstr "सिनेमा मोड"
-
-#: src/settings_translation_file.cpp
-msgid "Cinematic mode key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Clean transparent textures"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2683,6 +2727,10 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Client"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Client Mesh Chunksize"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2698,7 +2746,11 @@ msgid "Client side modding restrictions"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Client side node lookup range restriction"
+msgid "Client-side Modding"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Client-side node lookup range restriction"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2714,7 +2766,7 @@ msgid "Clouds"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Clouds are a client side effect."
+msgid "Clouds are a client-side effect."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2750,10 +2802,6 @@ msgstr ""
 msgid ""
 "Comma-separated list of trusted mods that are allowed to access insecure\n"
 "functions even when mod security is on (via request_insecure_environment())."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Command key"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2797,6 +2845,10 @@ msgid "Console height"
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "Content Repository"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "ContentDB Flag Blacklist"
 msgstr ""
 
@@ -2809,20 +2861,6 @@ msgid "ContentDB URL"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Continuous forward"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Continuous forward movement, toggled by autoforward key.\n"
-"Press the autoforward key again or the backwards movement to disable."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Controls"
-msgstr "कंट्रोल्स"
-
-#: src/settings_translation_file.cpp
 msgid ""
 "Controls length of day/night cycle.\n"
 "Examples:\n"
@@ -2830,7 +2868,9 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Controls sinking speed in liquid."
+msgid ""
+"Controls sinking speed in liquid when idling. Negative values will cause\n"
+"you to rise instead."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2850,10 +2890,6 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Crash message"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Creative"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2881,14 +2917,6 @@ msgid "DPI"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Damage"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Debug info toggle key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Debug log file size threshold"
 msgstr ""
 
@@ -2897,11 +2925,7 @@ msgid "Debug log level"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Dec. volume key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Decrease this to increase liquid resistance to movement."
+msgid "Debugging"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2913,13 +2937,9 @@ msgid "Default acceleration"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Default game"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid ""
-"Default game when creating a new world.\n"
-"This will be overridden when creating a world from the main menu."
+"Default maximum number of forceloaded mapblocks.\n"
+"Set this to -1 to disable the limit."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2966,6 +2986,13 @@ msgid "Defines full size of caverns, smaller values create larger caverns."
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid ""
+"Defines how much bloom is applied to the rendered image\n"
+"Smaller values make bloom more subtle\n"
+"Range: from 0.01 to 1.0, default: 0.05"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Defines large-scale river channel structure."
 msgstr ""
 
@@ -2982,7 +3009,20 @@ msgid "Defines the depth of the river channel."
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid ""
+"Defines the magnitude of bloom overexposure.\n"
+"Range: from 0.1 to 10.0, default: 1.0"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Defines the maximal player transfer distance in blocks (0 = unlimited)."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Defines the size of the sampling grid for FSAA and SSAA antialiasing "
+"methods.\n"
+"Value of 2 means taking 2x2 = 4 samples."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3044,8 +3084,9 @@ msgid "Desynchronize block animation"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Dig key"
-msgstr ""
+#, fuzzy
+msgid "Developer Options"
+msgstr "सजावट"
 
 #: src/settings_translation_file.cpp
 msgid "Digging particles"
@@ -3064,6 +3105,12 @@ msgid "Display Density Scaling Factor"
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid ""
+"Distance in nodes at which transparency depth sorting is enabled\n"
+"Use this to limit the performance impact of transparency depth sorting"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Domain name of server, to be displayed in the serverlist."
 msgstr ""
 
@@ -3074,10 +3121,6 @@ msgstr "उड़ने के लिए दो बार कूदें"
 #: src/settings_translation_file.cpp
 msgid "Double-tapping the jump key toggles fly mode."
 msgstr "दो बार कूदने से उड़ान चलन चालू हो जाता है।"
-
-#: src/settings_translation_file.cpp
-msgid "Drop item key"
-msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Dump the mapgen debug information."
@@ -3093,6 +3136,19 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Dungeon noise"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Enable Automatic Exposure"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Enable Bloom"
+msgstr "सब सक्षम करें"
+
+#: src/settings_translation_file.cpp
+msgid "Enable Bloom Debug"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3115,6 +3171,18 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "Enable Raytraced Culling"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Enable automatic exposure correction\n"
+"When enabled, the post-processing engine will\n"
+"automatically adjust to the brightness of the scene,\n"
+"simulating the behavior of human eye."
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid ""
 "Enable colored shadows.\n"
 "On true translucent nodes cast colored shadows. This is expensive."
@@ -3125,11 +3193,11 @@ msgid "Enable console window"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Enable creative mode for all players"
+msgid "Enable joysticks"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Enable joysticks"
+msgid "Enable joysticks. Requires a restart to take effect"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3141,7 +3209,7 @@ msgid "Enable mod security"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Enable players getting damage and dying."
+msgid "Enable mouse wheel (scroll) for item selection in hotbar."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3149,19 +3217,13 @@ msgid "Enable random user input (only used for testing)."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Enable register confirmation"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Enable register confirmation when connecting to server.\n"
-"If disabled, new account will be registered automatically."
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid ""
 "Enable smooth lighting with simple ambient occlusion.\n"
 "Disable for speed or for different looks."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Enable split login/register"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3217,15 +3279,13 @@ msgid "Enables caching of facedir rotated meshes."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Enables minimap."
+msgid ""
+"Enables tradeoffs that reduce CPU load or increase rendering performance\n"
+"at the expense of minor visual glitches that do not impact game playability."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid ""
-"Enables the sound system.\n"
-"If disabled, this completely disables all sounds everywhere and the in-game\n"
-"sound controls will be non-functional.\n"
-"Changing this setting requires a restart."
+msgid "Engine Profiler"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3238,7 +3298,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Exponent of the floatland tapering. Alters the tapering behaviour.\n"
+"Exponent of the floatland tapering. Alters the tapering behavior.\n"
 "Value = 1.0 creates a uniform, linear tapering.\n"
 "Values > 1.0 create a smooth tapering suitable for the default separated\n"
 "floatlands.\n"
@@ -3247,11 +3307,15 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "FPS when unfocused or paused"
+msgid "Exposure compensation"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "FSAA"
+msgid "FPS"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "FPS when unfocused or paused"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3267,29 +3331,12 @@ msgid "Fallback font path"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Fast key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Fast mode acceleration"
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Fast mode speed"
 msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Fast movement"
-msgstr "तेज चलन"
-
-#: src/settings_translation_file.cpp
-#, fuzzy
-msgid ""
-"Fast movement (via the \"Aux1\" key).\n"
-"This requires the \"fast\" privilege on the server."
-msgstr ""
-"स्पेशल की दबाने पर आप बहुत तॆज चलने लगेंगे |\n"
-"इसके लिये \"तेज\" विषेशाधिकार आवश्यक है |"
 
 #: src/settings_translation_file.cpp
 msgid "Field of view"
@@ -3319,16 +3366,9 @@ msgid "Filmic tone mapping"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid ""
-"Filtered textures can blend RGB values with fully-transparent neighbors,\n"
-"which PNG optimizers usually discard, often resulting in dark or\n"
-"light edges to transparent textures. Apply a filter to clean that up\n"
-"at texture load time. This is automatically enabled if mipmapping is enabled."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Filtering"
-msgstr ""
+#, fuzzy
+msgid "Filtering and Antialiasing"
+msgstr "ऐन्टी एलियासिंग :"
 
 #: src/settings_translation_file.cpp
 msgid "First of 4 2D noises that together define hill/mountain range height."
@@ -3344,6 +3384,12 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Fixed virtual joystick"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Fixes the position of virtual joystick.\n"
+"If disabled, virtual joystick will center to first-touch's position."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3375,14 +3421,6 @@ msgid "Floatland water level"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Fly key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Flying"
-msgstr "उडना"
-
-#: src/settings_translation_file.cpp
 msgid "Fog"
 msgstr ""
 
@@ -3391,7 +3429,7 @@ msgid "Fog start"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Fog toggle key"
+msgid "Font"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3415,17 +3453,32 @@ msgid "Font size"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Font size of the default font in point (pt)."
+msgid "Font size divisible by"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Font size of the monospace font in point (pt)."
+msgid "Font size of the default font where 1 unit = 1 pixel at 96 DPI"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Font size of the monospace font where 1 unit = 1 pixel at 96 DPI"
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
 "Font size of the recent chat text and chat prompt in point (pt).\n"
 "Value 0 will use the default font size."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"For pixel-style fonts that do not scale well, this ensures that font sizes "
+"used\n"
+"with this font will always be divisible by this value, in pixels. For "
+"instance,\n"
+"a pixel font 16 pixels tall should have this set to 16, so it will only ever "
+"be\n"
+"sized 16, 32, 48, etc., so a mod requesting a size of 25 will get 32."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3440,14 +3493,6 @@ msgid "Format of screenshots."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Formspec Default Background Color"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Formspec Default Background Opacity"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Formspec Full-Screen Background Color"
 msgstr ""
 
@@ -3456,23 +3501,11 @@ msgid "Formspec Full-Screen Background Opacity"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Formspec default background color (R,G,B)."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Formspec default background opacity (between 0 and 255)."
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Formspec full-screen background color (R,G,B)."
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Formspec full-screen background opacity (between 0 and 255)."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Forward key"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3485,10 +3518,6 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Fraction of the visible distance at which fog starts to be rendered"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "FreeType fonts"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3520,6 +3549,10 @@ msgid "Fullscreen mode."
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "GUI"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "GUI scaling"
 msgstr ""
 
@@ -3530,6 +3563,11 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid "GUI scaling filter txr2img"
 msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Gamepads"
+msgstr "अनेक खेल"
 
 #: src/settings_translation_file.cpp
 msgid "Global callbacks"
@@ -3559,6 +3597,14 @@ msgid "Graphics"
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "Graphics Effects"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Graphics and Audio"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Gravity"
 msgstr ""
 
@@ -3575,12 +3621,13 @@ msgid "HTTP mods"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "HUD scale factor"
-msgstr ""
+msgid "HUD"
+msgstr "खेल पटल"
 
 #: src/settings_translation_file.cpp
-msgid "HUD toggle key"
-msgstr ""
+#, fuzzy
+msgid "HUD scaling"
+msgstr "हे॰अ॰डि॰ दिखाई देंगी"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -3608,8 +3655,7 @@ msgid "Heat noise"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid ""
-"Height component of the initial window size. Ignored in fullscreen mode."
+msgid "Height component of the initial window size."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3667,139 +3713,11 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Hotbar next key"
+msgid "Hotbar: Enable mouse wheel for selection"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Hotbar previous key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 1 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 10 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 11 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 12 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 13 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 14 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 15 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 16 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 17 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 18 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 19 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 2 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 20 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 21 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 22 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 23 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 24 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 25 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 26 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 27 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 28 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 29 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 3 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 30 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 31 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 32 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 4 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 5 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 6 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 7 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 8 key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Hotbar slot 9 key"
+msgid "Hotbar: Invert mouse wheel direction"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3809,14 +3727,20 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "How fast liquid waves will move. Higher = faster.\n"
-"If negative, liquid waves will move backwards.\n"
-"Requires waving liquids to be enabled."
+"If negative, liquid waves will move backwards."
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"How much the server will wait before unloading unused mapblocks.\n"
+"How long the server will wait before unloading unused mapblocks, stated in "
+"seconds.\n"
 "Higher value is smoother, but will use more RAM."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"How much you are slowed down when moving inside a liquid.\n"
+"Decrease this to increase liquid resistance to movement."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3859,24 +3783,6 @@ msgstr ""
 "स्पेशल की दबानी पड़ेगी |"
 
 #: src/settings_translation_file.cpp
-msgid ""
-"If enabled the server will perform map block occlusion culling based on\n"
-"on the eye position of the player. This can reduce the number of blocks\n"
-"sent to the client 50-80%. The client will not longer receive most "
-"invisible\n"
-"so that the utility of noclip mode is reduced."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"If enabled together with fly mode, player is able to fly through solid "
-"nodes.\n"
-"This requires the \"noclip\" privilege on the server."
-msgstr ""
-"अगर यह उडान के साथ चालू होगा तो आप हर चीज़ के आर-पार उड पाएंगे |\n"
-"इसके लिये \"तरल चाल\" विषेशाधिकार आवश्यक है |"
-
-#: src/settings_translation_file.cpp
 #, fuzzy
 msgid ""
 "If enabled, \"Aux1\" key instead of \"Sneak\" key is used for climbing down "
@@ -3885,6 +3791,12 @@ msgid ""
 msgstr ""
 "अगर यहां चालू हुआ तो नीचे उतरने के लिए स्पेशल\n"
 "की का इस्तेमाल होगा।"
+
+#: src/settings_translation_file.cpp
+msgid ""
+"If enabled, account registration is separate from login in the UI.\n"
+"If disabled, new accounts will be registered automatically when logging in."
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -3904,18 +3816,23 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"If enabled, makes move directions relative to the player's pitch when flying "
-"or swimming."
-msgstr "चालू होने पर आप जहां देखेंगे उस दिशा को सामने माना जाएगा (पिच चलन)|"
-
-#: src/settings_translation_file.cpp
-msgid "If enabled, new players cannot join with an empty password."
+"If enabled, players cannot join without a password or change theirs to an "
+"empty password."
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"If enabled, you can place blocks at the position (feet + eye level) where "
-"you stand.\n"
+"If enabled, the server will perform map block occlusion culling based on\n"
+"on the eye position of the player. This can reduce the number of blocks\n"
+"sent to the client by 50-80%. Clients will no longer receive most\n"
+"invisible blocks, so that the utility of noclip mode is reduced."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid ""
+"If enabled, you can place nodes at the position (feet + eye level) where you "
+"stand.\n"
 "This is helpful when working with nodeboxes in small areas."
 msgstr ""
 "अगर यह चालू होगा तो आप जिस स्थान मैं खडें हैं वही पर डिब्बे डाल सकेंगे |\n"
@@ -3951,10 +3868,6 @@ msgid "Ignore world errors"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "In-Game"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "In-game chat console background alpha (opaqueness, between 0 and 255)."
 msgstr ""
 
@@ -3964,10 +3877,6 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "In-game chat console height, between 0.1 (10%) and 1.0 (100%)."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Inc. volume key"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4005,15 +3914,11 @@ msgid "Instrument the methods of entities on registration."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Instrumentation"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Interval of saving important changes in the world, stated in seconds."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Interval of sending time of day to clients."
+msgid "Interval of sending time of day to clients, stated in seconds."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4021,12 +3926,12 @@ msgid "Inventory items animations"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Inventory key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Invert mouse"
 msgstr "माउस उल्टा"
+
+#: src/settings_translation_file.cpp
+msgid "Invert mouse wheel (scroll) direction for item selection in hotbar."
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Invert vertical mouse movement."
@@ -4126,511 +4031,11 @@ msgid "Julia z"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Jump key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Jumping speed"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid ""
-"Key for decreasing the viewing range.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for decreasing the volume.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for digging.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for dropping the currently selected item.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for increasing the viewing range.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for increasing the volume.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for jumping.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for moving fast in fast mode.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for moving the player backward.\n"
-"Will also disable autoforward, when active.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for moving the player forward.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for moving the player left.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for moving the player right.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for muting the game.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for opening the chat window to type commands.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for opening the chat window to type local commands.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for opening the chat window.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for opening the inventory.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for placing.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 11th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 12th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 13th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 14th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 15th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 16th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 17th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 18th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 19th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 20th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 21st hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 22nd hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 23rd hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 24th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 25th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 26th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 27th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 28th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 29th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 30th hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 31st hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the 32nd hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the eighth hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the fifth hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the first hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the fourth hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the next item in the hotbar.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the ninth hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the previous item in the hotbar.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the second hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the seventh hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the sixth hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the tenth hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for selecting the third hotbar slot.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for sneaking.\n"
-"Also used for climbing down and descending in water if aux1_descends is "
-"disabled.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for switching between first- and third-person camera.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for taking screenshots.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for toggling autoforward.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for toggling cinematic mode.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for toggling display of minimap.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for toggling fast mode.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for toggling flying.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for toggling noclip mode.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for toggling pitch move mode.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for toggling the camera update. Only used for development\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for toggling the display of chat.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for toggling the display of debug info.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for toggling the display of fog.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for toggling the display of the HUD.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for toggling the display of the large chat console.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for toggling the display of the profiler. Used for development.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key for toggling unlimited view range.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Key to use view zoom when possible.\n"
-"See http://irrlicht.sourceforge.net/docu/namespaceirr."
-"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgid "Keyboard and Mouse"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4666,10 +4071,6 @@ msgid "Large cave proportion flooded"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Large chat console key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Leaves style"
 msgstr ""
 
@@ -4682,32 +4083,29 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Left key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid ""
 "Length of a server tick and the interval at which objects are generally "
 "updated over\n"
-"network."
+"network, stated in seconds."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Length of liquid waves."
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Length of liquid waves.\n"
-"Requires waving liquids to be enabled."
+"Length of time between Active Block Modifier (ABM) execution cycles, stated "
+"in seconds."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Length of time between Active Block Modifier (ABM) execution cycles"
+msgid "Length of time between NodeTimer execution cycles, stated in seconds."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Length of time between NodeTimer execution cycles"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Length of time between active block management cycles"
+msgid ""
+"Length of time between active block management cycles, stated in seconds."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4719,7 +4117,8 @@ msgid ""
 "-    warning\n"
 "-    action\n"
 "-    info\n"
-"-    verbose"
+"-    verbose\n"
+"-    trace"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4745,6 +4144,11 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid "Light curve low gradient"
 msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Lighting"
+msgstr "चिकना उजाला"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -4803,6 +4207,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Loading Block Modifiers"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Logical value that controls how far the bloom effect spreads\n"
+"from the bright objects.\n"
+"Range: from 0.1 to 8, default: 1"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4903,6 +4314,10 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Mapblock mesh generation delay"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Mapblock mesh generation threads"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5062,10 +4477,6 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Maximum number of forceloaded mapblocks."
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid ""
 "Maximum number of mapblocks for client to be kept in memory.\n"
 "Set to -1 for unlimited amount."
@@ -5105,12 +4516,13 @@ msgid "Maximum simultaneous block sends per client"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Maximum size of the out chat queue"
-msgstr ""
+#, fuzzy
+msgid "Maximum size of the outgoing chat queue"
+msgstr "बातचीत कतार साफ करें"
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Maximum size of the out chat queue.\n"
+"Maximum size of the outgoing chat queue.\n"
 "0 to disable queueing and -1 to make the queue size unlimited."
 msgstr ""
 
@@ -5128,10 +4540,6 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Maximum users"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Menus"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5155,14 +4563,6 @@ msgid "Minimal level of logging to be written to chat."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Minimap"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Minimap key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Minimap scan height"
 msgstr ""
 
@@ -5175,11 +4575,19 @@ msgid "Minimum limit of random number of small caves per mapchunk."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Minimum texture size"
+msgid "Mipmapping"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Mipmapping"
+msgid "Miscellaneous"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Mod Profiler"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Mod Security"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5196,6 +4604,10 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Monospace font size"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Monospace font size divisible by"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5233,10 +4645,6 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Mute key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Mute sound"
 msgstr ""
 
@@ -5261,17 +4669,13 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Near plane"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Network"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid ""
 "Network port to listen (UDP).\n"
 "This value will be overridden when starting from the main menu."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Networking"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5279,12 +4683,9 @@ msgid "New users need to input this password."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Noclip"
-msgstr "तरल चाल"
-
-#: src/settings_translation_file.cpp
-msgid "Noclip key"
-msgstr ""
+#, fuzzy
+msgid "Node and Entity Highlighting"
+msgstr "डिब्बें उजाले हों"
 
 #: src/settings_translation_file.cpp
 msgid "Node highlighting"
@@ -5324,7 +4725,22 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Online Content Repository"
+msgid "Number of messages a player may send per 10 seconds."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Number of threads to use for mesh generation.\n"
+"Value of 0 (default) will let Minetest autodetect the number of available "
+"threads."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Occlusion Culler"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Occlusion Culling"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5349,9 +4765,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Path of the fallback font.\n"
-"If “freetype” setting is enabled: Must be a TrueType font.\n"
-"If “freetype” setting is disabled: Must be a bitmap or XML vectors font.\n"
+"Path of the fallback font. Must be a TrueType font.\n"
 "This font will be used for certain languages or if the default font is "
 "unavailable."
 msgstr ""
@@ -5369,22 +4783,14 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Path to texture directory. All textures are first searched from here."
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid ""
-"Path to the default font.\n"
-"If “freetype” setting is enabled: Must be a TrueType font.\n"
-"If “freetype” setting is disabled: Must be a bitmap or XML vectors font.\n"
+"Path to the default font. Must be a TrueType font.\n"
 "The fallback font will be used if the font cannot be loaded."
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Path to the monospace font.\n"
-"If “freetype” setting is enabled: Must be a TrueType font.\n"
-"If “freetype” setting is disabled: Must be a bitmap or XML vectors font.\n"
+"Path to the monospace font. Must be a TrueType font.\n"
 "This font is used for e.g. the console and profiler screen."
 msgstr ""
 
@@ -5405,40 +4811,12 @@ msgid "Physics"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Pitch move key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Pitch move mode"
-msgstr "पिच चलन"
-
-#: src/settings_translation_file.cpp
-msgid "Place key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 #, fuzzy
 msgid "Place repetition interval"
 msgstr "राइट क्लिक के दोहराने का समय"
 
 #: src/settings_translation_file.cpp
-msgid ""
-"Player is able to fly without being affected by gravity.\n"
-"This requires the \"fly\" privilege on the server."
-msgstr ""
-"खिलाडी के असर से मुक्त उड सकेगा |\n"
-"इसके लिये \"उडान\" विषेशाधिकार आवश्यक है |"
-
-#: src/settings_translation_file.cpp
-msgid "Player name"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Player transfer distance"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Player versus player"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5446,15 +4824,15 @@ msgid "Poisson filtering"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid ""
-"Port to connect to (UDP).\n"
-"Note that the port field in the main menu overrides this setting."
+msgid "Post Processing"
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Prevent digging and placing from repeating when holding the mouse buttons.\n"
-"Enable this when you dig or place too often by accident."
+"Prevent digging and placing from repeating when holding the respective "
+"buttons.\n"
+"Enable this when you dig or place too often by accident.\n"
+"On touchscreens, this only affects digging."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5473,14 +4851,6 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Profiler"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Profiler toggle key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Profiling"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5515,10 +4885,6 @@ msgid "Random input"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Range select key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Recent Chat Messages"
 msgstr ""
 
@@ -5527,11 +4893,11 @@ msgid "Regular font path"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Remote media"
+msgid "Remember screen size"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Remote port"
+msgid "Remote media"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5579,10 +4945,6 @@ msgid "Ridged mountain size noise"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Right key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "River channel depth"
 msgstr ""
 
@@ -5619,10 +4981,6 @@ msgid "Rolling hills spread noise"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Round minimap"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Safe digging and placing"
 msgstr ""
 
@@ -5635,7 +4993,12 @@ msgid "Save the map received by the client on disk."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Save window size automatically when modified."
+msgid ""
+"Save window size automatically when modified.\n"
+"If true, screen size is saved in screen_w and screen_h, and whether the "
+"window\n"
+"is maximized is stored in window_maximized.\n"
+"(Autosaving window_maximized only works if compiled with SDL.)"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5650,6 +5013,11 @@ msgid ""
 "pixels when scaling down, at the cost of blurring some\n"
 "edge pixels when images are scaled by non-integer sizes."
 msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Screen"
+msgstr "स्क्रीन :"
 
 #: src/settings_translation_file.cpp
 msgid "Screen height"
@@ -5679,6 +5047,11 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Screenshots"
+msgstr "स्क्रीनशॉट"
+
+#: src/settings_translation_file.cpp
 msgid "Seabed noise"
 msgstr ""
 
@@ -5691,11 +5064,29 @@ msgid "Second of two 3D noises that together define tunnels."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Security"
+msgid "See https://www.sqlite.org/pragma.html#pragma_synchronous"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "See https://www.sqlite.org/pragma.html#pragma_synchronous"
+msgid ""
+"Select the antialiasing method to apply.\n"
+"\n"
+"* None - No antialiasing (default)\n"
+"\n"
+"* FSAA - Hardware-provided full-screen antialiasing (incompatible with "
+"shaders)\n"
+"A.K.A multi-sample antialiasing (MSAA)\n"
+"Smoothens out block edges but does not affect the insides of textures.\n"
+"A restart is required to change this option.\n"
+"\n"
+"* FXAA - Fast approximate antialiasing (requires shaders)\n"
+"Applies a post-processing filter to detect and smoothen high-contrast "
+"edges.\n"
+"Provides balance between speed and image quality.\n"
+"\n"
+"* SSAA - Super-sampling antialiasing (requires shaders)\n"
+"Renders higher-resolution image of the scene, then scales down to reduce\n"
+"the aliasing effects. This is the slowest and the most accurate method."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5734,8 +5125,19 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Server / Singleplayer"
-msgstr ""
+#, fuzzy
+msgid "Server"
+msgstr "सर्वर चलाएं"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Server Gameplay"
+msgstr "- सर्वर का नाम : "
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Server Security"
+msgstr "सर्वर पोर्ट"
 
 #: src/settings_translation_file.cpp
 msgid "Server URL"
@@ -5758,15 +5160,38 @@ msgid "Server port"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Server side occlusion culling"
+msgid "Server-side occlusion culling"
 msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Server/Env Performance"
+msgstr "सर्वर पोर्ट"
 
 #: src/settings_translation_file.cpp
 msgid "Serverlist URL"
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "Serverlist and MOTD"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Serverlist file"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Set the default tilt of Sun/Moon orbit in degrees.\n"
+"Games may change orbit tilt via API.\n"
+"Value of 0 means no tilt / vertical orbit."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Set the exposure compensation in EV units.\n"
+"Value of 0.0 (default) means no exposure compensation.\n"
+"Range: from -1 to 1.0"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5776,12 +5201,14 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Set the maximum character length of a chat message sent by clients."
+msgid ""
+"Set the maximum length of a chat message (in characters) sent by clients."
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Set the shadow strength.\n"
+"Set the shadow strength gamma.\n"
+"Adjusts the intensity of in-game dynamic shadows.\n"
 "Lower value means lighter shadows, higher value means darker shadows."
 msgstr ""
 
@@ -5789,38 +5216,37 @@ msgstr ""
 msgid ""
 "Set the soft shadow radius size.\n"
 "Lower values mean sharper shadows, bigger values mean softer shadows.\n"
-"Minimum value: 1.0; maximum value: 10.0"
+"Minimum value: 1.0; maximum value: 15.0"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Set to true to enable Shadow Mapping."
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Set the tilt of Sun/Moon orbit in degrees.\n"
-"Value of 0 means no tilt / vertical orbit.\n"
-"Minimum value: 0.0; maximum value: 60.0"
+"Set to true to enable bloom effect.\n"
+"Bright colors will bleed over the neighboring objects."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Set to true to enable waving leaves."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Set to true to enable waving liquids (like water)."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Set to true to enable waving plants."
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Set to true to enable Shadow Mapping.\n"
-"Requires shaders to be enabled."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Set to true to enable waving leaves.\n"
-"Requires shaders to be enabled."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Set to true to enable waving liquids (like water).\n"
-"Requires shaders to be enabled."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Set to true to enable waving plants.\n"
-"Requires shaders to be enabled."
+"Set to true to render debugging breakdown of the bloom effect.\n"
+"In debug mode, the screen is split into 4 quadrants:\n"
+"top-left - processed base image, top-right - final image\n"
+"bottom-left - raw base image, bottom-right - bloom texture."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5833,6 +5259,10 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid "Shader path"
 msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Shaders"
+msgstr "छाया बनावट"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -5865,11 +5295,7 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Shadow strength"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Shape of the minimap. Enabled = round, disabled = square."
+msgid "Shadow strength gamma"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5896,8 +5322,17 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Side length of a cube of map blocks that the client will consider together\n"
+"when generating meshes.\n"
+"Larger values increase the utilization of the GPU by reducing the number of\n"
+"draw calls, benefiting especially high-end GPUs.\n"
+"Systems with a low-end GPU (or no GPU) would benefit from smaller values."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Size of mapchunks generated by mapgen, stated in mapblocks (16 nodes).\n"
-"WARNING!: There is no benefit, and there are several dangers, in\n"
+"WARNING: There is no benefit, and there are several dangers, in\n"
 "increasing this value above 5.\n"
 "Reducing this value increases cave and dungeon density.\n"
 "Altering this value is for special usage, leaving it unchanged is\n"
@@ -5944,24 +5379,18 @@ msgid "Smooth lighting"
 msgstr ""
 
 #: src/settings_translation_file.cpp
+#, fuzzy
 msgid ""
-"Smooths camera when looking around. Also called look or mouse smoothing.\n"
-"Useful for recording videos."
-msgstr ""
-"आपका माउस चिकने तरीके से हिलेगा | इसे माउस या दृष्टि चिकनाई भी कहा जाता है |\n"
-"विडियो बनाते वख़्त काम आ सकता है |"
-
-#: src/settings_translation_file.cpp
-msgid "Smooths rotation of camera in cinematic mode. 0 to disable."
+"Smooths rotation of camera when in cinematic mode, 0 to disable. Enter "
+"cinematic mode by using the key set in Change Keys."
 msgstr "सिनेमा मोड में केमरा चिकने तरीके से मुडेगा | मना करने के लिये 0."
 
 #: src/settings_translation_file.cpp
-msgid "Smooths rotation of camera. 0 to disable."
-msgstr "केमरा के मुडने की चिकनाई. मना करने के लिये 0."
-
-#: src/settings_translation_file.cpp
-msgid "Sneak key"
-msgstr ""
+#, fuzzy
+msgid ""
+"Smooths rotation of camera, also called look or mouse smoothing. 0 to "
+"disable."
+msgstr "सिनेमा मोड में केमरा चिकने तरीके से मुडेगा | मना करने के लिये 0."
 
 #: src/settings_translation_file.cpp
 msgid "Sneaking speed"
@@ -5973,10 +5402,6 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Soft shadow radius"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Sound"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5996,7 +5421,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Spread a complete update of shadow map over given amount of frames.\n"
+"Spread a complete update of shadow map over given number of frames.\n"
 "Higher values might make shadows laggy, lower values\n"
 "will consume more resources.\n"
 "Minimum value: 1; maximum value: 16"
@@ -6010,7 +5435,7 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Static spawnpoint"
+msgid "Static spawn point"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6051,7 +5476,7 @@ msgid ""
 "to above 'mgv7_floatland_ymax' - 'mgv7_floatland_taper' (the start of the\n"
 "upper tapering).\n"
 "***WARNING, POTENTIAL DANGER TO WORLDS AND SERVER PERFORMANCE***:\n"
-"When enabling water placement the floatlands must be configured and tested\n"
+"When enabling water placement, floatlands must be configured and tested\n"
 "to be a solid layer by setting 'mgv7_floatland_density' to 2.0 (or other\n"
 "required value depending on 'mgv7_np_floatland'), to avoid\n"
 "server-intensive extreme water flow and to avoid vast flooding of the\n"
@@ -6105,10 +5530,6 @@ msgid "Terrain persistence noise"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Texture path"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid ""
 "Texture size to render the shadow map on.\n"
 "This must be a power of two.\n"
@@ -6140,12 +5561,8 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "The depth of dirt or other biome filler node."
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid ""
-"The file path relative to your worldpath in which profiles will be saved to."
+"The file path relative to your world path in which profiles will be saved to."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6153,7 +5570,7 @@ msgid "The identifier of the joystick to use"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "The length in pixels it takes for touch screen interaction to start."
+msgid "The length in pixels it takes for touchscreen interaction to start."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6161,8 +5578,7 @@ msgid ""
 "The maximum height of the surface of waving liquids.\n"
 "4.0 = Wave height is two nodes.\n"
 "0.0 = Wave doesn't move at all.\n"
-"Default is 1.0 (1/2 node).\n"
-"Requires waving liquids to be enabled."
+"Default is 1.0 (1/2 node)."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6189,11 +5605,9 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "The rendering back-end.\n"
-"A restart is required after changing this.\n"
-"Note: On Android, stick with OGLES1 if unsure! App may fail to start "
-"otherwise.\n"
-"On other platforms, OpenGL is recommended.\n"
-"Shaders are supported by OpenGL (desktop only) and OGLES2 (experimental)"
+"Note: A restart is required after changing this!\n"
+"OpenGL is the default for desktop, and OGLES2 for Android.\n"
+"Shaders are supported by OpenGL and OGLES2 (experimental)."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6242,7 +5656,7 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "The vertical distance over which heat drops by 20 if 'altitude_chill' is\n"
-"enabled. Also the vertical distance over which humidity drops by 10 if\n"
+"enabled. Also, the vertical distance over which humidity drops by 10 if\n"
 "'altitude_dry' is enabled."
 msgstr ""
 
@@ -6269,7 +5683,7 @@ msgid "Time speed"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Timeout for client to remove unused map data from memory."
+msgid "Timeout for client to remove unused map data from memory, in seconds."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6281,15 +5695,34 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Toggle camera mode key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Tooltip delay"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Touch screen threshold"
+msgid "Touchscreen"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Touchscreen sensitivity"
+msgstr "माउस संवेदनशीलता"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Touchscreen sensitivity multiplier."
+msgstr "माउस संवेदनशीलता गुणक।"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Touchscreen threshold"
+msgstr "छूने की त्रिज्या : (px)"
+
+#: src/settings_translation_file.cpp
+msgid "Tradeoffs for performance"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Transparency Sorting Distance"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6309,6 +5742,21 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Trusted mods"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Type of occlusion_culler\n"
+"\n"
+"\"loops\" is the legacy algorithm with nested loops and O(n³) complexity\n"
+"\"bfs\" is the new algorithm based on breadth-first-search and side culling\n"
+"\n"
+"This setting should only be changed if you have performance problems."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"URL to JSON file which provides information about the newest Minetest release"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6337,6 +5785,10 @@ msgid "Unload unused server data"
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "Update information URL"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Upper Y limit of dungeons."
 msgstr ""
 
@@ -6353,7 +5805,7 @@ msgid "Use a cloud animation for the main menu background."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Use anisotropic filtering when viewing at textures from an angle."
+msgid "Use anisotropic filtering when looking at textures from an angle."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6361,25 +5813,45 @@ msgid "Use bilinear filtering when scaling textures."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid ""
-"Use mipmapping to scale textures. May slightly increase performance,\n"
-"especially when using a high resolution texture pack.\n"
-"Gamma correct downscaling is not supported."
+msgid "Use crosshair for touch screen"
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Use multi-sample antialiasing (MSAA) to smooth out block edges.\n"
-"This algorithm smooths out the 3D viewport while keeping the image sharp,\n"
-"but it doesn't affect the insides of textures\n"
-"(which is especially noticeable with transparent textures).\n"
-"Visible spaces appear between nodes when shaders are disabled.\n"
-"If set to 0, MSAA is disabled.\n"
-"A restart is required after changing this option."
+"Use crosshair to select object instead of whole screen.\n"
+"If enabled, a crosshair will be shown and will be used for selecting object."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Use trilinear filtering when scaling textures."
+msgid ""
+"Use mipmaps when scaling textures. May slightly increase performance,\n"
+"especially when using a high-resolution texture pack.\n"
+"Gamma-correct downscaling is not supported."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Use raytraced occlusion culling in the new culler.\n"
+"This flag enables use of raytraced occlusion culling test for\n"
+"client mesh sizes smaller than 4x4x4 map blocks."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Use trilinear filtering when scaling textures.\n"
+"If both bilinear and trilinear filtering are enabled, trilinear filtering\n"
+"is applied."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Use virtual joystick to trigger \"Aux1\" button.\n"
+"If enabled, virtual joystick will also tap \"Aux1\" button when out of main "
+"circle."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "User Interfaces"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6443,7 +5915,9 @@ msgid "Vertical climbing speed, in nodes per second."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Vertical screen synchronization."
+msgid ""
+"Vertical screen synchronization. Your system may still force VSync on even "
+"if this is disabled."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6456,18 +5930,6 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "View distance in nodes."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "View range decrease key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "View range increase key"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "View zoom key"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6578,13 +6040,6 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Whether FreeType fonts are used, requires FreeType support to be compiled "
-"in.\n"
-"If disabled, bitmap and XML vectors fonts are used instead."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
 "Whether name tag backgrounds should be shown by default.\n"
 "Mods may still set a background."
 msgstr ""
@@ -6600,7 +6055,7 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Whether to allow players to damage and kill each other."
+msgid "Whether the window is maximized."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6627,11 +6082,15 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Width component of the initial window size. Ignored in fullscreen mode."
+msgid "Width component of the initial window size."
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Width of the selection box lines around nodes."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Window maximized"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6712,6 +6171,10 @@ msgid "Y-level of seabed."
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "cURL"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "cURL file download timeout"
 msgstr ""
 
@@ -6723,17 +6186,51 @@ msgstr ""
 msgid "cURL parallel limit"
 msgstr ""
 
+#~ msgid "- Creative Mode: "
+#~ msgstr "- असीमित साधन "
+
+#~ msgid "- Damage: "
+#~ msgstr "- हानि : "
+
+#~ msgid "2x"
+#~ msgstr "दुग्ना"
+
+#~ msgid "3D Clouds"
+#~ msgstr "त्रिविम दृश्यन बादल"
+
+#~ msgid "4x"
+#~ msgstr "चार गुना"
+
+#~ msgid "8x"
+#~ msgstr "आठ गुना"
+
+#~ msgid "< Back to Settings page"
+#~ msgstr "वापस सेटिंग पृष्ठ पर जाएं"
+
 #~ msgid "Address / Port"
 #~ msgstr "ऐडरेस / पोर्ट"
+
+#~ msgid "All Settings"
+#~ msgstr "सभी सेटिंग देखें"
 
 #~ msgid "Are you sure to reset your singleplayer world?"
 #~ msgstr "क्या आप सचमुच अपने एक-खिलाडी दुनिया रद्द करना चाहते हैं?"
 
-#~ msgid "Back"
-#~ msgstr "पीछे"
+#~ msgid "Autosave Screen Size"
+#~ msgstr "स्क्रीन परिमाण स्वयं सेव हो"
+
+#~ msgid "Bilinear Filter"
+#~ msgstr "द्विरेखिय फिल्टर"
 
 #~ msgid "Bump Mapping"
 #~ msgstr "टकराव मैपिंग"
+
+#, fuzzy
+#~ msgid "Change keys"
+#~ msgstr "की बदलें"
+
+#~ msgid "Cinematic mode"
+#~ msgstr "सिनेमा मोड"
 
 #~ msgid "Config mods"
 #~ msgstr "मॉड कॆ सेटिंग बदलें"
@@ -6741,20 +6238,89 @@ msgstr ""
 #~ msgid "Configure"
 #~ msgstr "सेटिंग बदलें"
 
+#~ msgid "Connect"
+#~ msgstr "कनेक्ट करें"
+
+#~ msgid "Connected Glass"
+#~ msgstr "जुडे शिशे"
+
 #~ msgid "Credits"
 #~ msgstr "आभार सूची"
 
 #~ msgid "Damage enabled"
 #~ msgstr "हानि व मृत्यु हो सकती है"
 
+#~ msgid "Disabled unlimited viewing range"
+#~ msgstr "दृष्टि सीमित"
+
+#~ msgid "Down"
+#~ msgstr "नीचे"
+
+#~ msgid "Download a game, such as Minetest Game, from minetest.net"
+#~ msgstr "मैनटेस्ट खेल जैसे अन्य खेल minetest.net से डाऊनलोड किए जा सकते हैं"
+
+#~ msgid "Download one from minetest.net"
+#~ msgstr "आप किसी भी खेल को minetest.net से डाऊनलोड कर सकते हैं"
+
 #~ msgid "Downloading and installing $1, please wait..."
 #~ msgstr "$1 का डाऊनलोड व इन्स्टाल चल रहा है, कृपया ठहरें ..."
+
+#~ msgid "Enabled"
+#~ msgstr "चालू"
+
+#~ msgid "Enter "
+#~ msgstr "डालें "
+
+#~ msgid "Fancy Leaves"
+#~ msgstr "रोचक पत्ते"
+
+#, fuzzy
+#~ msgid ""
+#~ "Fast movement (via the \"Aux1\" key).\n"
+#~ "This requires the \"fast\" privilege on the server."
+#~ msgstr ""
+#~ "स्पेशल की दबाने पर आप बहुत तॆज चलने लगेंगे |\n"
+#~ "इसके लिये \"तेज\" विषेशाधिकार आवश्यक है |"
+
+#~ msgid "Flying"
+#~ msgstr "उडना"
+
+#~ msgid "Game"
+#~ msgstr "खेल"
 
 #~ msgid "Generate Normal Maps"
 #~ msgstr "मामूली नक्शे बनाएं"
 
+#, fuzzy
+#~ msgid "Hide: Temporary Settings"
+#~ msgstr "सेटिंग"
+
+#~ msgid ""
+#~ "If enabled together with fly mode, player is able to fly through solid "
+#~ "nodes.\n"
+#~ "This requires the \"noclip\" privilege on the server."
+#~ msgstr ""
+#~ "अगर यह उडान के साथ चालू होगा तो आप हर चीज़ के आर-पार उड पाएंगे |\n"
+#~ "इसके लिये \"तरल चाल\" विषेशाधिकार आवश्यक है |"
+
+#~ msgid ""
+#~ "If enabled, makes move directions relative to the player's pitch when "
+#~ "flying or swimming."
+#~ msgstr "चालू होने पर आप जहां देखेंगे उस दिशा को सामने माना जाएगा (पिच चलन)|"
+
+#~ msgid "Information:"
+#~ msgstr "जानकारी :"
+
+#~ msgid "Install Mod: Unable to find real mod name for: $1"
+#~ msgstr "इन्स्टाल मॉड: $1 का असल नाम नहीं जान पाया गया"
+
 #~ msgid "Install: file: \"$1\""
 #~ msgstr "इन्स्टाल : फाईल : \"$1\""
+
+#~ msgid ""
+#~ "Keybindings. (If this menu screws up, remove stuff from minetest.conf)"
+#~ msgstr ""
+#~ "कीबोर्ड सेटिंग (अगर यह मेनू खराब हो जाए तो minetest.conf से सब कुछ खाली कर दें)"
 
 #~ msgid "Main"
 #~ msgstr "मुख्य"
@@ -6771,6 +6337,12 @@ msgstr ""
 #~ msgid "Minimap in surface mode, Zoom x4"
 #~ msgstr "छोटा नक्शा जमीन मोड, 4 गुना जून"
 
+#~ msgid "Mipmap"
+#~ msgstr "मिपमैप"
+
+#~ msgid "Mipmap + Aniso. Filter"
+#~ msgstr "मिपमैप व अनीसो. फिल्टर"
+
 #~ msgid "Name / Password"
 #~ msgstr "नाम/पासवर्ड"
 
@@ -6780,11 +6352,54 @@ msgstr ""
 #~ msgid "No"
 #~ msgstr "नहीं"
 
+#~ msgid "No Filter"
+#~ msgstr "कोई फिल्टर नहीं"
+
+#~ msgid "No Mipmap"
+#~ msgstr "मिपमैप नहीं हो"
+
+#~ msgid "Noclip"
+#~ msgstr "तरल चाल"
+
+#~ msgid "Node Highlighting"
+#~ msgstr "डिब्बें उजाले हों"
+
+#~ msgid "Node Outlining"
+#~ msgstr "डिब्बों की रूपरेखा"
+
+#~ msgid "None"
+#~ msgstr "कुछ नहीं"
+
 #~ msgid "Ok"
 #~ msgstr "ठीक है"
 
+#~ msgid "Opaque Leaves"
+#~ msgstr "अपारदर्शी पत्ते"
+
+#~ msgid "Opaque Water"
+#~ msgstr "अपारदर्शी पानी"
+
 #~ msgid "Parallax Occlusion"
 #~ msgstr "पेरलेक्स ऑक्लूजन"
+
+#~ msgid "Particles"
+#~ msgstr "कण"
+
+#~ msgid "Pitch move mode"
+#~ msgstr "पिच चलन"
+
+#~ msgid ""
+#~ "Player is able to fly without being affected by gravity.\n"
+#~ "This requires the \"fly\" privilege on the server."
+#~ msgstr ""
+#~ "खिलाडी के असर से मुक्त उड सकेगा |\n"
+#~ "इसके लिये \"उडान\" विषेशाधिकार आवश्यक है |"
+
+#~ msgid "Please enter a valid integer."
+#~ msgstr "कृपया एक पूर्णांक (integer) भरें।"
+
+#~ msgid "Please enter a valid number."
+#~ msgstr "कृपया एक अंक भरें।"
 
 #~ msgid "PvP enabled"
 #~ msgstr "खिलाडियों में मारा-पीटी की अनुमती है"
@@ -6792,24 +6407,116 @@ msgstr ""
 #~ msgid "Reset singleplayer world"
 #~ msgstr "एक-खिलाडी दुनिया रीसेट करें"
 
+#~ msgid "Screen:"
+#~ msgstr "स्क्रीन :"
+
+#, fuzzy
+#~ msgid "Shaders (experimental)"
+#~ msgstr "फ्लोटलैंड्स (आसमान में तैरते हुए भूमि-खंड) (प्रायोगिक)"
+
+#~ msgid "Shaders (unavailable)"
+#~ msgstr "छाया बनावट (अनुपलब्ध)"
+
+#~ msgid "Simple Leaves"
+#~ msgstr "मामूली पत्ते"
+
+#~ msgid "Smooth Lighting"
+#~ msgstr "चिकना उजाला"
+
+#~ msgid "Smooths rotation of camera. 0 to disable."
+#~ msgstr "केमरा के मुडने की चिकनाई. मना करने के लिये 0."
+
 #~ msgid "Special"
 #~ msgstr "स्पेशल"
 
 #~ msgid "Start Singleplayer"
 #~ msgstr "एक-खिलाडी शुरू करें"
 
+#~ msgid "Texturing:"
+#~ msgstr "कला बनावट :"
+
+#~ msgid "The value must be at least $1."
+#~ msgstr "इसका मूल्य कम-से-कम $1 होना चाहिए।"
+
+#~ msgid "The value must not be larger than $1."
+#~ msgstr "इसका मूल्य $1 से अधिक नहीं होना चाहिए।"
+
+#, fuzzy
+#~ msgid ""
+#~ "This can be bound to a key to toggle camera smoothing when looking "
+#~ "around.\n"
+#~ "Useful for recording videos"
+#~ msgstr ""
+#~ "आपका माउस चिकने तरीके से हिलेगा | इसे माउस या दृष्टि चिकनाई भी कहा जाता है |\n"
+#~ "विडियो बनाते वख़्त काम आ सकता है |"
+
 #~ msgid "To enable shaders the OpenGL driver needs to be used."
 #~ msgstr "छाया बनावट कॆ लिये OpenGL ड्राईवर आवश्यक हैं|"
+
+#~ msgid "Tone Mapping"
+#~ msgstr "टोन मैपिंग"
+
+#~ msgid "Trilinear Filter"
+#~ msgstr "त्रिरेखीय फिल्टर"
+
+#~ msgid "Unable to install a game as a $1"
+#~ msgstr "खेल को $1 के रूप में इन्स्टाल नहीं किया जा सका"
+
+#~ msgid "Unable to install a modpack as a $1"
+#~ msgstr "माॅडपैक को $1 के रूप में इन्स्टाल नहीं किया जा सका"
+
+#~ msgid "Uninstall Package"
+#~ msgstr "पैकेज हटाएं"
+
+#~ msgid "Up"
+#~ msgstr "ऊपर"
 
 #~ msgid "View"
 #~ msgstr "दृश्य"
 
+#, c-format
+#~ msgid "Viewing range is at maximum: %d"
+#~ msgstr "दृष्टि सीमा अधिकतम : %d"
+
+#~ msgid "Waving Leaves"
+#~ msgstr "पत्ते लहराएं"
+
+#~ msgid "Waving Liquids"
+#~ msgstr "पानी में लहरें बनें"
+
+#~ msgid "Waving Plants"
+#~ msgstr "पाैधे लहराएं"
+
+#~ msgid "X"
+#~ msgstr "एक्स"
+
+#~ msgid "Y"
+#~ msgstr "वाई"
+
 #~ msgid "Yes"
 #~ msgstr "हां"
+
+#, c-format
+#~ msgid ""
+#~ "You are about to join this server with the name \"%s\" for the first "
+#~ "time.\n"
+#~ "If you proceed, a new account using your credentials will be created on "
+#~ "this server.\n"
+#~ "Please retype your password and click 'Register and Join' to confirm "
+#~ "account creation, or click 'Cancel' to abort."
+#~ msgstr ""
+#~ "आप \"%s\" नाम से इस सरवर में पहली बार आने वाले हैं। अगर आप आगे बढ़ते हैं तो आपके लिए "
+#~ "इस सर्वर पर एक अकाउंट बनाया जाएगा।\n"
+#~ "\n"
+#~ "आगे बढ़ने ए लिखें कृपया अपने पासवर्ड को वापस लिखें और फिर 'पंजीकरण व खेलें' दबाएं, अथवा "
+#~ "'रोकें' दबाएं।"
 
 #, fuzzy
 #~ msgid "You died."
 #~ msgstr "आपकी मौत हो गयी"
+
+#~ msgid "Z"
+#~ msgstr "जेड"
 
 #~ msgid "needs_fallback_font"
 #~ msgstr "yes"

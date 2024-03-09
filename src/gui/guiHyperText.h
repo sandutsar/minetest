@@ -19,16 +19,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
-#include "config.h" // for USE_FREETYPE
+#include <vector>
+#include <list>
+#include <unordered_map>
+#include <string>
+#include "irrlichttypes_extrabloated.h"
 
 using namespace irr;
 
 class ISimpleTextureSource;
 class Client;
-
-#if USE_FREETYPE
-#include "irrlicht_changes/CGUITTFont.h"
-#endif
+class GUIScrollBar;
 
 class ParsedText
 {
@@ -187,8 +188,9 @@ protected:
 	};
 
 	ParsedText m_text;
-	Client *m_client;
-	gui::IGUIEnvironment *m_environment;
+	Client *m_client; ///< null in the mainmenu
+	ISimpleTextureSource *m_tsrc;
+	gui::IGUIEnvironment *m_guienv;
 	s32 m_height;
 	s32 m_voffset;
 	std::vector<RectWithMargin> m_floating;
@@ -215,7 +217,7 @@ public:
 
 protected:
 	// GUI members
-	Client *m_client;
+	ISimpleTextureSource *m_tsrc;
 	GUIScrollBar *m_vscrollbar;
 	TextDrawer m_drawer;
 

@@ -223,6 +223,11 @@ WieldMeshSceneNode::WieldMeshSceneNode(scene::ISceneManager *mgr, s32 id, bool l
 	dummymesh->drop(); // m_meshnode grabbed it
 
 	m_shadow = RenderingEngine::get_shadow_renderer();
+
+	if (m_shadow) {
+		// Add mesh to shadow caster
+		m_shadow->addNodeToShadowList(m_meshnode);
+	}
 }
 
 WieldMeshSceneNode::~WieldMeshSceneNode()
@@ -230,8 +235,8 @@ WieldMeshSceneNode::~WieldMeshSceneNode()
 	sanity_check(g_extrusion_mesh_cache);
 
 	// Remove node from shadow casters. m_shadow might be an invalid pointer!
-	if (auto shadow = RenderingEngine::get_shadow_renderer())
-		shadow->removeNodeFromShadowList(m_meshnode);
+	if (m_shadow)
+		m_shadow->removeNodeFromShadowList(m_meshnode);
 
 	if (g_extrusion_mesh_cache->drop())
 		g_extrusion_mesh_cache = nullptr;
@@ -287,22 +292,20 @@ void WieldMeshSceneNode::setExtruded(const std::string &imagename,
 	// Customize materials
 	for (u32 layer = 0; layer < m_meshnode->getMaterialCount(); layer++) {
 		video::SMaterial &material = m_meshnode->getMaterial(layer);
-		material.TextureLayer[0].TextureWrapU = video::ETC_CLAMP_TO_EDGE;
-		material.TextureLayer[0].TextureWrapV = video::ETC_CLAMP_TO_EDGE;
+		material.TextureLayers[0].TextureWrapU = video::ETC_CLAMP_TO_EDGE;
+		material.TextureLayers[0].TextureWrapV = video::ETC_CLAMP_TO_EDGE;
 		material.MaterialType = m_material_type;
 		material.MaterialTypeParam = 0.5f;
-		material.setFlag(video::EMF_BACK_FACE_CULLING, true);
+		material.BackfaceCulling = true;
 		// Enable bi/trilinear filtering only for high resolution textures
-		if (dim.Width > 32) {
-			material.setFlag(video::EMF_BILINEAR_FILTER, m_bilinear_filter);
-			material.setFlag(video::EMF_TRILINEAR_FILTER, m_trilinear_filter);
-		} else {
-			material.setFlag(video::EMF_BILINEAR_FILTER, false);
-			material.setFlag(video::EMF_TRILINEAR_FILTER, false);
-		}
-		material.setFlag(video::EMF_ANISOTROPIC_FILTER, m_anisotropic_filter);
+		bool bilinear_filter = dim.Width > 32 && m_bilinear_filter;
+		bool trilinear_filter = dim.Width > 32 && m_trilinear_filter;
+		material.forEachTexture([=] (auto &tex) {
+			setMaterialFilters(tex, bilinear_filter, trilinear_filter,
+					m_anisotropic_filter);
+		});
 		// mipmaps cause "thin black line" artifacts
-		material.setFlag(video::EMF_USE_MIP_MAPS, false);
+		material.UseMipMaps = false;
 		if (m_enable_shaders) {
 			material.setTexture(2, tsrc->getShaderFlagsTexture(false));
 		}
@@ -312,8 +315,8 @@ void WieldMeshSceneNode::setExtruded(const std::string &imagename,
 static scene::SMesh *createSpecialNodeMesh(Client *client, MapNode n,
 	std::vector<ItemPartColor> *colors, const ContentFeatures &f)
 {
-	MeshMakeData mesh_make_data(client, false);
-	MeshCollector collector;
+	MeshMakeData mesh_make_data(client->ndef(), 1, false);
+	MeshCollector collector(v3f(0.0f * BS), v3f());
 	mesh_make_data.setSmoothLighting(false);
 	MapblockMeshGenerator gen(&mesh_make_data, &collector,
 		client->getSceneManager()->getMeshManipulator());
@@ -379,13 +382,20 @@ void WieldMeshSceneNode::setItem(const ItemStack &item, Client *client, bool che
 	m_colors.clear();
 	m_base_color = idef->getItemstackColor(item, client);
 
+	const std::string wield_image = item.getWieldImage(idef);
+	const std::string wield_overlay = item.getWieldOverlay(idef);
+	const v3f wield_scale = item.getWieldScale(idef);
+
 	// If wield_image needs to be checked and is defined, it overrides everything else
-	if (!def.wield_image.empty() && check_wield_image) {
-		setExtruded(def.wield_image, def.wield_overlay, def.wield_scale, tsrc,
+	if (!wield_image.empty() && check_wield_image) {
+		setExtruded(wield_image, wield_overlay, wield_scale, tsrc,
 			1);
 		m_colors.emplace_back();
 		// overlay is white, if present
 		m_colors.emplace_back(true, video::SColor(0xFFFFFFFF));
+		// initialize the color
+		if (!m_lighting)
+			setColor(video::SColor(0xFFFFFFFF));
 		return;
 	}
 
@@ -405,7 +415,7 @@ void WieldMeshSceneNode::setItem(const ItemStack &item, Client *client, bool che
 		case NDT_RAILLIKE:
 		case NDT_PLANTLIKE:
 		case NDT_FLOWINGLIQUID: {
-			v3f wscale = def.wield_scale;
+			v3f wscale = wield_scale;
 			if (f.drawtype == NDT_FLOWINGLIQUID)
 				wscale.Z *= 0.1f;
 			setExtruded(tsrc->getTextureName(f.tiles[0].layers[0].texture_id),
@@ -421,7 +431,7 @@ void WieldMeshSceneNode::setItem(const ItemStack &item, Client *client, bool che
 		}
 		case NDT_PLANTLIKE_ROOTED: {
 			setExtruded(tsrc->getTextureName(f.special_tiles[0].layers[0].texture_id),
-				"", def.wield_scale, tsrc,
+				"", wield_scale, tsrc,
 				f.special_tiles[0].layers[0].animation_frame_count);
 			// Add color
 			const TileLayer &l0 = f.special_tiles[0].layers[0];
@@ -431,18 +441,19 @@ void WieldMeshSceneNode::setItem(const ItemStack &item, Client *client, bool che
 		case NDT_NORMAL:
 		case NDT_ALLFACES:
 		case NDT_LIQUID:
-			setCube(f, def.wield_scale);
+			setCube(f, wield_scale);
 			break;
 		default: {
 			// Render non-trivial drawtypes like the actual node
 			MapNode n(id);
-			n.setParam2(def.place_param2);
+			if (def.place_param2)
+				n.setParam2(*def.place_param2);
 
 			mesh = createSpecialNodeMesh(client, n, &m_colors, f);
 			changeToMesh(mesh);
 			mesh->drop();
 			m_meshnode->setScale(
-				def.wield_scale * WIELD_SCALE_FACTOR
+				wield_scale * WIELD_SCALE_FACTOR
 				/ (BS * f.visual_scale));
 			break;
 		}
@@ -453,15 +464,22 @@ void WieldMeshSceneNode::setItem(const ItemStack &item, Client *client, bool che
 			video::SMaterial &material = m_meshnode->getMaterial(i);
 			material.MaterialType = m_material_type;
 			material.MaterialTypeParam = 0.5f;
-			material.setFlag(video::EMF_BACK_FACE_CULLING, cull_backface);
-			material.setFlag(video::EMF_BILINEAR_FILTER, m_bilinear_filter);
-			material.setFlag(video::EMF_TRILINEAR_FILTER, m_trilinear_filter);
+			material.BackfaceCulling = cull_backface;
+			material.forEachTexture([this] (auto &tex) {
+				setMaterialFilters(tex, m_bilinear_filter, m_trilinear_filter,
+						m_anisotropic_filter);
+			});
 		}
+
+		// initialize the color
+		if (!m_lighting)
+			setColor(video::SColor(0xFFFFFFFF));
 		return;
 	} else {
-		if (!def.inventory_image.empty()) {
-			setExtruded(def.inventory_image, def.inventory_overlay, def.wield_scale,
-				tsrc, 1);
+		const std::string inventory_image = item.getInventoryImage(idef);
+		if (!inventory_image.empty()) {
+			const std::string inventory_overlay = item.getInventoryOverlay(idef);
+			setExtruded(inventory_image, inventory_overlay, def.wield_scale, tsrc, 1);
 		} else {
 			setExtruded("no_texture.png", "", def.wield_scale, tsrc, 1);
 		}
@@ -469,6 +487,10 @@ void WieldMeshSceneNode::setItem(const ItemStack &item, Client *client, bool che
 		m_colors.emplace_back();
 		// overlay is white, if present
 		m_colors.emplace_back(true, video::SColor(0xFFFFFFFF));
+
+		// initialize the color
+		if (!m_lighting)
+			setColor(video::SColor(0xFFFFFFFF));
 		return;
 	}
 
@@ -486,21 +508,26 @@ void WieldMeshSceneNode::setColor(video::SColor c)
 	u8 red = c.getRed();
 	u8 green = c.getGreen();
 	u8 blue = c.getBlue();
-	u32 mc = mesh->getMeshBufferCount();
+
+	const u32 mc = mesh->getMeshBufferCount();
+	if (mc > m_colors.size())
+		m_colors.resize(mc);
 	for (u32 j = 0; j < mc; j++) {
 		video::SColor bc(m_base_color);
-		if ((m_colors.size() > j) && (m_colors[j].override_base))
-			bc = m_colors[j].color;
+		m_colors[j].applyOverride(bc);
 		video::SColor buffercolor(255,
 			bc.getRed() * red / 255,
 			bc.getGreen() * green / 255,
 			bc.getBlue() * blue / 255);
 		scene::IMeshBuffer *buf = mesh->getMeshBuffer(j);
 
-		if (m_enable_shaders)
-			setMeshBufferColor(buf, buffercolor);
-		else
-			colorizeMeshBuffer(buf, &buffercolor);
+		if (m_colors[j].needColorize(buffercolor)) {
+			buf->setDirty(scene::EBT_VERTEX);
+			if (m_enable_shaders)
+				setMeshBufferColor(buf, buffercolor);
+			else
+				colorizeMeshBuffer(buf, &buffercolor);
+		}
 	}
 }
 
@@ -514,9 +541,9 @@ void WieldMeshSceneNode::setNodeLightColor(video::SColor color)
 			video::SMaterial &material = m_meshnode->getMaterial(i);
 			material.EmissiveColor = color;
 		}
+	} else {
+		setColor(color);
 	}
-
-	setColor(color);
 }
 
 void WieldMeshSceneNode::render()
@@ -534,16 +561,20 @@ void WieldMeshSceneNode::changeToMesh(scene::IMesh *mesh)
 		dummymesh->drop();  // m_meshnode grabbed it
 	} else {
 		m_meshnode->setMesh(mesh);
+		// without shaders recolored often for lighting
+		// otherwise only once
+		if (m_enable_shaders)
+			mesh->setHardwareMappingHint(scene::EHM_STATIC);
+		else
+			mesh->setHardwareMappingHint(scene::EHM_DYNAMIC);
 	}
 
-	m_meshnode->setMaterialFlag(video::EMF_LIGHTING, m_lighting);
-	// need to normalize normals when lighting is enabled (because of setScale())
-	m_meshnode->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, m_lighting);
+	m_meshnode->forEachMaterial([this] (auto &mat) {
+		mat.Lighting = m_lighting;
+		// need to normalize normals when lighting is enabled (because of setScale())
+		mat.NormalizeNormals = m_lighting;
+	});
 	m_meshnode->setVisible(true);
-
-	// Add mesh to shadow caster
-	if (m_shadow)
-		m_shadow->addNodeToShadowList(m_meshnode);
 }
 
 void getItemMesh(Client *client, const ItemStack &item, ItemMesh *result)
@@ -565,9 +596,10 @@ void getItemMesh(Client *client, const ItemStack &item, ItemMesh *result)
 	bool cull_backface = f.needsBackfaceCulling();
 
 	// If inventory_image is defined, it overrides everything else
-	if (!def.inventory_image.empty()) {
-		mesh = getExtrudedMesh(tsrc, def.inventory_image,
-			def.inventory_overlay);
+	const std::string inventory_image = item.getInventoryImage(idef);
+	const std::string inventory_overlay = item.getInventoryOverlay(idef);
+	if (!inventory_image.empty()) {
+		mesh = getExtrudedMesh(tsrc, inventory_image, inventory_overlay);
 		result->buffer_colors.emplace_back();
 		// overlay is white, if present
 		result->buffer_colors.emplace_back(true, video::SColor(0xFFFFFFFF));
@@ -575,8 +607,7 @@ void getItemMesh(Client *client, const ItemStack &item, ItemMesh *result)
 		result->needs_shading = false;
 	} else if (def.type == ITEM_NODE && f.drawtype == NDT_AIRLIKE) {
 		// Fallback image for airlike node
-		mesh = getExtrudedMesh(tsrc, "no_texture_airlike.png",
-			def.inventory_overlay);
+		mesh = getExtrudedMesh(tsrc, "no_texture_airlike.png", inventory_overlay);
 		result->needs_shading = false;
 	} else if (def.type == ITEM_NODE) {
 		switch (f.drawtype) {
@@ -621,7 +652,8 @@ void getItemMesh(Client *client, const ItemStack &item, ItemMesh *result)
 		default: {
 			// Render non-trivial drawtypes like the actual node
 			MapNode n(id);
-			n.setParam2(def.place_param2);
+			if (def.place_param2)
+				n.setParam2(*def.place_param2);
 
 			mesh = createSpecialNodeMesh(client, n, &result->buffer_colors, f);
 			scaleMesh(mesh, v3f(0.12, 0.12, 0.12));
@@ -629,20 +661,27 @@ void getItemMesh(Client *client, const ItemStack &item, ItemMesh *result)
 		}
 		}
 
-		u32 mc = mesh->getMeshBufferCount();
-		for (u32 i = 0; i < mc; ++i) {
+		for (u32 i = 0; i < mesh->getMeshBufferCount(); ++i) {
 			scene::IMeshBuffer *buf = mesh->getMeshBuffer(i);
 			video::SMaterial &material = buf->getMaterial();
 			material.MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
 			material.MaterialTypeParam = 0.5f;
-			material.setFlag(video::EMF_BILINEAR_FILTER, false);
-			material.setFlag(video::EMF_TRILINEAR_FILTER, false);
-			material.setFlag(video::EMF_BACK_FACE_CULLING, cull_backface);
-			material.setFlag(video::EMF_LIGHTING, false);
+			material.forEachTexture([] (auto &tex) {
+				tex.MinFilter = video::ETMINF_NEAREST_MIPMAP_NEAREST;
+				tex.MagFilter = video::ETMAGF_NEAREST;
+			});
+			material.BackfaceCulling = cull_backface;
+			material.Lighting = false;
 		}
 
 		rotateMeshXZby(mesh, -45);
 		rotateMeshYZby(mesh, -30);
+	}
+
+	// might need to be re-colorized, this is done only when needed
+	if (mesh) {
+		mesh->setHardwareMappingHint(scene::EHM_DYNAMIC, scene::EBT_VERTEX);
+		mesh->setHardwareMappingHint(scene::EHM_STATIC, scene::EBT_INDEX);
 	}
 	result->mesh = mesh;
 }
@@ -678,12 +717,14 @@ scene::SMesh *getExtrudedMesh(ITextureSource *tsrc,
 	// Customize materials
 	for (u32 layer = 0; layer < mesh->getMeshBufferCount(); layer++) {
 		video::SMaterial &material = mesh->getMeshBuffer(layer)->getMaterial();
-		material.TextureLayer[0].TextureWrapU = video::ETC_CLAMP_TO_EDGE;
-		material.TextureLayer[0].TextureWrapV = video::ETC_CLAMP_TO_EDGE;
-		material.setFlag(video::EMF_BILINEAR_FILTER, false);
-		material.setFlag(video::EMF_TRILINEAR_FILTER, false);
-		material.setFlag(video::EMF_BACK_FACE_CULLING, true);
-		material.setFlag(video::EMF_LIGHTING, false);
+		material.TextureLayers[0].TextureWrapU = video::ETC_CLAMP_TO_EDGE;
+		material.TextureLayers[0].TextureWrapV = video::ETC_CLAMP_TO_EDGE;
+		material.forEachTexture([] (auto &tex) {
+			tex.MinFilter = video::ETMINF_NEAREST_MIPMAP_NEAREST;
+			tex.MagFilter = video::ETMAGF_NEAREST;
+		});
+		material.BackfaceCulling = true;
+		material.Lighting = false;
 		material.MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
 		material.MaterialTypeParam = 0.5f;
 	}
@@ -696,11 +737,10 @@ void postProcessNodeMesh(scene::SMesh *mesh, const ContentFeatures &f,
 	bool use_shaders, bool set_material, const video::E_MATERIAL_TYPE *mattype,
 	std::vector<ItemPartColor> *colors, bool apply_scale)
 {
-	u32 mc = mesh->getMeshBufferCount();
+	const u32 mc = mesh->getMeshBufferCount();
 	// Allocate colors for existing buffers
 	colors->clear();
-	for (u32 i = 0; i < mc; ++i)
-		colors->push_back(ItemPartColor());
+	colors->resize(mc);
 
 	for (u32 i = 0; i < mc; ++i) {
 		const TileSpec *tile = &(f.tiles[i]);
@@ -715,11 +755,11 @@ void postProcessNodeMesh(scene::SMesh *mesh, const ContentFeatures &f,
 				mesh->addMeshBuffer(copy);
 				copy->drop();
 				buf = copy;
-				colors->push_back(
-					ItemPartColor(layer->has_color, layer->color));
+				colors->emplace_back(layer->has_color, layer->color);
 			} else {
 				(*colors)[i] = ItemPartColor(layer->has_color, layer->color);
 			}
+
 			video::SMaterial &material = buf->getMaterial();
 			if (set_material)
 				layer->applyMaterialOptions(material);
@@ -742,6 +782,7 @@ void postProcessNodeMesh(scene::SMesh *mesh, const ContentFeatures &f,
 				}
 				material.setTexture(2, layer->flags_texture);
 			}
+
 			if (apply_scale && tile->world_aligned) {
 				u32 n = buf->getVertexCount();
 				for (u32 k = 0; k != n; ++k)

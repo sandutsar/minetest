@@ -5,9 +5,6 @@
 #ifndef __GUI_SKIN_H_INCLUDED__
 #define __GUI_SKIN_H_INCLUDED__
 
-#include "IrrCompileConfig.h"
-#ifdef _IRR_COMPILE_WITH_GUI_
-
 #include "IGUISkin.h"
 #include "irrString.h"
 #include <string>
@@ -290,16 +287,6 @@ namespace gui
 		//! get the type of this skin
 		virtual EGUI_SKIN_TYPE getType() const;
 
-		//! Writes attributes of the object.
-		//! Implement this to expose the attributes of your scene node animator for
-		//! scripting languages, editors, debuggers or xml serialization purposes.
-		virtual void serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options=0) const;
-
-		//! Reads attributes of the object.
-		//! Implement this to set the attributes of your scene node animator for
-		//! scripting languages, editors, debuggers or xml deserialization purposes.
-		virtual void deserializeAttributes(io::IAttributes* in, io::SAttributeReadWriteOptions* options=0);
-
 		//! gets the colors
 		virtual void getColors(video::SColor* colors); // ::PATCH:
 
@@ -369,8 +356,5 @@ inline void setShading(video::SColor &color,f32 s) // :PATCH:
 	}
 }
 } // end namespace irr
-
-
-#endif // _IRR_COMPILE_WITH_GUI_
 
 #endif

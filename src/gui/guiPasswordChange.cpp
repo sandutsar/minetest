@@ -25,10 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <IGUIStaticText.h>
 #include <IGUIFont.h>
 
-#ifdef HAVE_TOUCHSCREENGUI
-	#include "client/renderingengine.h"
-#endif
-
 #include "porting.h"
 #include "gettext.h"
 
@@ -51,23 +47,6 @@ GUIPasswordChange::GUIPasswordChange(gui::IGUIEnvironment* env,
 {
 }
 
-GUIPasswordChange::~GUIPasswordChange()
-{
-	removeChildren();
-}
-
-void GUIPasswordChange::removeChildren()
-{
-	const core::list<gui::IGUIElement *> &children = getChildren();
-	core::list<gui::IGUIElement *> children_copy;
-	for (gui::IGUIElement *i : children) {
-		children_copy.push_back(i);
-	}
-
-	for (gui::IGUIElement *i : children_copy) {
-		i->remove();
-	}
-}
 void GUIPasswordChange::regenerateGui(v2u32 screensize)
 {
 	/*
@@ -78,16 +57,13 @@ void GUIPasswordChange::regenerateGui(v2u32 screensize)
 	/*
 		Remove stuff
 	*/
-	removeChildren();
+	removeAllChildren();
 
 	/*
 		Calculate new sizes and positions
 	*/
-#ifdef HAVE_TOUCHSCREENGUI
-	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 2;
-#else
 	const float s = m_gui_scale;
-#endif
+
 	DesiredRect = core::rect<s32>(
 		screensize.X / 2 - 580 * s / 2,
 		screensize.Y / 2 - 300 * s / 2,
@@ -99,8 +75,6 @@ void GUIPasswordChange::regenerateGui(v2u32 screensize)
 	v2s32 size = DesiredRect.getSize();
 	v2s32 topleft_client(40 * s, 0);
 
-	const wchar_t *text;
-
 	/*
 		Add stuff
 	*/
@@ -108,9 +82,8 @@ void GUIPasswordChange::regenerateGui(v2u32 screensize)
 	{
 		core::rect<s32> rect(0, 0, 150 * s, 20 * s);
 		rect += topleft_client + v2s32(25 * s, ypos + 6 * s);
-		text = wgettext("Old Password");
-		Environment->addStaticText(text, rect, false, true, this, -1);
-		delete[] text;
+		gui::StaticText::add(Environment, wstrgettext("Old Password"), rect,
+				false, true, this, -1);
 	}
 	{
 		core::rect<s32> rect(0, 0, 230 * s, 30 * s);
@@ -124,9 +97,8 @@ void GUIPasswordChange::regenerateGui(v2u32 screensize)
 	{
 		core::rect<s32> rect(0, 0, 150 * s, 20 * s);
 		rect += topleft_client + v2s32(25 * s, ypos + 6 * s);
-		text = wgettext("New Password");
-		Environment->addStaticText(text, rect, false, true, this, -1);
-		delete[] text;
+		gui::StaticText::add(Environment, wstrgettext("New Password"), rect,
+				false, true, this, -1);
 	}
 	{
 		core::rect<s32> rect(0, 0, 230 * s, 30 * s);
@@ -139,9 +111,8 @@ void GUIPasswordChange::regenerateGui(v2u32 screensize)
 	{
 		core::rect<s32> rect(0, 0, 150 * s, 20 * s);
 		rect += topleft_client + v2s32(25 * s, ypos + 6 * s);
-		text = wgettext("Confirm Password");
-		Environment->addStaticText(text, rect, false, true, this, -1);
-		delete[] text;
+		gui::StaticText::add(Environment, wstrgettext("Confirm Password"), rect,
+				false, true, this, -1);
 	}
 	{
 		core::rect<s32> rect(0, 0, 230 * s, 30 * s);
@@ -155,28 +126,24 @@ void GUIPasswordChange::regenerateGui(v2u32 screensize)
 	{
 		core::rect<s32> rect(0, 0, 100 * s, 30 * s);
 		rect = rect + v2s32(size.X / 4 + 56 * s, ypos);
-		text = wgettext("Change");
-		GUIButton::addButton(Environment, rect, m_tsrc, this, ID_change, text);
-		delete[] text;
+		GUIButton::addButton(Environment, rect, m_tsrc, this, ID_change,
+				wstrgettext("Change").c_str());
 	}
 	{
 		core::rect<s32> rect(0, 0, 100 * s, 30 * s);
 		rect = rect + v2s32(size.X / 4 + 185 * s, ypos);
-		text = wgettext("Cancel");
-		GUIButton::addButton(Environment, rect, m_tsrc, this, ID_cancel, text);
-		delete[] text;
+		GUIButton::addButton(Environment, rect, m_tsrc, this, ID_cancel,
+				wstrgettext("Cancel").c_str());
 	}
 
 	ypos += 50 * s;
 	{
 		core::rect<s32> rect(0, 0, 300 * s, 20 * s);
 		rect += topleft_client + v2s32(35 * s, ypos);
-		text = wgettext("Passwords do not match!");
-		IGUIElement *e =
-			Environment->addStaticText(
-			text, rect, false, true, this, ID_message);
+		IGUIElement *e = gui::StaticText::add(
+				Environment, wstrgettext("Passwords do not match!"), rect,
+				false, true, this, ID_message);
 		e->setVisible(false);
-		delete[] text;
 	}
 }
 
@@ -225,14 +192,12 @@ bool GUIPasswordChange::processInput()
 bool GUIPasswordChange::OnEvent(const SEvent &event)
 {
 	if (event.EventType == EET_KEY_INPUT_EVENT) {
-		// clang-format off
 		if ((event.KeyInput.Key == KEY_ESCAPE ||
 				event.KeyInput.Key == KEY_CANCEL) &&
 				event.KeyInput.PressedDown) {
 			quitMenu();
 			return true;
 		}
-		// clang-format on
 		if (event.KeyInput.Key == KEY_RETURN && event.KeyInput.PressedDown) {
 			acceptInput();
 			if (processInput())
@@ -292,14 +257,19 @@ std::string GUIPasswordChange::getNameByID(s32 id)
 }
 
 #ifdef __ANDROID__
-bool GUIPasswordChange::getAndroidUIInput()
+void GUIPasswordChange::getAndroidUIInput()
 {
-	if (!hasAndroidUIInput())
-		return false;
+	porting::AndroidDialogState dialogState = getAndroidUIInputState();
+	if (dialogState == porting::DIALOG_SHOWN) {
+		return;
+	} else if (dialogState == porting::DIALOG_CANCELED) {
+		m_jni_field_name.clear();
+		return;
+	}
 
-	// still waiting
-	if (porting::getInputDialogState() == -1)
-		return true;
+	// It has to be a text input
+	if (porting::getLastInputDialogType() != porting::TEXT_INPUT)
+		return;
 
 	gui::IGUIElement *e = nullptr;
 	if (m_jni_field_name == "old_password")
@@ -311,10 +281,10 @@ bool GUIPasswordChange::getAndroidUIInput()
 	m_jni_field_name.clear();
 
 	if (!e || e->getType() != irr::gui::EGUIET_EDIT_BOX)
-		return false;
+		return;
 
-	std::string text = porting::getInputDialogValue();
+	std::string text = porting::getInputDialogMessage();
 	e->setText(utf8_to_wide(text).c_str());
-	return false;
+	return;
 }
 #endif

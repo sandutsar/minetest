@@ -20,11 +20,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #pragma once
 
 #include "lua_api/l_base.h"
+#include "irr_v3d.h"
 
 typedef u16 biome_t;  // copy from mg_biome.h to avoid an unnecessary include
 
+class MMVManip;
+class BiomeManager;
+class BiomeGen;
+class Mapgen;
+
 class ModApiMapgen : public ModApiBase
 {
+	friend class LuaVoxelManip;
 private:
 	// get_biome_id(biomename)
 	// returns the biome id as used in biomemap and returned by 'get_biome_data()'
@@ -61,6 +68,12 @@ private:
 	// set mapgen parameters
 	static int l_set_mapgen_params(lua_State *L);
 
+	// get_mapgen_edges([mapgen_limit[, chunksize]])
+	static int l_get_mapgen_edges(lua_State *L);
+
+	// get_seed([add])
+	static int l_get_seed(lua_State *L);
+
 	// get_mapgen_setting(name)
 	static int l_get_mapgen_setting(lua_State *L);
 
@@ -79,11 +92,14 @@ private:
 	// get_noiseparam_defaults(name)
 	static int l_get_noiseparams(lua_State *L);
 
-	// set_gen_notify(flags, {deco_id_table})
+	// set_gen_notify(flags, {deco_ids}, {ud_ids})
 	static int l_set_gen_notify(lua_State *L);
 
 	// get_gen_notify()
 	static int l_get_gen_notify(lua_State *L);
+
+	// save_gen_notify(ud_id, data)
+	static int l_save_gen_notify(lua_State *L);
 
 	// get_decoration_id(decoration_name)
 	// returns the decoration ID as used in gennotify
@@ -136,8 +152,33 @@ private:
 	// read_schematic(schematic, options={...})
 	static int l_read_schematic(lua_State *L);
 
+	// Foreign implementations
+	/*
+	 * In this case the API functions belong to LuaVoxelManip (so l_vmanip.cpp),
+	 * but the implementations are so deeply connected to mapgen-related code
+	 * that they are better off being here.
+	 */
+
+	static int update_liquids(lua_State *L, MMVManip *vm);
+
+	static int calc_lighting(lua_State *L, MMVManip *vm,
+			v3s16 pmin, v3s16 pmax, bool propagate_shadow);
+
+	static int set_lighting(lua_State *L, MMVManip *vm,
+			v3s16 pmin, v3s16 pmax, u8 light);
+
+	// Helpers
+
+	// get a read-only(!) EmergeManager
+	static const EmergeManager *getEmergeManager(lua_State *L);
+	// get the thread-local or global BiomeGen (still read-only)
+	static const BiomeGen *getBiomeGen(lua_State *L);
+	// get the thread-local mapgen
+	static Mapgen *getMapgen(lua_State *L);
+
 public:
 	static void Initialize(lua_State *L, int top);
+	static void InitializeEmerge(lua_State *L, int top);
 
 	static struct EnumString es_BiomeTerrainType[];
 	static struct EnumString es_DecorationType[];

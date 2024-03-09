@@ -25,9 +25,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "nodedef.h"
 #include "nodemetadata.h"
 #include "gamedef.h"
+#include "irrlicht_changes/printing.h"
 #include "log.h"
 #include "nameidmapping.h"
-#include "content_mapnode.h" // For legacy name-id mapping
+#include "content_mapnode.h"  // For legacy name-id mapping
 #include "content_nodemeta.h" // For legacy deserialization
 #include "serialization.h"
 #ifndef SERVER
@@ -39,13 +40,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/basic_macros.h"
 
 static const char *modified_reason_strings[] = {
-	"initial",
-	"reallocate",
+	"reallocate or initial",
 	"setIsUnderground",
 	"setLightingExpired",
 	"setGenerated",
 	"setNode",
-	"setNodeNoCheck",
 	"setTimestamp",
 	"NodeMetaRef::reportMetadataChange",
 	"clearAllObjects",
@@ -61,19 +60,18 @@ static const char *modified_reason_strings[] = {
 	"unknown",
 };
 
-
 /*
 	MapBlock
 */
 
-MapBlock::MapBlock(Map *parent, v3s16 pos, IGameDef *gamedef, bool dummy):
-		m_parent(parent),
+MapBlock::MapBlock(v3s16 pos, IGameDef *gamedef):
 		m_pos(pos),
 		m_pos_relative(pos * MAP_BLOCKSIZE),
+		data(new MapNode[nodecount]),
 		m_gamedef(gamedef)
 {
-	if (!dummy)
-		reallocate();
+	reallocate();
+	assert(m_modified > MOD_STATE_CLEAN);
 }
 
 MapBlock::~MapBlock()
@@ -88,28 +86,62 @@ MapBlock::~MapBlock()
 	delete[] data;
 }
 
-bool MapBlock::isValidPositionParent(v3s16 p)
+bool MapBlock::onObjectsActivation()
 {
-	if (isValidPosition(p)) {
-		return true;
+	// Ignore if no stored objects (to not set changed flag)
+	if (m_static_objects.getAllStored().empty())
+		return false;
+
+	const auto count = m_static_objects.getStoredSize();
+	verbosestream << "MapBlock::onObjectsActivation(): "
+			<< "activating " << count << "objects in block " << getPos()
+			<< std::endl;
+
+	if (count > g_settings->getU16("max_objects_per_block")) {
+		errorstream << "suspiciously large amount of objects detected: "
+			<< count << " in " << getPos() << "; removing all of them."
+			<< std::endl;
+		// Clear stored list
+		m_static_objects.clearStored();
+		raiseModified(MOD_STATE_WRITE_NEEDED, MOD_REASON_TOO_MANY_OBJECTS);
+		return false;
 	}
 
-	return m_parent->isValidPosition(getPosRelative() + p);
+	return true;
 }
 
-MapNode MapBlock::getNodeParent(v3s16 p, bool *is_valid_position)
+bool MapBlock::saveStaticObject(u16 id, const StaticObject &obj, u32 reason)
 {
-	if (!isValidPosition(p))
-		return m_parent->getNode(getPosRelative() + p, is_valid_position);
-
-	if (!data) {
-		if (is_valid_position)
-			*is_valid_position = false;
-		return {CONTENT_IGNORE};
+	if (m_static_objects.getStoredSize() >= g_settings->getU16("max_objects_per_block")) {
+		warningstream << "MapBlock::saveStaticObject(): Trying to store id = " << id
+				<< " statically but block " << getPos() << " already contains "
+				<< m_static_objects.getStoredSize() << " objects."
+				<< std::endl;
+		return false;
 	}
-	if (is_valid_position)
-		*is_valid_position = true;
-	return data[p.Z * zstride + p.Y * ystride + p.X];
+
+	m_static_objects.insert(id, obj);
+	if (reason != MOD_REASON_UNKNOWN) // Do not mark as modified if requested
+		raiseModified(MOD_STATE_WRITE_NEEDED, reason);
+
+	return true;
+}
+
+// This method is only for Server, don't call it on client
+void MapBlock::step(float dtime, const std::function<bool(v3s16, MapNode, f32)> &on_timer_cb)
+{
+	// Run script callbacks for elapsed node_timers
+	std::vector<NodeTimer> elapsed_timers = m_node_timers.step(dtime);
+	if (!elapsed_timers.empty()) {
+		MapNode n;
+		v3s16 p;
+		for (const NodeTimer &elapsed_timer : elapsed_timers) {
+			n = getNodeNoEx(elapsed_timer.position);
+			p = elapsed_timer.position + getPosRelative();
+			if (on_timer_cb(p, n, elapsed_timer.elapsed))
+				setNodeTimer(NodeTimer(elapsed_timer.timeout, 0, elapsed_timer.position));
+		}
+	}
 }
 
 std::string MapBlock::getModifiedReasonString()
@@ -154,100 +186,62 @@ void MapBlock::copyFrom(VoxelManipulator &dst)
 			getPosRelative(), data_size);
 }
 
-void MapBlock::actuallyUpdateDayNightDiff()
+void MapBlock::actuallyUpdateIsAir()
 {
-	const NodeDefManager *nodemgr = m_gamedef->ndef();
+	// Running this function un-expires m_is_air
+	m_is_air_expired = false;
 
-	// Running this function un-expires m_day_night_differs
-	m_day_night_differs_expired = false;
-
-	if (!data) {
-		m_day_night_differs = false;
-		return;
-	}
-
-	bool differs = false;
-
-	/*
-		Check if any lighting value differs
-	*/
-
-	MapNode previous_n(CONTENT_IGNORE);
+	bool only_air = true;
 	for (u32 i = 0; i < nodecount; i++) {
-		MapNode n = data[i];
-
-		// If node is identical to previous node, don't verify if it differs
-		if (n == previous_n)
-			continue;
-
-		differs = !n.isLightDayNightEq(nodemgr);
-		if (differs)
+		MapNode &n = data[i];
+		if (n.getContent() != CONTENT_AIR) {
+			only_air = false;
 			break;
-		previous_n = n;
-	}
-
-	/*
-		If some lighting values differ, check if the whole thing is
-		just air. If it is just air, differs = false
-	*/
-	if (differs) {
-		bool only_air = true;
-		for (u32 i = 0; i < nodecount; i++) {
-			MapNode &n = data[i];
-			if (n.getContent() != CONTENT_AIR) {
-				only_air = false;
-				break;
-			}
 		}
-		if (only_air)
-			differs = false;
 	}
 
 	// Set member variable
-	m_day_night_differs = differs;
+	m_is_air = only_air;
 }
 
-void MapBlock::expireDayNightDiff()
+void MapBlock::expireIsAirCache()
 {
-	if (!data) {
-		m_day_night_differs = false;
-		m_day_night_differs_expired = false;
-		return;
-	}
-
-	m_day_night_differs_expired = true;
+	m_is_air_expired = true;
 }
 
 /*
 	Serialization
 */
+
 // List relevant id-name pairs for ids in the block using nodedef
-// Renumbers the content IDs (starting at 0 and incrementing
-// use static memory requires about 65535 * sizeof(int) ram in order to be
-// sure we can handle all content ids. But it's absolutely worth it as it's
-// a speedup of 4 for one of the major time consuming functions on storing
-// mapblocks.
-static content_t getBlockNodeIdMapping_mapping[USHRT_MAX + 1];
+// Renumbers the content IDs (starting at 0 and incrementing)
 static void getBlockNodeIdMapping(NameIdMapping *nimap, MapNode *nodes,
 	const NodeDefManager *nodedef)
 {
-	memset(getBlockNodeIdMapping_mapping, 0xFF, (USHRT_MAX + 1) * sizeof(content_t));
+	// The static memory requires about 65535 * sizeof(int) RAM in order to be
+	// sure we can handle all content ids. But it's absolutely worth it as it's
+	// a speedup of 4 for one of the major time consuming functions on storing
+	// mapblocks.
+	thread_local std::unique_ptr<content_t[]> mapping;
+	static_assert(sizeof(content_t) == 2, "content_t must be 16-bit");
+	if (!mapping)
+		mapping = std::make_unique<content_t[]>(USHRT_MAX + 1);
 
-	std::set<content_t> unknown_contents;
+	memset(mapping.get(), 0xFF, (USHRT_MAX + 1) * sizeof(content_t));
+
+	std::unordered_set<content_t> unknown_contents;
 	content_t id_counter = 0;
 	for (u32 i = 0; i < MapBlock::nodecount; i++) {
 		content_t global_id = nodes[i].getContent();
 		content_t id = CONTENT_IGNORE;
 
 		// Try to find an existing mapping
-		if (getBlockNodeIdMapping_mapping[global_id] != 0xFFFF) {
-			id = getBlockNodeIdMapping_mapping[global_id];
-		}
-		else
-		{
+		if (mapping[global_id] != 0xFFFF) {
+			id = mapping[global_id];
+		} else {
 			// We have to assign a new mapping
 			id = id_counter++;
-			getBlockNodeIdMapping_mapping[global_id] = id;
+			mapping[global_id] = id;
 
 			const ContentFeatures &f = nodedef->get(global_id);
 			const std::string &name = f.name;
@@ -265,6 +259,7 @@ static void getBlockNodeIdMapping(NameIdMapping *nimap, MapNode *nodes,
 				<< "Name for node id " << unknown_content << " not known" << std::endl;
 	}
 }
+
 // Correct ids in the block to match nodedef based on names.
 // Unknown ones are added to nodedef.
 // Will not update itself to match id-name pairs in nodedef.
@@ -335,10 +330,7 @@ void MapBlock::serialize(std::ostream &os_compressed, u8 version, bool disk, int
 	if(!ser_ver_supported(version))
 		throw VersionMismatchException("ERROR: MapBlock format not supported");
 
-	if (!data)
-		throw SerializationError("ERROR: Not writing dummy block.");
-
-	FATAL_ERROR_IF(version < SER_FMT_VER_LOWEST_WRITE, "Serialisation version error");
+	FATAL_ERROR_IF(version < SER_FMT_VER_LOWEST_WRITE, "Serialization version error");
 
 	std::ostringstream os_raw(std::ios_base::binary);
 	std::ostream &os = version >= 29 ? os_raw : os_compressed;
@@ -347,7 +339,12 @@ void MapBlock::serialize(std::ostream &os_compressed, u8 version, bool disk, int
 	u8 flags = 0;
 	if(is_underground)
 		flags |= 0x01;
-	if(getDayNightDiff())
+	// This flag used to be day-night-differs, and it is no longer used.
+	// We write it anyway so that old servers can still use this.
+	// Above ground isAir implies !day-night-differs, !isAir is good enough for old servers
+	// to check whether above ground blocks should be sent.
+	// See RemoteClient::getNextBlocks(...)
+	if(!isAir())
 		flags |= 0x02;
 	if (!m_generated)
 		flags |= 0x08;
@@ -360,7 +357,7 @@ void MapBlock::serialize(std::ostream &os_compressed, u8 version, bool disk, int
 		Bulk node data
 	*/
 	NameIdMapping nimap;
-	SharedBuffer<u8> buf;
+	Buffer<u8> buf;
 	const u8 content_width = 2;
 	const u8 params_width = 2;
  	if(disk)
@@ -410,9 +407,8 @@ void MapBlock::serialize(std::ostream &os_compressed, u8 version, bool disk, int
 	/*
 		Data that goes to disk, but not the network
 	*/
-	if(disk)
-	{
-		if(version <= 24){
+	if (disk) {
+		if (version <= 24) {
 			// Node timers
 			m_node_timers.serialize(os, version);
 		}
@@ -420,7 +416,7 @@ void MapBlock::serialize(std::ostream &os_compressed, u8 version, bool disk, int
 		// Static objects
 		m_static_objects.serialize(os);
 
-		if(version < 29){
+		if (version < 29) {
 			// Timestamp
 			writeU32(os, getTimestamp());
 
@@ -428,7 +424,7 @@ void MapBlock::serialize(std::ostream &os_compressed, u8 version, bool disk, int
 			nimap.serialize(os);
 		}
 
-		if(version >= 25){
+		if (version >= 25) {
 			// Node timers
 			m_node_timers.serialize(os, version);
 		}
@@ -442,10 +438,6 @@ void MapBlock::serialize(std::ostream &os_compressed, u8 version, bool disk, int
 
 void MapBlock::serializeNetworkSpecific(std::ostream &os)
 {
-	if (!data) {
-		throw SerializationError("ERROR: Not writing dummy block.");
-	}
-
 	writeU8(os, 2); // version
 }
 
@@ -454,9 +446,9 @@ void MapBlock::deSerialize(std::istream &in_compressed, u8 version, bool disk)
 	if(!ser_ver_supported(version))
 		throw VersionMismatchException("ERROR: MapBlock format not supported");
 
-	TRACESTREAM(<<"MapBlock::deSerialize "<<PP(getPos())<<std::endl);
+	TRACESTREAM(<<"MapBlock::deSerialize "<<getPos()<<std::endl);
 
-	m_day_night_differs_expired = false;
+	m_is_air_expired = true;
 
 	if(version <= 21)
 	{
@@ -472,7 +464,9 @@ void MapBlock::deSerialize(std::istream &in_compressed, u8 version, bool disk)
 
 	u8 flags = readU8(is);
 	is_underground = (flags & 0x01) != 0;
-	m_day_night_differs = (flags & 0x02) != 0;
+	// IMPORTANT: when the version is bumped to 30 we can read m_is_air from here
+	// m_is_air = (flags & 0x02) == 0;
+
 	if (version < 27)
 		m_lighting_complete = 0xFFFF;
 	else
@@ -482,18 +476,18 @@ void MapBlock::deSerialize(std::istream &in_compressed, u8 version, bool disk)
 	NameIdMapping nimap;
 	if (disk && version >= 29) {
 		// Timestamp
-		TRACESTREAM(<<"MapBlock::deSerialize "<<PP(getPos())
+		TRACESTREAM(<<"MapBlock::deSerialize "<<getPos()
 				<<": Timestamp"<<std::endl);
 		setTimestampNoChangedFlag(readU32(is));
 		m_disk_timestamp = m_timestamp;
 
 		// Node/id mapping
-		TRACESTREAM(<<"MapBlock::deSerialize "<<PP(getPos())
+		TRACESTREAM(<<"MapBlock::deSerialize "<<getPos()
 				<<": NameIdMapping"<<std::endl);
 		nimap.deSerialize(is);
 	}
 
-	TRACESTREAM(<<"MapBlock::deSerialize "<<PP(getPos())
+	TRACESTREAM(<<"MapBlock::deSerialize "<<getPos()
 			<<": Bulk node data"<<std::endl);
 	u8 content_width = readU8(is);
 	u8 params_width = readU8(is);
@@ -518,7 +512,7 @@ void MapBlock::deSerialize(std::istream &in_compressed, u8 version, bool disk)
 	/*
 		NodeMetadata
 	*/
-	TRACESTREAM(<<"MapBlock::deSerialize "<<PP(getPos())
+	TRACESTREAM(<<"MapBlock::deSerialize "<<getPos()
 			<<": Node metadata"<<std::endl);
 	if (version >= 29) {
 		m_node_metadata.deSerialize(is, m_gamedef->idef());
@@ -537,40 +531,39 @@ void MapBlock::deSerialize(std::istream &in_compressed, u8 version, bool disk)
 		} catch(SerializationError &e) {
 			warningstream<<"MapBlock::deSerialize(): Ignoring an error"
 					<<" while deserializing node metadata at ("
-					<<PP(getPos())<<": "<<e.what()<<std::endl;
+					<<getPos()<<": "<<e.what()<<std::endl;
 		}
 	}
 
 	/*
 		Data that is only on disk
 	*/
-	if(disk)
-	{
+	if (disk) {
 		// Node timers
-		if(version == 23){
+		if (version == 23) {
 			// Read unused zero
 			readU8(is);
 		}
-		if(version == 24){
-			TRACESTREAM(<<"MapBlock::deSerialize "<<PP(getPos())
-					<<": Node timers (ver==24)"<<std::endl);
+		if (version == 24) {
+			TRACESTREAM(<< "MapBlock::deSerialize " << getPos()
+						<< ": Node timers (ver==24)" << std::endl);
 			m_node_timers.deSerialize(is, version);
 		}
 
 		// Static objects
-		TRACESTREAM(<<"MapBlock::deSerialize "<<PP(getPos())
+		TRACESTREAM(<<"MapBlock::deSerialize "<<getPos()
 				<<": Static objects"<<std::endl);
 		m_static_objects.deSerialize(is);
 
-		if(version < 29) {
+		if (version < 29) {
 			// Timestamp
-			TRACESTREAM(<<"MapBlock::deSerialize "<<PP(getPos())
+			TRACESTREAM(<<"MapBlock::deSerialize "<<getPos()
 				    <<": Timestamp"<<std::endl);
 			setTimestampNoChangedFlag(readU32(is));
 			m_disk_timestamp = m_timestamp;
 
 			// Node/id mapping
-			TRACESTREAM(<<"MapBlock::deSerialize "<<PP(getPos())
+			TRACESTREAM(<<"MapBlock::deSerialize "<<getPos()
 				    <<": NameIdMapping"<<std::endl);
 			nimap.deSerialize(is);
 		}
@@ -579,13 +572,17 @@ void MapBlock::deSerialize(std::istream &in_compressed, u8 version, bool disk)
 		correctBlockNodeIds(&nimap, data, m_gamedef);
 
 		if(version >= 25){
-			TRACESTREAM(<<"MapBlock::deSerialize "<<PP(getPos())
+			TRACESTREAM(<<"MapBlock::deSerialize "<<getPos()
 					<<": Node timers (ver>=25)"<<std::endl);
 			m_node_timers.deSerialize(is, version);
 		}
+
+		u16 dummy;
+		m_is_air = nimap.size() == 1 && nimap.getId("air", dummy);
+		m_is_air_expired = false;
 	}
 
-	TRACESTREAM(<<"MapBlock::deSerialize "<<PP(getPos())
+	TRACESTREAM(<<"MapBlock::deSerialize "<<getPos()
 			<<": Done."<<std::endl);
 }
 
@@ -603,6 +600,26 @@ void MapBlock::deSerializeNetworkSpecific(std::istream &is)
 	}
 }
 
+bool MapBlock::storeActiveObject(u16 id)
+{
+	if (m_static_objects.storeActiveObject(id)) {
+		raiseModified(MOD_STATE_WRITE_NEEDED,
+			MOD_REASON_REMOVE_OBJECTS_DEACTIVATE);
+		return true;
+	}
+
+	return false;
+}
+
+u32 MapBlock::clearObjects()
+{
+	u32 size = m_static_objects.size();
+	if (size > 0) {
+		m_static_objects.clear();
+		raiseModified(MOD_STATE_WRITE_NEEDED, MOD_REASON_CLEAR_ALL_OBJECTS);
+	}
+	return size;
+}
 /*
 	Legacy serialization
 */
@@ -611,13 +628,13 @@ void MapBlock::deSerialize_pre22(std::istream &is, u8 version, bool disk)
 {
 	// Initialize default flags
 	is_underground = false;
-	m_day_night_differs = false;
+	m_is_air = false;
 	m_lighting_complete = 0xFFFF;
 	m_generated = true;
 
 	// Make a temporary buffer
 	u32 ser_length = MapNode::serializedLength(version);
-	SharedBuffer<u8> databuf_nodelist(nodecount * ser_length);
+	Buffer<u8> databuf_nodelist(nodecount * ser_length);
 
 	// These have no compression
 	if (version <= 3 || version == 5 || version == 6) {
@@ -677,8 +694,7 @@ void MapBlock::deSerialize_pre22(std::istream &is, u8 version, bool disk)
 		u8 flags;
 		is.read((char*)&flags, 1);
 		is_underground = (flags & 0x01) != 0;
-		m_day_night_differs = (flags & 0x02) != 0;
-		if(version >= 18)
+		if (version >= 18)
 			m_generated = (flags & 0x08) == 0;
 
 		// Uncompress data
@@ -762,19 +778,21 @@ void MapBlock::deSerialize_pre22(std::istream &is, u8 version, bool disk)
 		// If supported, read node definition id mapping
 		if (version >= 21) {
 			nimap.deSerialize(is);
+			u16 dummy;
+			m_is_air = nimap.size() == 1 && nimap.getId("air", dummy);
 		// Else set the legacy mapping
 		} else {
 			content_mapnode_get_name_id_mapping(&nimap);
+			m_is_air = false;
+			m_is_air_expired = true;
 		}
 		correctBlockNodeIds(&nimap, data, m_gamedef);
 	}
 
-
 	// Legacy data changes
 	// This code has to convert from pre-22 to post-22 format.
 	const NodeDefManager *nodedef = m_gamedef->ndef();
-	for(u32 i=0; i<nodecount; i++)
-	{
+	for (u32 i = 0; i < nodecount; i++) {
 		const ContentFeatures &f = nodedef->get(data[i].getContent());
 		// Mineral
 		if(nodedef->getId("default:stone") == data[i].getContent()
@@ -790,21 +808,17 @@ void MapBlock::deSerialize_pre22(std::istream &is, u8 version, bool disk)
 			data[i].setParam1(0);
 		}
 		// facedir_simple
-		if(f.legacy_facedir_simple)
-		{
+		if (f.legacy_facedir_simple) {
 			data[i].setParam2(data[i].getParam1());
 			data[i].setParam1(0);
 		}
 		// wall_mounted
-		if(f.legacy_wallmounted)
-		{
+		if (f.legacy_wallmounted) {
 			u8 wallmounted_new_to_old[8] = {0x04, 0x08, 0x01, 0x02, 0x10, 0x20, 0, 0};
 			u8 dir_old_format = data[i].getParam2();
 			u8 dir_new_format = 0;
-			for(u8 j=0; j<8; j++)
-			{
-				if((dir_old_format & wallmounted_new_to_old[j]) != 0)
-				{
+			for (u8 j = 0; j < 8; j++) {
+				if ((dir_old_format & wallmounted_new_to_old[j]) != 0) {
 					dir_new_format = j;
 					break;
 				}
@@ -812,7 +826,6 @@ void MapBlock::deSerialize_pre22(std::istream &is, u8 version, bool disk)
 			data[i].setParam2(dir_new_format);
 		}
 	}
-
 }
 
 /*
@@ -820,7 +833,7 @@ void MapBlock::deSerialize_pre22(std::istream &is, u8 version, bool disk)
 */
 std::string analyze_block(MapBlock *block)
 {
-	if(block == NULL)
+	if (block == NULL)
 		return "NULL";
 
 	std::ostringstream desc;
@@ -857,52 +870,45 @@ std::string analyze_block(MapBlock *block)
 
 	desc<<"lighting_complete: "<<block->getLightingComplete()<<", ";
 
-	if(block->isDummy())
+	bool full_ignore = true;
+	bool some_ignore = false;
+	bool full_air = true;
+	bool some_air = false;
+	for(s16 z0=0; z0<MAP_BLOCKSIZE; z0++)
+	for(s16 y0=0; y0<MAP_BLOCKSIZE; y0++)
+	for(s16 x0=0; x0<MAP_BLOCKSIZE; x0++)
 	{
-		desc<<"Dummy, ";
+		v3s16 p(x0,y0,z0);
+		MapNode n = block->getNodeNoEx(p);
+		content_t c = n.getContent();
+		if(c == CONTENT_IGNORE)
+			some_ignore = true;
+		else
+			full_ignore = false;
+		if(c == CONTENT_AIR)
+			some_air = true;
+		else
+			full_air = false;
 	}
-	else
-	{
-		bool full_ignore = true;
-		bool some_ignore = false;
-		bool full_air = true;
-		bool some_air = false;
-		for(s16 z0=0; z0<MAP_BLOCKSIZE; z0++)
-		for(s16 y0=0; y0<MAP_BLOCKSIZE; y0++)
-		for(s16 x0=0; x0<MAP_BLOCKSIZE; x0++)
-		{
-			v3s16 p(x0,y0,z0);
-			MapNode n = block->getNodeNoEx(p);
-			content_t c = n.getContent();
-			if(c == CONTENT_IGNORE)
-				some_ignore = true;
-			else
-				full_ignore = false;
-			if(c == CONTENT_AIR)
-				some_air = true;
-			else
-				full_air = false;
-		}
 
-		desc<<"content {";
+	desc<<"content {";
 
-		std::ostringstream ss;
+	std::ostringstream ss;
 
-		if(full_ignore)
-			ss<<"IGNORE (full), ";
-		else if(some_ignore)
-			ss<<"IGNORE, ";
+	if(full_ignore)
+		ss<<"IGNORE (full), ";
+	else if(some_ignore)
+		ss<<"IGNORE, ";
 
-		if(full_air)
-			ss<<"AIR (full), ";
-		else if(some_air)
-			ss<<"AIR, ";
+	if(full_air)
+		ss<<"AIR (full), ";
+	else if(some_air)
+		ss<<"AIR, ";
 
-		if(ss.str().size()>=2)
-			desc<<ss.str().substr(0, ss.str().size()-2);
+	if(ss.str().size()>=2)
+		desc<<ss.str().substr(0, ss.str().size()-2);
 
-		desc<<"}, ";
-	}
+	desc<<"}, ";
 
 	return desc.str().substr(0, desc.str().size()-2);
 }

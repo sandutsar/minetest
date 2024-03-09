@@ -52,6 +52,9 @@ private:
 	// the returned list is sorted alphabetically for you
 	static int l_get_modnames(lua_State *L);
 
+	// get_game_info()
+	static int l_get_game_info(lua_State *L);
+
 	// print(text)
 	static int l_print(lua_State *L);
 
@@ -85,6 +88,9 @@ private:
 	// get_player_information(name)
 	static int l_get_player_information(lua_State *L);
 
+	// get_player_window_information(name)
+	static int l_get_player_window_information(lua_State *L);
+
 	// get_ban_list()
 	static int l_get_ban_list(lua_State *L);
 
@@ -106,6 +112,19 @@ private:
 	// notify_authentication_modified(name)
 	static int l_notify_authentication_modified(lua_State *L);
 
+	// do_async_callback(func, params, mod_origin)
+	static int l_do_async_callback(lua_State *L);
+
+	// register_async_dofile(path)
+	static int l_register_async_dofile(lua_State *L);
+
+	// register_mapgen_script(path)
+	static int l_register_mapgen_script(lua_State *L);
+
+	// serialize_roundtrip(obj)
+	static int l_serialize_roundtrip(lua_State *L);
+
 public:
 	static void Initialize(lua_State *L, int top);
+	static void InitializeAsync(lua_State *L, int top);
 };

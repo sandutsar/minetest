@@ -20,10 +20,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #pragma once
 
 #include "environment.h"
-#include <ISceneManager.h>
-#include "clientobject.h"
-#include "util/numeric.h"
-#include "activeobjectmgr.h"
+#include "util/numeric.h" // IntervalLimiter
+#include "activeobjectmgr.h" // client::ActiveObjectMgr
+#include <set>
 
 class ClientSimpleObject;
 class ClientMap;
@@ -101,7 +100,7 @@ public:
 		Returns the id of the object.
 		Returns 0 if not added and thus deleted.
 	*/
-	u16 addActiveObject(ClientActiveObject *object);
+	u16 addActiveObject(std::unique_ptr<ClientActiveObject> object);
 
 	void addActiveObject(u16 id, u8 type, const std::string &init_data);
 	void removeActiveObject(u16 id);
@@ -132,15 +131,21 @@ public:
 
 	virtual void getSelectedActiveObjects(
 		const core::line3d<f32> &shootline_on_map,
-		std::vector<PointedThing> &objects
+		std::vector<PointedThing> &objects,
+		const std::optional<Pointabilities> &pointabilities
 	);
 
-	const std::list<std::string> &getPlayerNames() { return m_player_names; }
-	void addPlayerName(const std::string &name) { m_player_names.push_back(name); }
-	void removePlayerName(const std::string &name) { m_player_names.remove(name); }
+	const std::set<std::string> &getPlayerNames() { return m_player_names; }
+	void addPlayerName(const std::string &name) { m_player_names.insert(name); }
+	void removePlayerName(const std::string &name) { m_player_names.erase(name); }
 	void updateCameraOffset(const v3s16 &camera_offset)
 	{ m_camera_offset = camera_offset; }
 	v3s16 getCameraOffset() const { return m_camera_offset; }
+
+	void updateFrameTime(bool is_paused);
+	u64 getFrameTime() const { return m_frame_time; }
+	u64 getFrameTimeDelta() const { return m_frame_dtime; }
+
 private:
 	ClientMap *m_map;
 	LocalPlayer *m_local_player = nullptr;
@@ -151,6 +156,9 @@ private:
 	std::vector<ClientSimpleObject*> m_simple_objects;
 	std::queue<ClientEnvEvent> m_client_event_queue;
 	IntervalLimiter m_active_object_light_update_interval;
-	std::list<std::string> m_player_names;
+	std::set<std::string> m_player_names;
 	v3s16 m_camera_offset;
+	u64 m_frame_time = 0;
+	u64 m_frame_dtime = 0;
+	u64 m_frame_time_pause_accumulator = 0;
 };

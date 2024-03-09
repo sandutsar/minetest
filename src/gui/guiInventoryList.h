@@ -34,11 +34,19 @@ public:
 
 		ItemSpec(const InventoryLocation &a_inventoryloc,
 				const std::string &a_listname,
-				s32 a_i) :
+				s32 a_i,
+				const v2s32 slotsize) :
 			inventoryloc(a_inventoryloc),
 			listname(a_listname),
-			i(a_i)
+			i(a_i),
+			slotsize(slotsize)
 		{
+		}
+
+		bool operator==(const ItemSpec& other) const
+		{
+			return inventoryloc == other.inventoryloc &&
+					listname == other.listname && i == other.i;
 		}
 
 		bool isValid() const { return i != -1; }
@@ -46,6 +54,7 @@ public:
 		InventoryLocation inventoryloc;
 		std::string listname;
 		s32 i = -1;
+		v2s32 slotsize;
 	};
 
 	// options for inventorylists that are setable with the lua api
@@ -97,6 +106,11 @@ public:
 	{
 		m_options.slotborder = slotborder;
 		m_options.slotbordercolor = slotbordercolor;
+	}
+
+	const v2s32 getSlotSize() const noexcept
+	{
+		return m_slot_size;
 	}
 
 	// returns -1 if not item is at pos p

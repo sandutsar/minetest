@@ -30,6 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "settings.h"
 #include "tool.h"
 #include "version.h"
+#include "irrlicht_changes/printing.h"
 #include "network/connection.h"
 #include "network/networkprotocol.h"
 #include "network/serveropcodes.h"
@@ -40,6 +41,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/pointedthing.h"
 #include "util/serialize.h"
 #include "util/srp.h"
+#include "clientdynamicinfo.h"
 
 void Server::handleCommand_Deprecated(NetworkPacket* pkt)
 {
@@ -86,12 +88,15 @@ void Server::handleCommand_Init(NetworkPacket* pkt)
 
 	// Do not allow multiple players in simple singleplayer mode.
 	// This isn't a perfect way to do it, but will suffice for now
-	if (m_simple_singleplayer_mode && m_clients.getClientIDs().size() > 1) {
+	if (m_simple_singleplayer_mode && !m_clients.getClientIDs().empty()) {
 		infostream << "Server: Not allowing another client (" << addr_s <<
 			") to connect in simple singleplayer mode" << std::endl;
 		DenyAccess(peer_id, SERVER_ACCESSDENIED_SINGLEPLAYER);
 		return;
 	}
+
+	if (denyIfBanned(peer_id))
+		return;
 
 	// First byte after command is maximum supported
 	// serialization version
@@ -108,8 +113,10 @@ void Server::handleCommand_Init(NetworkPacket* pkt)
 	// Use the highest version supported by both
 	u8 depl_serial_v = std::min(client_max, our_max);
 	// If it's lower than the lowest supported, give up.
+#if SER_FMT_VER_LOWEST_READ > 0
 	if (depl_serial_v < SER_FMT_VER_LOWEST_READ)
 		depl_serial_v = SER_FMT_VER_INVALID;
+#endif
 
 	if (depl_serial_v == SER_FMT_VER_INVALID) {
 		actionstream << "Server: A mismatched client tried to connect from " <<
@@ -143,10 +150,8 @@ void Server::handleCommand_Init(NetworkPacket* pkt)
 
 	client->net_proto_version = net_proto_version;
 
-	if ((g_settings->getBool("strict_protocol_version_checking") &&
-			net_proto_version != LATEST_PROTOCOL_VERSION) ||
-			net_proto_version < SERVER_PROTOCOL_VERSION_MIN ||
-			net_proto_version > SERVER_PROTOCOL_VERSION_MAX) {
+	if (net_proto_version < Server::getProtocolVersionMin() ||
+			net_proto_version > Server::getProtocolVersionMax()) {
 		actionstream << "Server: A mismatched client tried to connect from " <<
 			addr_s << " proto_max=" << (int)max_net_proto_version << std::endl;
 		DenyAccess(peer_id, SERVER_ACCESSDENIED_WRONG_VERSION);
@@ -227,7 +232,7 @@ void Server::handleCommand_Init(NetworkPacket* pkt)
 		Compose auth methods for answer
 	*/
 	std::string encpwd; // encrypted Password field for the user
-	bool has_auth = m_script->getAuth(playername, &encpwd, NULL);
+	bool has_auth = m_script->getAuth(playername, &encpwd, nullptr);
 	u32 auth_mechs = 0;
 
 	client->chosen_mech = AUTH_MECHANISM_NONE;
@@ -354,24 +359,24 @@ void Server::handleCommand_Init2(NetworkPacket* pkt)
 
 void Server::handleCommand_RequestMedia(NetworkPacket* pkt)
 {
-	std::vector<std::string> tosend;
+	std::unordered_set<std::string> tosend;
 	u16 numfiles;
 
 	*pkt >> numfiles;
 
 	session_t peer_id = pkt->getPeerId();
-	infostream << "Sending " << numfiles << " files to " <<
-		getPlayerName(peer_id) << std::endl;
-	verbosestream << "TOSERVER_REQUEST_MEDIA: requested file(s)" << std::endl;
+	verbosestream << "Client " << getPlayerName(peer_id)
+		<< " requested media file(s):\n";
 
 	for (u16 i = 0; i < numfiles; i++) {
 		std::string name;
 
 		*pkt >> name;
 
-		tosend.emplace_back(name);
-		verbosestream << "  " << name << std::endl;
+		tosend.emplace(name);
+		verbosestream << "  " << name << "\n";
 	}
+	verbosestream << std::flush;
 
 	sendRequestedMedia(peer_id, tosend);
 }
@@ -380,55 +385,47 @@ void Server::handleCommand_ClientReady(NetworkPacket* pkt)
 {
 	session_t peer_id = pkt->getPeerId();
 
-	PlayerSAO* playersao = StageTwoClientInit(peer_id);
+	// decode all information first
+	u8 major_ver, minor_ver, patch_ver, reserved;
+	u16 formspec_ver = 1; // v1 for clients older than 5.1.0-dev
+	std::string full_ver;
 
-	if (playersao == NULL) {
-		errorstream << "TOSERVER_CLIENT_READY stage 2 client init failed "
+	*pkt >> major_ver >> minor_ver >> patch_ver >> reserved >> full_ver;
+	if (pkt->getRemainingBytes() >= 2)
+		*pkt >> formspec_ver;
+
+	m_clients.setClientVersion(peer_id, major_ver, minor_ver, patch_ver,
+		full_ver);
+
+	// Emerge player
+	PlayerSAO* playersao = StageTwoClientInit(peer_id);
+	if (!playersao) {
+		errorstream << "Server: stage 2 client init failed "
 			"peer_id=" << peer_id << std::endl;
 		DisconnectPeer(peer_id);
 		return;
 	}
 
-
-	if (pkt->getSize() < 8) {
-		errorstream << "TOSERVER_CLIENT_READY client sent inconsistent data, "
-			"disconnecting peer_id: " << peer_id << std::endl;
-		DisconnectPeer(peer_id);
-		return;
-	}
-
-	u8 major_ver, minor_ver, patch_ver, reserved;
-	std::string full_ver;
-	*pkt >> major_ver >> minor_ver >> patch_ver >> reserved >> full_ver;
-
-	m_clients.setClientVersion(peer_id, major_ver, minor_ver, patch_ver,
-		full_ver);
-
-	if (pkt->getRemainingBytes() >= 2)
-		*pkt >> playersao->getPlayer()->formspec_version;
-
-	const std::vector<std::string> &players = m_clients.getPlayerNames();
-	NetworkPacket list_pkt(TOCLIENT_UPDATE_PLAYER_LIST, 0, peer_id);
-	list_pkt << (u8) PLAYER_LIST_INIT << (u16) players.size();
-	for (const std::string &player: players) {
-		list_pkt <<  player;
-	}
-	m_clients.send(peer_id, 0, &list_pkt, true);
-
-	NetworkPacket notice_pkt(TOCLIENT_UPDATE_PLAYER_LIST, 0, PEER_ID_INEXISTENT);
-	// (u16) 1 + std::string represents a pseudo vector serialization representation
-	notice_pkt << (u8) PLAYER_LIST_ADD << (u16) 1 << std::string(playersao->getPlayer()->getName());
-	m_clients.sendToAll(&notice_pkt);
+	playersao->getPlayer()->formspec_version = formspec_ver;
 	m_clients.event(peer_id, CSE_SetClientReady);
+
+	// Send player list to this client
+	{
+		const std::vector<std::string> &players = m_clients.getPlayerNames();
+		NetworkPacket list_pkt(TOCLIENT_UPDATE_PLAYER_LIST, 0, peer_id);
+		list_pkt << (u8) PLAYER_LIST_INIT << (u16) players.size();
+		for (const auto &player : players)
+			list_pkt << player;
+		Send(peer_id, &list_pkt);
+	}
 
 	s64 last_login;
 	m_script->getAuth(playersao->getPlayer()->getName(), nullptr, nullptr, &last_login);
 	m_script->on_joinplayer(playersao, last_login);
 
 	// Send shutdown timer if shutdown has been scheduled
-	if (m_shutdown_state.isTimerRunning()) {
+	if (m_shutdown_state.isTimerRunning())
 		SendChatMessage(peer_id, m_shutdown_state.getShutdownTimerMessage());
-	}
 }
 
 void Server::handleCommand_GotBlocks(NetworkPacket* pkt)
@@ -452,7 +449,7 @@ void Server::handleCommand_GotBlocks(NetworkPacket* pkt)
 				("GOTBLOCKS length is too short");
 	}
 
-	m_clients.lock();
+	ClientInterface::AutoLock lock(m_clients);
 	RemoteClient *client = m_clients.lockedGetClientNoEx(pkt->getPeerId());
 
 	for (u16 i = 0; i < count; i++) {
@@ -460,7 +457,6 @@ void Server::handleCommand_GotBlocks(NetworkPacket* pkt)
 		*pkt >> p;
 		client->GotBlock(p);
 	}
-	m_clients.unlock();
 }
 
 void Server::process_PlayerPos(RemotePlayer *player, PlayerSAO *playersao,
@@ -482,14 +478,16 @@ void Server::process_PlayerPos(RemotePlayer *player, PlayerSAO *playersao,
 	f32 yaw = (f32)f32yaw / 100.0f;
 	u32 keyPressed = 0;
 
-	// default behavior (in case an old client doesn't send these)
 	f32 fov = 0;
 	u8 wanted_range = 0;
+	u8 bits = 0; // bits instead of bool so it is extensible later
 
 	*pkt >> keyPressed;
 	*pkt >> f32fov;
 	fov = (f32)f32fov / 80.0f;
 	*pkt >> wanted_range;
+	if (pkt->getRemainingBytes() >= 1)
+		*pkt >> bits;
 
 	v3f position((f32)ps.X / 100.0f, (f32)ps.Y / 100.0f, (f32)ps.Z / 100.0f);
 	v3f speed((f32)ss.X / 100.0f, (f32)ss.Y / 100.0f, (f32)ss.Z / 100.0f);
@@ -507,19 +505,14 @@ void Server::process_PlayerPos(RemotePlayer *player, PlayerSAO *playersao,
 	playersao->setPlayerYaw(yaw);
 	playersao->setFov(fov);
 	playersao->setWantedRange(wanted_range);
+	playersao->setCameraInverted(bits & 0x01);
 
-	player->keyPressed = keyPressed;
-	player->control.jump  = (keyPressed & (0x1 << 4));
-	player->control.aux1  = (keyPressed & (0x1 << 5));
-	player->control.sneak = (keyPressed & (0x1 << 6));
-	player->control.dig   = (keyPressed & (0x1 << 7));
-	player->control.place = (keyPressed & (0x1 << 8));
-	player->control.zoom  = (keyPressed & (0x1 << 9));
+	player->control.unpackKeysPressed(keyPressed);
 
 	if (playersao->checkMovementCheat()) {
 		// Call callbacks
 		m_script->on_cheat(playersao, "moved_too_fast");
-		SendMovePlayer(pkt->getPeerId());
+		SendMovePlayer(playersao);
 	}
 }
 
@@ -822,12 +815,11 @@ void Server::handleCommand_Damage(NetworkPacket* pkt)
 		}
 
 		actionstream << player->getName() << " damaged by "
-				<< (int)damage << " hp at " << PP(playersao->getBasePosition() / BS)
+				<< (int)damage << " hp at " << (playersao->getBasePosition() / BS)
 				<< std::endl;
 
 		PlayerHPChangeReason reason(PlayerHPChangeReason::FALL);
-		playersao->setHP((s32)playersao->getHP() - (s32)damage, reason, false);
-		SendPlayerHPOrDie(playersao, reason); // correct client side prediction
+		playersao->setHP((s32)playersao->getHP() - (s32)damage, reason, true);
 	}
 }
 
@@ -893,7 +885,7 @@ void Server::handleCommand_Respawn(NetworkPacket* pkt)
 	RespawnPlayer(peer_id);
 
 	actionstream << player->getName() << " respawns at "
-			<< PP(playersao->getBasePosition() / BS) << std::endl;
+			<< (playersao->getBasePosition() / BS) << std::endl;
 
 	// ActiveObject is added to environment in AsyncRunStep after
 	// the previous addition has been successfully removed
@@ -921,8 +913,8 @@ bool Server::checkInteractDistance(RemotePlayer *player, const f32 d, const std:
 	return true;
 }
 
-// Tiny helper to retrieve the selected item into an Optional
-static inline void getWieldedItem(const PlayerSAO *playersao, Optional<ItemStack> &ret)
+// Tiny helper to retrieve the selected item into an std::optional
+static inline void getWieldedItem(const PlayerSAO *playersao, std::optional<ItemStack> &ret)
 {
 	ret = ItemStack();
 	playersao->getWieldedItem(&(*ret));
@@ -1001,7 +993,7 @@ void Server::handleCommand_Interact(NetworkPacket *pkt)
 		return;
 	}
 
-	playersao->getPlayer()->setWieldIndex(item_i);
+	player->setWieldIndex(item_i);
 
 	// Get pointed to object (NULL if not POINTEDTYPE_OBJECT)
 	ServerActiveObject *pointed_object = NULL;
@@ -1159,8 +1151,8 @@ void Server::handleCommand_Interact(NetworkPacket *pkt)
 			if (nocheat_p != p_under) {
 				infostream << "Server: " << player->getName()
 						<< " started digging "
-						<< PP(nocheat_p) << " and completed digging "
-						<< PP(p_under) << "; not digging." << std::endl;
+						<< nocheat_p << " and completed digging "
+						<< p_under << "; not digging." << std::endl;
 				is_valid_dig = false;
 				// Call callbacks
 				m_script->on_cheat(playersao, "finished_unknown_dig");
@@ -1169,7 +1161,7 @@ void Server::handleCommand_Interact(NetworkPacket *pkt)
 			// Get player's wielded item
 			// See also: Game::handleDigging
 			ItemStack selected_item, hand_item;
-			playersao->getPlayer()->getWieldedItem(&selected_item, &hand_item);
+			player->getWieldedItem(&selected_item, &hand_item);
 
 			// Get diggability and expected digging time
 			DigParams params = getDigParams(m_nodedef->get(n).groups,
@@ -1183,7 +1175,7 @@ void Server::handleCommand_Interact(NetworkPacket *pkt)
 			// If can't dig, ignore dig
 			if (!params.diggable) {
 				infostream << "Server: " << player->getName()
-						<< " completed digging " << PP(p_under)
+						<< " completed digging " << p_under
 						<< ", which is not diggable with tool; not digging."
 						<< std::endl;
 				is_valid_dig = false;
@@ -1209,7 +1201,7 @@ void Server::handleCommand_Interact(NetworkPacket *pkt)
 			// Dig not possible
 			else {
 				infostream << "Server: " << player->getName()
-						<< " completed digging " << PP(p_under)
+						<< " completed digging " << p_under
 						<< "too fast; not digging." << std::endl;
 				is_valid_dig = false;
 				// Call callbacks
@@ -1236,7 +1228,7 @@ void Server::handleCommand_Interact(NetworkPacket *pkt)
 
 	// Place block or right-click object
 	case INTERACT_PLACE: {
-		Optional<ItemStack> selected_item;
+		std::optional<ItemStack> selected_item;
 		getWieldedItem(playersao, selected_item);
 
 		// Reset build time counter
@@ -1261,7 +1253,7 @@ void Server::handleCommand_Interact(NetworkPacket *pkt)
 			// Do stuff
 			if (m_script->item_OnSecondaryUse(selected_item, playersao, pointed)) {
 				if (selected_item.has_value() && playersao->setWieldedItem(*selected_item))
-					SendInventory(playersao, true);
+					SendInventory(player, true);
 			}
 
 			pointed_object->rightClick(playersao);
@@ -1270,7 +1262,7 @@ void Server::handleCommand_Interact(NetworkPacket *pkt)
 
 			// Apply returned ItemStack
 			if (selected_item.has_value() && playersao->setWieldedItem(*selected_item))
-				SendInventory(playersao, true);
+				SendInventory(player, true);
 		}
 
 		if (pointed.type != POINTEDTHING_NODE)
@@ -1295,7 +1287,7 @@ void Server::handleCommand_Interact(NetworkPacket *pkt)
 	} // action == INTERACT_PLACE
 
 	case INTERACT_USE: {
-		Optional<ItemStack> selected_item;
+		std::optional<ItemStack> selected_item;
 		getWieldedItem(playersao, selected_item);
 
 		actionstream << player->getName() << " uses " << selected_item->name
@@ -1304,7 +1296,7 @@ void Server::handleCommand_Interact(NetworkPacket *pkt)
 		if (m_script->item_OnUse(selected_item, playersao, pointed)) {
 			// Apply returned ItemStack
 			if (selected_item.has_value() && playersao->setWieldedItem(*selected_item))
-				SendInventory(playersao, true);
+				SendInventory(player, true);
 		}
 
 		return;
@@ -1312,7 +1304,7 @@ void Server::handleCommand_Interact(NetworkPacket *pkt)
 
 	// Rightclick air
 	case INTERACT_ACTIVATE: {
-		Optional<ItemStack> selected_item;
+		std::optional<ItemStack> selected_item;
 		getWieldedItem(playersao, selected_item);
 
 		actionstream << player->getName() << " activates "
@@ -1323,7 +1315,7 @@ void Server::handleCommand_Interact(NetworkPacket *pkt)
 		if (m_script->item_OnSecondaryUse(selected_item, playersao, pointed)) {
 			// Apply returned ItemStack
 			if (selected_item.has_value() && playersao->setWieldedItem(*selected_item))
-				SendInventory(playersao, true);
+				SendInventory(player, true);
 		}
 
 		return;
@@ -1344,33 +1336,37 @@ void Server::handleCommand_RemovedSounds(NetworkPacket* pkt)
 
 		*pkt >> id;
 
-		std::unordered_map<s32, ServerPlayingSound>::iterator i =
-			m_playing_sounds.find(id);
+		auto i = m_playing_sounds.find(id);
 		if (i == m_playing_sounds.end())
 			continue;
 
 		ServerPlayingSound &psound = i->second;
 		psound.clients.erase(pkt->getPeerId());
 		if (psound.clients.empty())
-			m_playing_sounds.erase(i++);
+			m_playing_sounds.erase(i);
 	}
+}
+
+static bool pkt_read_formspec_fields(NetworkPacket *pkt, StringMap &fields)
+{
+	u16 field_count;
+	*pkt >> field_count;
+
+	u64 length = 0;
+	for (u16 k = 0; k < field_count; k++) {
+		std::string fieldname;
+		*pkt >> fieldname;
+		fields[fieldname] = pkt->readLongString();
+
+		length += fieldname.size();
+		length += fields[fieldname].size();
+	}
+	// 640K ought to be enough for anyone
+	return length < 640 * 1024;
 }
 
 void Server::handleCommand_NodeMetaFields(NetworkPacket* pkt)
 {
-	v3s16 p;
-	std::string formname;
-	u16 num;
-
-	*pkt >> p >> formname >> num;
-
-	StringMap fields;
-	for (u16 k = 0; k < num; k++) {
-		std::string fieldname;
-		*pkt >> fieldname;
-		fields[fieldname] = pkt->readLongString();
-	}
-
 	session_t peer_id = pkt->getPeerId();
 	RemotePlayer *player = m_env->getPlayer(peer_id);
 
@@ -1388,6 +1384,18 @@ void Server::handleCommand_NodeMetaFields(NetworkPacket* pkt)
 			"Server::ProcessData(): Canceling: No player object for peer_id=" <<
 			peer_id << " disconnecting peer!" << std::endl;
 		DisconnectPeer(peer_id);
+		return;
+	}
+
+	v3s16 p;
+	std::string formname;
+	StringMap fields;
+
+	*pkt >> p >> formname;
+
+	if (!pkt_read_formspec_fields(pkt, fields)) {
+		warningstream << "Too large formspec fields! Ignoring for pos="
+			<< p << ", player=" << player->getName() << std::endl;
 		return;
 	}
 
@@ -1411,18 +1419,6 @@ void Server::handleCommand_NodeMetaFields(NetworkPacket* pkt)
 
 void Server::handleCommand_InventoryFields(NetworkPacket* pkt)
 {
-	std::string client_formspec_name;
-	u16 num;
-
-	*pkt >> client_formspec_name >> num;
-
-	StringMap fields;
-	for (u16 k = 0; k < num; k++) {
-		std::string fieldname;
-		*pkt >> fieldname;
-		fields[fieldname] = pkt->readLongString();
-	}
-
 	session_t peer_id = pkt->getPeerId();
 	RemotePlayer *player = m_env->getPlayer(peer_id);
 
@@ -1440,6 +1436,17 @@ void Server::handleCommand_InventoryFields(NetworkPacket* pkt)
 			"Server::ProcessData(): Canceling: No player object for peer_id=" <<
 			peer_id << " disconnecting peer!" << std::endl;
 		DisconnectPeer(peer_id);
+		return;
+	}
+
+	std::string client_formspec_name;
+	StringMap fields;
+
+	*pkt >> client_formspec_name;
+
+	if (!pkt_read_formspec_fields(pkt, fields)) {
+		warningstream << "Too large formspec fields! Ignoring for formname=\""
+			<< client_formspec_name << "\", player=" << player->getName() << std::endl;
 		return;
 	}
 
@@ -1478,11 +1485,9 @@ void Server::handleCommand_FirstSrp(NetworkPacket* pkt)
 	session_t peer_id = pkt->getPeerId();
 	RemoteClient *client = getClient(peer_id, CS_Invalid);
 	ClientState cstate = client->getState();
+	const std::string playername = client->getName();
 
-	std::string playername = client->getName();
-
-	std::string salt;
-	std::string verification_key;
+	std::string salt, verification_key;
 
 	std::string addr_s = getPeerAddress(peer_id).serializeString();
 	u8 is_empty;
@@ -1491,6 +1496,9 @@ void Server::handleCommand_FirstSrp(NetworkPacket* pkt)
 
 	verbosestream << "Server: Got TOSERVER_FIRST_SRP from " << addr_s
 		<< ", with is_empty=" << (is_empty == 1) << std::endl;
+
+	const bool empty_disallowed = !isSingleplayer() && is_empty == 1 &&
+		g_settings->getBool("disallow_empty_password");
 
 	// Either this packet is sent because the user is new or to change the password
 	if (cstate == CS_HelloSent) {
@@ -1502,21 +1510,31 @@ void Server::handleCommand_FirstSrp(NetworkPacket* pkt)
 			return;
 		}
 
-		if (!isSingleplayer() &&
-				g_settings->getBool("disallow_empty_password") &&
-				is_empty == 1) {
+		if (empty_disallowed) {
 			actionstream << "Server: " << playername
 					<< " supplied empty password from " << addr_s << std::endl;
 			DenyAccess(peer_id, SERVER_ACCESSDENIED_EMPTY_PASSWORD);
 			return;
 		}
 
-		std::string initial_ver_key;
+		std::string encpwd = encode_srp_verifier(verification_key, salt);
 
-		initial_ver_key = encode_srp_verifier(verification_key, salt);
-		m_script->createAuth(playername, initial_ver_key);
+		// It is possible for multiple connections to get this far with the same
+		// player name. In the end only one player with a given name will be emerged
+		// (see Server::StateTwoClientInit) but we still have to be careful here.
+		if (m_script->getAuth(playername, nullptr, nullptr)) {
+			// Another client beat us to it
+			actionstream << "Server: Client from " << addr_s
+				<< " tried to register " << playername << " a second time."
+				<< std::endl;
+			DenyAccess(peer_id, SERVER_ACCESSDENIED_ALREADY_CONNECTED);
+			return;
+		}
+
+		m_script->createAuth(playername, encpwd);
+		client->setEncryptedPassword(encpwd);
+
 		m_script->on_authplayer(playername, addr_s, true);
-
 		acceptAuth(peer_id, false);
 	} else {
 		if (cstate < CS_SudoMode) {
@@ -1526,12 +1544,22 @@ void Server::handleCommand_FirstSrp(NetworkPacket* pkt)
 			return;
 		}
 		m_clients.event(peer_id, CSE_SudoLeave);
-		std::string pw_db_field = encode_srp_verifier(verification_key, salt);
-		bool success = m_script->setPassword(playername, pw_db_field);
+
+		if (empty_disallowed) {
+			actionstream << "Server: " << playername
+					<< " supplied empty password" << std::endl;
+			SendChatMessage(peer_id, ChatMessage(CHATMESSAGE_TYPE_SYSTEM,
+				L"Changing to an empty password is not allowed."));
+			return;
+		}
+
+		std::string encpwd = encode_srp_verifier(verification_key, salt);
+		bool success = m_script->setPassword(playername, encpwd);
 		if (success) {
 			actionstream << playername << " changes password" << std::endl;
 			SendChatMessage(peer_id, ChatMessage(CHATMESSAGE_TYPE_SYSTEM,
 				L"Password change successful."));
+			client->setEncryptedPassword(encpwd);
 		} else {
 			actionstream << playername <<
 				" tries to change password but it fails" << std::endl;
@@ -1547,14 +1575,14 @@ void Server::handleCommand_SrpBytesA(NetworkPacket* pkt)
 	RemoteClient *client = getClient(peer_id, CS_Invalid);
 	ClientState cstate = client->getState();
 
-	bool wantSudo = (cstate == CS_Active);
-
 	if (!((cstate == CS_HelloSent) || (cstate == CS_Active))) {
 		actionstream << "Server: got SRP _A packet in wrong state " << cstate <<
 			" from " << getPeerAddress(peer_id).serializeString() <<
 			". Ignoring." << std::endl;
 		return;
 	}
+
+	const bool wantSudo = (cstate == CS_Active);
 
 	if (client->chosen_mech != AUTH_MECHANISM_NONE) {
 		actionstream << "Server: got SRP _A packet, while auth is already "
@@ -1582,7 +1610,8 @@ void Server::handleCommand_SrpBytesA(NetworkPacket* pkt)
 		AUTH_MECHANISM_LEGACY_PASSWORD : AUTH_MECHANISM_SRP;
 
 	if (wantSudo) {
-		if (!client->isSudoMechAllowed(chosen)) {
+		// Right now, the auth mechs don't change between login and sudo mode.
+		if (!client->isMechAllowed(chosen)) {
 			actionstream << "Server: Player \"" << client->getName() <<
 				"\" at " << getPeerAddress(peer_id).serializeString() <<
 				" tried to change password using unallowed mech " << chosen <<
@@ -1602,8 +1631,7 @@ void Server::handleCommand_SrpBytesA(NetworkPacket* pkt)
 
 	client->chosen_mech = chosen;
 
-	std::string salt;
-	std::string verifier;
+	std::string salt, verifier;
 
 	if (based_on == 0) {
 
@@ -1635,6 +1663,7 @@ void Server::handleCommand_SrpBytesA(NetworkPacket* pkt)
 			<< std::endl;
 		if (wantSudo) {
 			DenySudoAccess(peer_id);
+			client->resetChosenMech();
 			return;
 		}
 
@@ -1652,10 +1681,10 @@ void Server::handleCommand_SrpBytesM(NetworkPacket* pkt)
 	session_t peer_id = pkt->getPeerId();
 	RemoteClient *client = getClient(peer_id, CS_Invalid);
 	ClientState cstate = client->getState();
-	std::string addr_s = getPeerAddress(pkt->getPeerId()).serializeString();
-	std::string playername = client->getName();
+	const std::string addr_s = client->getAddress().serializeString();
+	const std::string playername = client->getName();
 
-	bool wantSudo = (cstate == CS_Active);
+	const bool wantSudo = (cstate == CS_Active);
 
 	verbosestream << "Server: Received TOSERVER_SRP_BYTES_M." << std::endl;
 
@@ -1701,6 +1730,7 @@ void Server::handleCommand_SrpBytesM(NetworkPacket* pkt)
 				<< " tried to change their password, but supplied wrong"
 				<< " (SRP) password for authentication." << std::endl;
 			DenySudoAccess(peer_id);
+			client->resetChosenMech();
 			return;
 		}
 
@@ -1714,8 +1744,7 @@ void Server::handleCommand_SrpBytesM(NetworkPacket* pkt)
 	if (client->create_player_on_auth_success) {
 		m_script->createAuth(playername, client->enc_pwd);
 
-		std::string checkpwd; // not used, but needed for passing something
-		if (!m_script->getAuth(playername, &checkpwd, NULL)) {
+		if (!m_script->getAuth(playername, nullptr, nullptr)) {
 			errorstream << "Server: " << playername <<
 				" cannot be authenticated (auth handler does not work?)" <<
 				std::endl;
@@ -1836,4 +1865,25 @@ void Server::handleCommand_HaveMedia(NetworkPacket *pkt)
 				getScriptIface()->on_dynamic_media_added(token, player->getName());
 		}
 	}
+}
+
+void Server::handleCommand_UpdateClientInfo(NetworkPacket *pkt)
+{
+	ClientDynamicInfo info;
+	*pkt >> info.render_target_size.X;
+	*pkt >> info.render_target_size.Y;
+	*pkt >> info.real_gui_scaling;
+	*pkt >> info.real_hud_scaling;
+	*pkt >> info.max_fs_size.X;
+	*pkt >> info.max_fs_size.Y;
+	try {
+		// added in 5.9.0
+		*pkt >> info.touch_controls;
+	} catch (PacketError &e) {
+		info.touch_controls = false;
+	}
+
+	session_t peer_id = pkt->getPeerId();
+	RemoteClient *client = getClient(peer_id, CS_Invalid);
+	client->setDynamicInfo(info);
 }

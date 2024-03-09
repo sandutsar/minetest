@@ -34,7 +34,7 @@ extern "C" {
 class Client;
 class GUIEngine;
 #endif
-
+class EmergeThread;
 class ScriptApiBase;
 class Server;
 class Environment;
@@ -49,6 +49,7 @@ public:
 	static Client*          getClient(lua_State *L);
 	static GUIEngine*       getGuiEngine(lua_State *L);
 	#endif // !SERVER
+	static EmergeThread*    getEmergeThread(lua_State *L);
 
 	static IGameDef*        getGameDef(lua_State *L);
 
@@ -73,6 +74,16 @@ public:
 			const char* name,
 			lua_CFunction func,
 			int top);
+
+	static void registerClass(lua_State *L, const char *name,
+			const luaL_Reg *methods,
+			const luaL_Reg *metamethods);
+
+	template<typename T>
+	static inline T *checkObject(lua_State *L, int narg)
+	{
+		return *reinterpret_cast<T**>(luaL_checkudata(L, narg, T::className));
+	}
 
 	/**
 	 * A wrapper for deprecated functions.

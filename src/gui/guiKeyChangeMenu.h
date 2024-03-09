@@ -33,7 +33,7 @@ class ISimpleTextureSource;
 struct key_setting
 {
 	int id;
-	const wchar_t *button_name;
+	std::wstring button_name;
 	KeyPress key;
 	std::string setting_name;
 	gui::IGUIButton *button;
@@ -46,7 +46,6 @@ public:
 			IMenuManager *menumgr, ISimpleTextureSource *tsrc);
 	~GUIKeyChangeMenu();
 
-	void removeChildren();
 	/*
 	 Remove and re-add (or reposition) stuff
 	 */
@@ -69,7 +68,7 @@ private:
 
 	bool resetMenu();
 
-	void add_key(int id, const wchar_t *button_name, const std::string &setting_name);
+	void add_key(int id, std::wstring button_name, const std::string &setting_name);
 
 	bool shift_down = false;
 

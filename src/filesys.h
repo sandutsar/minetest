@@ -21,8 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <set>
 #include <string>
+#include <string_view>
 #include <vector>
-#include "exceptions.h"
 
 #ifdef _WIN32
 #define DIR_DELIM "\\"
@@ -36,9 +36,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PATH_DELIM ":"
 #endif
 
-namespace irr { namespace io {
+namespace irr::io {
 class IFileSystem;
-}}
+}
 
 namespace fs
 {
@@ -59,6 +59,13 @@ bool PathExists(const std::string &path);
 bool IsPathAbsolute(const std::string &path);
 
 bool IsDir(const std::string &path);
+
+bool IsExecutable(const std::string &path);
+
+inline bool IsFile(const std::string &path)
+{
+	return PathExists(path) && !IsDir(path);
+}
 
 bool IsDirDelimiter(char c);
 
@@ -120,7 +127,7 @@ bool PathStartsWith(const std::string &path, const std::string &prefix);
 // removed: If non-NULL, receives the removed component(s).
 // count: Number of components to remove
 std::string RemoveLastPathComponent(const std::string &path,
-               std::string *removed = NULL, int count = 1);
+		std::string *removed = NULL, int count = 1);
 
 // Remove "." and ".." path components and for every ".." removed, remove
 // the last normal path component before it. Unlike AbsolutePath,
@@ -135,7 +142,7 @@ std::string AbsolutePath(const std::string &path);
 // delimiter is found.
 const char *GetFilenameFromPath(const char *path);
 
-bool safeWriteToFile(const std::string &path, const std::string &content);
+bool safeWriteToFile(const std::string &path, std::string_view content);
 
 #ifndef SERVER
 bool extractZipFile(irr::io::IFileSystem *fs, const char *filename, const std::string &destination);

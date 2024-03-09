@@ -27,6 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irr_aabb3d.h"
 #include "SColor.h"
 #include <matrix4.h>
+#include <cmath>
 
 #define rangelim(d, min, max) ((d) < (min) ? (min) : ((d) > (max) ? (max) : (d)))
 #define myfloor(x) ((x) < 0.0 ? (int)(x) - 1 : (int)(x))
@@ -145,6 +146,49 @@ inline v3s16 componentwise_max(const v3s16 &a, const v3s16 &b)
 	return v3s16(MYMAX(a.X, b.X), MYMAX(a.Y, b.Y), MYMAX(a.Z, b.Z));
 }
 
+/// @brief Describes a grid with given step, oirginating at (0,0,0)
+struct MeshGrid {
+	u16 cell_size;
+
+	u32 getCellVolume() const { return cell_size * cell_size * cell_size; }
+
+	/// @brief returns coordinate of mesh cell given coordinate of a map block
+	s16 getCellPos(s16 p) const
+	{
+		return (p - (p < 0) * (cell_size - 1)) / cell_size;
+	}
+
+	/// @brief returns position of mesh cell in the grid given position of a map block
+	v3s16 getCellPos(v3s16 block_pos) const
+	{
+		return v3s16(getCellPos(block_pos.X), getCellPos(block_pos.Y), getCellPos(block_pos.Z));
+	}
+
+	/// @brief returns closest step of the grid smaller than p
+	s16 getMeshPos(s16 p) const
+	{
+		return getCellPos(p) * cell_size;
+	}
+
+	/// @brief Returns coordinates of the origin of the grid cell containing p
+	v3s16 getMeshPos(v3s16 p) const
+	{
+		return v3s16(getMeshPos(p.X), getMeshPos(p.Y), getMeshPos(p.Z));
+	}
+
+	/// @brief Returns true if p is an origin of a cell in the grid.
+	bool isMeshPos(v3s16 &p) const
+	{
+		return ((p.X + p.Y + p.Z) % cell_size) == 0;
+	}
+
+	/// @brief Returns index of the given offset in a grid cell
+	/// All offset coordinates must be smaller than the size of the cell
+	u16 getOffsetIndex(v3s16 offset) const
+	{
+		return (offset.Z * cell_size + offset.Y) * cell_size + offset.X;
+	}
+};
 
 /** Returns \p f wrapped to the range [-360, 360]
  *
@@ -152,30 +196,10 @@ inline v3s16 componentwise_max(const v3s16 &a, const v3s16 &b)
  *
  *  \note This is also used in cases where degrees wrapped to the range [0, 360]
  *  is innapropriate (e.g. pitch needs negative values)
- *
- *  \internal functionally equivalent -- although precision may vary slightly --
- *  to fmodf((f), 360.0f) however empirical tests indicate that this approach is
- *  faster.
  */
 inline float modulo360f(float f)
 {
-	int sign;
-	int whole;
-	float fraction;
-
-	if (f < 0) {
-		f = -f;
-		sign = -1;
-	} else {
-		sign = 1;
-	}
-
-	whole = f;
-
-	fraction = f - whole;
-	whole %= 360;
-
-	return sign * (whole + fraction);
+	return fmodf(f, 360.0f);
 }
 
 
@@ -223,6 +247,8 @@ u32 myrand();
 void mysrand(unsigned int seed);
 void myrand_bytes(void *out, size_t len);
 int myrand_range(int min, int max);
+float myrand_range(float min, float max);
+float myrand_float();
 
 /*
 	Miscellaneous functions
@@ -324,12 +350,10 @@ class IntervalLimiter
 public:
 	IntervalLimiter() = default;
 
-	/*
-		dtime: time from last call to this method
-		wanted_interval: interval wanted
-		return value:
-			true: action should be skipped
-			false: action should be done
+	/**
+		@param dtime time from last call to this method
+		@param wanted_interval interval wanted
+		@return true if action should be done
 	*/
 	bool step(float dtime, float wanted_interval)
 	{
@@ -445,4 +469,25 @@ inline irr::video::SColor multiplyColorValue(const irr::video::SColor &color, fl
 			core::clamp<u32>(color.getRed() * mod, 0, 255),
 			core::clamp<u32>(color.getGreen() * mod, 0, 255),
 			core::clamp<u32>(color.getBlue() * mod, 0, 255));
+}
+
+template <typename T> inline T numericAbsolute(T v) { return v < 0 ? T(-v) : v;                }
+template <typename T> inline T numericSign(T v)     { return T(v < 0 ? -1 : (v == 0 ? 0 : 1)); }
+
+inline v3f vecAbsolute(v3f v)
+{
+	return v3f(
+		numericAbsolute(v.X),
+		numericAbsolute(v.Y),
+		numericAbsolute(v.Z)
+	);
+}
+
+inline v3f vecSign(v3f v)
+{
+	return v3f(
+		numericSign(v.X),
+		numericSign(v.Y),
+		numericSign(v.Z)
+	);
 }

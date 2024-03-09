@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "guiEditBox.h"
 
-#include "IrrCompileConfig.h"
 #include "IGUISkin.h"
 #include "IGUIEnvironment.h"
 #include "IGUIFont.h"
@@ -178,6 +177,16 @@ void GUIEditBox::setTextMarkers(s32 begin, s32 end)
 	if (begin != m_mark_begin || end != m_mark_end) {
 		m_mark_begin = begin;
 		m_mark_end = end;
+
+		if (!m_passwordbox && m_operator && m_mark_begin != m_mark_end) {
+			// copy to primary selection
+			const s32 realmbgn = m_mark_begin < m_mark_end ? m_mark_begin : m_mark_end;
+			const s32 realmend = m_mark_begin < m_mark_end ? m_mark_end : m_mark_begin;
+
+			std::string s = stringw_to_utf8(Text.subString(realmbgn, realmend - realmbgn));
+			m_operator->copyToPrimarySelection(s.c_str());
+		}
+
 		sendGuiEvent(EGET_EDITBOX_MARKING_CHANGED);
 	}
 }
@@ -200,7 +209,6 @@ void GUIEditBox::sendGuiEvent(EGUI_EVENT_TYPE type)
 bool GUIEditBox::OnEvent(const SEvent &event)
 {
 	if (isEnabled()) {
-
 		switch (event.EventType) {
 		case EET_GUI_EVENT:
 			if (event.GUIEvent.EventType == EGET_ELEMENT_FOCUS_LOST) {
@@ -218,11 +226,9 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 			if (processMouse(event))
 				return true;
 			break;
-#if (IRRLICHT_VERSION_MT_REVISION >= 2)
 		case EET_STRING_INPUT_EVENT:
 			inputString(*event.StringInput.Str);
 			return true;
-#endif
 		default:
 			break;
 		}
@@ -447,7 +453,6 @@ bool GUIEditBox::processKey(const SEvent &event)
 
 bool GUIEditBox::onKeyUp(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 {
-	// clang-format off
 	if (m_multiline || (m_word_wrap && m_broken_text.size() > 1)) {
 		s32 lineNo = getLineFromPos(m_cursor_pos);
 		s32 mb = (m_mark_begin == m_mark_end) ? m_cursor_pos :
@@ -473,13 +478,11 @@ bool GUIEditBox::onKeyUp(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 		return true;
 	}
 
-	// clang-format on
 	return false;
 }
 
 bool GUIEditBox::onKeyDown(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 {
-	// clang-format off
 	if (m_multiline || (m_word_wrap && m_broken_text.size() > 1)) {
 		s32 lineNo = getLineFromPos(m_cursor_pos);
 		s32 mb = (m_mark_begin == m_mark_end) ? m_cursor_pos :
@@ -505,7 +508,6 @@ bool GUIEditBox::onKeyDown(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 		return true;
 	}
 
-	// clang-format on
 	return false;
 }
 
@@ -778,6 +780,32 @@ bool GUIEditBox::processMouse(const SEvent &event)
 			return true;
 		}
 		break;
+	case EMIE_MMOUSE_PRESSED_DOWN: {
+		if (!AbsoluteClippingRect.isPointInside(core::position2d<s32>(
+					event.MouseInput.X, event.MouseInput.Y)))
+			return false;
+
+		if (!Environment->hasFocus(this)) {
+			m_blink_start_time = porting::getTimeMs();
+		}
+
+		// move cursor and disable marking
+		m_cursor_pos = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
+		m_mouse_marking = false;
+		setTextMarkers(m_cursor_pos, m_cursor_pos);
+
+		// paste from the primary selection
+		inputString([&] {
+			if (!m_operator)
+				return core::stringw();
+			const c8 *inserted_text_utf8 = m_operator->getTextFromPrimarySelection();
+			if (!inserted_text_utf8)
+				return core::stringw();
+			return utf8_to_stringw(inserted_text_utf8);
+		}());
+
+		return true;
+	}
 	default:
 		break;
 	}
@@ -845,55 +873,4 @@ void GUIEditBox::updateVScrollBar()
 			m_vscrollbar->setPageSize(s32(getTextDimension().Height));
 		}
 	}
-}
-
-void GUIEditBox::deserializeAttributes(
-		io::IAttributes *in, io::SAttributeReadWriteOptions *options = 0)
-{
-	IGUIEditBox::deserializeAttributes(in, options);
-
-	setOverrideColor(in->getAttributeAsColor("OverrideColor"));
-	enableOverrideColor(in->getAttributeAsBool("OverrideColorEnabled"));
-	setMax(in->getAttributeAsInt("MaxChars"));
-	setWordWrap(in->getAttributeAsBool("WordWrap"));
-	setMultiLine(in->getAttributeAsBool("MultiLine"));
-	setAutoScroll(in->getAttributeAsBool("AutoScroll"));
-	core::stringw ch = in->getAttributeAsStringW("PasswordChar");
-
-	if (ch.empty())
-		setPasswordBox(in->getAttributeAsBool("PasswordBox"));
-	else
-		setPasswordBox(in->getAttributeAsBool("PasswordBox"), ch[0]);
-
-	setTextAlignment((EGUI_ALIGNMENT)in->getAttributeAsEnumeration(
-					 "HTextAlign", GUIAlignmentNames),
-			(EGUI_ALIGNMENT)in->getAttributeAsEnumeration(
-					"VTextAlign", GUIAlignmentNames));
-
-	setWritable(in->getAttributeAsBool("Writable"));
-	// setOverrideFont(in->getAttributeAsFont("OverrideFont"));
-}
-
-//! Writes attributes of the element.
-void GUIEditBox::serializeAttributes(
-		io::IAttributes *out, io::SAttributeReadWriteOptions *options = 0) const
-{
-	// IGUIEditBox::serializeAttributes(out,options);
-
-	out->addBool("OverrideColorEnabled", m_override_color_enabled);
-	out->addColor("OverrideColor", m_override_color);
-	// out->addFont("OverrideFont",m_override_font);
-	out->addInt("MaxChars", m_max);
-	out->addBool("WordWrap", m_word_wrap);
-	out->addBool("MultiLine", m_multiline);
-	out->addBool("AutoScroll", m_autoscroll);
-	out->addBool("PasswordBox", m_passwordbox);
-	core::stringw ch = L" ";
-	ch[0] = m_passwordchar;
-	out->addString("PasswordChar", ch.c_str());
-	out->addEnum("HTextAlign", m_halign, GUIAlignmentNames);
-	out->addEnum("VTextAlign", m_valign, GUIAlignmentNames);
-	out->addBool("Writable", m_writable);
-
-	IGUIEditBox::serializeAttributes(out, options);
 }

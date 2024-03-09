@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "clientenvironment.h"
 #include "clientsimpleobject.h"
 #include "clientmap.h"
+#include "localplayer.h"
 #include "scripting_client.h"
 #include "mapblock_mesh.h"
 #include "mtevent.h"
@@ -34,58 +35,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "settings.h"
 #include "shader.h"
 #include "content_cao.h"
+#include "porting.h"
 #include <algorithm>
 #include "client/renderingengine.h"
-
-/*
-	CAOShaderConstantSetter
-*/
-
-//! Shader constant setter for passing material emissive color to the CAO object_shader
-class CAOShaderConstantSetter : public IShaderConstantSetter
-{
-public:
-	CAOShaderConstantSetter():
-			m_emissive_color_setting("emissiveColor")
-	{}
-
-	~CAOShaderConstantSetter() override = default;
-
-	void onSetConstants(video::IMaterialRendererServices *services) override
-	{
-		// Ambient color
-		video::SColorf emissive_color(m_emissive_color);
-
-		float as_array[4] = {
-			emissive_color.r,
-			emissive_color.g,
-			emissive_color.b,
-			emissive_color.a,
-		};
-		m_emissive_color_setting.set(as_array, services);
-	}
-
-	void onSetMaterial(const video::SMaterial& material) override
-	{
-		m_emissive_color = material.EmissiveColor;
-	}
-
-private:
-	video::SColor m_emissive_color;
-	CachedPixelShaderSetting<float, 4> m_emissive_color_setting;
-};
-
-class CAOShaderConstantSetterFactory : public IShaderConstantSetterFactory
-{
-public:
-	CAOShaderConstantSetterFactory()
-	{}
-
-	virtual IShaderConstantSetter* create()
-	{
-		return new CAOShaderConstantSetter();
-	}
-};
 
 /*
 	ClientEnvironment
@@ -98,8 +50,6 @@ ClientEnvironment::ClientEnvironment(ClientMap *map,
 	m_texturesource(texturesource),
 	m_client(client)
 {
-	auto *shdrsrc = m_client->getShaderSource();
-	shdrsrc->addShaderConstantSetterFactory(new CAOShaderConstantSetterFactory());
 }
 
 ClientEnvironment::~ClientEnvironment()
@@ -183,7 +133,7 @@ void ClientEnvironment::step(float dtime)
 		Stuff that has a maximum time increment
 	*/
 
-	u32 steps = ceil(dtime / dtime_max_increment);
+	u32 steps = std::ceil(dtime / dtime_max_increment);
 	f32 dtime_part = dtime / steps;
 	for (; steps > 0; --steps) {
 		/*
@@ -194,52 +144,58 @@ void ClientEnvironment::step(float dtime)
 		lplayer->applyControl(dtime_part, this);
 
 		// Apply physics
+		lplayer->gravity = 0;
 		if (!free_move) {
 			// Gravity
-			v3f speed = lplayer->getSpeed();
 			if (!is_climbing && !lplayer->in_liquid)
-				speed.Y -= lplayer->movement_gravity *
-					lplayer->physics_override_gravity * dtime_part * 2.0f;
+				// HACK the factor 2 for gravity is arbitrary and should be removed eventually
+				lplayer->gravity = 2 * lplayer->movement_gravity * lplayer->physics_override.gravity;
 
 			// Liquid floating / sinking
 			if (!is_climbing && lplayer->in_liquid &&
 					!lplayer->swimming_vertical &&
 					!lplayer->swimming_pitch)
-				speed.Y -= lplayer->movement_liquid_sink * dtime_part * 2.0f;
+				// HACK the factor 2 for gravity is arbitrary and should be removed eventually
+				lplayer->gravity = 2 * lplayer->movement_liquid_sink * lplayer->physics_override.liquid_sink;
 
 			// Movement resistance
 			if (lplayer->move_resistance > 0) {
+				v3f speed = lplayer->getSpeed();
+
 				// How much the node's move_resistance blocks movement, ranges
 				// between 0 and 1. Should match the scale at which liquid_viscosity
 				// increase affects other liquid attributes.
 				static const f32 resistance_factor = 0.3f;
+				float fluidity = lplayer->movement_liquid_fluidity;
+				fluidity *= MYMAX(1.0f, lplayer->physics_override.liquid_fluidity);
+				fluidity = MYMAX(0.001f, fluidity); // prevent division by 0
+				float fluidity_smooth = lplayer->movement_liquid_fluidity_smooth;
+				fluidity_smooth *= lplayer->physics_override.liquid_fluidity_smooth;
+				fluidity_smooth = MYMAX(0.0f, fluidity_smooth);
 
 				v3f d_wanted;
 				bool in_liquid_stable = lplayer->in_liquid_stable || lplayer->in_liquid;
-				if (in_liquid_stable) {
-					d_wanted = -speed / lplayer->movement_liquid_fluidity;
-				} else {
+				if (in_liquid_stable)
+					d_wanted = -speed / fluidity;
+				else
 					d_wanted = -speed / BS;
-				}
 				f32 dl = d_wanted.getLength();
-				if (in_liquid_stable) {
-					if (dl > lplayer->movement_liquid_fluidity_smooth)
-						dl = lplayer->movement_liquid_fluidity_smooth;
-				}
-
+				if (in_liquid_stable)
+					dl = MYMIN(dl, fluidity_smooth);
 				dl *= (lplayer->move_resistance * resistance_factor) +
 					(1 - resistance_factor);
 				v3f d = d_wanted.normalize() * (dl * dtime_part * 100.0f);
 				speed += d;
-			}
 
-			lplayer->setSpeed(speed);
+				lplayer->setSpeed(speed);
+			}
 		}
 
 		/*
 			Move the lplayer.
 			This also does collision detection.
 		*/
+
 		lplayer->move(dtime_part, this, position_max_increment,
 			&player_collisions);
 	}
@@ -305,6 +261,7 @@ void ClientEnvironment::step(float dtime)
 		node_at_lplayer = m_map->getNode(p);
 
 		u16 light = getInteriorLight(node_at_lplayer, 0, m_client->ndef());
+		lplayer->light_color = encode_light(light, 0); // this transfers light.alpha
 		final_color_blend(&lplayer->light_color, light, day_night_ratio);
 	}
 
@@ -355,26 +312,26 @@ GenericCAO* ClientEnvironment::getGenericCAO(u16 id)
 	return NULL;
 }
 
-u16 ClientEnvironment::addActiveObject(ClientActiveObject *object)
+u16 ClientEnvironment::addActiveObject(std::unique_ptr<ClientActiveObject> object)
 {
+	auto obj = object.get();
 	// Register object. If failed return zero id
-	if (!m_ao_manager.registerObject(object))
+	if (!m_ao_manager.registerObject(std::move(object)))
 		return 0;
 
-	object->addToScene(m_texturesource, m_client->getSceneManager());
+	obj->addToScene(m_texturesource, m_client->getSceneManager());
 
 	// Update lighting immediately
-	object->updateLight(getDayNightRatio());
-	return object->getId();
+	obj->updateLight(getDayNightRatio());
+	return obj->getId();
 }
 
 void ClientEnvironment::addActiveObject(u16 id, u8 type,
 	const std::string &init_data)
 {
-	ClientActiveObject* obj =
+	std::unique_ptr<ClientActiveObject> obj =
 		ClientActiveObject::create((ActiveObjectType) type, m_client, this);
-	if(obj == NULL)
-	{
+	if (!obj) {
 		infostream<<"ClientEnvironment::addActiveObject(): "
 			<<"id="<<id<<" type="<<type<<": Couldn't create object"
 			<<std::endl;
@@ -383,12 +340,9 @@ void ClientEnvironment::addActiveObject(u16 id, u8 type,
 
 	obj->setId(id);
 
-	try
-	{
+	try {
 		obj->initialize(init_data);
-	}
-	catch(SerializationError &e)
-	{
+	} catch(SerializationError &e) {
 		errorstream<<"ClientEnvironment::addActiveObject():"
 			<<" id="<<id<<" type="<<type
 			<<": SerializationError in initialize(): "
@@ -397,12 +351,12 @@ void ClientEnvironment::addActiveObject(u16 id, u8 type,
 			<<std::endl;
 	}
 
-	u16 new_id = addActiveObject(obj);
+	u16 new_id = addActiveObject(std::move(obj));
 	// Object initialized:
-	if ((obj = getActiveObject(new_id))) {
+	if (ClientActiveObject *obj2 = getActiveObject(new_id)) {
 		// Final step is to update all children which are already known
 		// Data provided by AO_CMD_SPAWN_INFANT
-		const auto &children = obj->getAttachmentChildIds();
+		const auto &children = obj2->getAttachmentChildIds();
 		for (auto c_id : children) {
 			if (auto *o = getActiveObject(c_id))
 				o->updateAttachments();
@@ -486,11 +440,10 @@ ClientEnvEvent ClientEnvironment::getClientEnvEvent()
 
 void ClientEnvironment::getSelectedActiveObjects(
 	const core::line3d<f32> &shootline_on_map,
-	std::vector<PointedThing> &objects)
+	std::vector<PointedThing> &objects,
+	const std::optional<Pointabilities> &pointabilities)
 {
-	std::vector<DistanceSortedActiveObject> allObjects;
-	getActiveObjects(shootline_on_map.start,
-		shootline_on_map.getLength() + 10.0f, allObjects);
+	auto allObjects = m_ao_manager.getActiveSelectableObjects(shootline_on_map);
 	const v3f line_vector = shootline_on_map.getVector();
 
 	for (const auto &allObject : allObjects) {
@@ -499,16 +452,54 @@ void ClientEnvironment::getSelectedActiveObjects(
 		if (!obj->getSelectionBox(&selection_box))
 			continue;
 
-		const v3f &pos = obj->getPosition();
-		aabb3f offsetted_box(selection_box.MinEdge + pos,
-			selection_box.MaxEdge + pos);
-
 		v3f current_intersection;
-		v3s16 current_normal;
-		if (boxLineCollision(offsetted_box, shootline_on_map.start, line_vector,
-				&current_intersection, &current_normal)) {
-			objects.emplace_back((s16) obj->getId(), current_intersection, current_normal,
-				(current_intersection - shootline_on_map.start).getLengthSQ());
+		v3f current_normal, current_raw_normal;
+		const v3f rel_pos = shootline_on_map.start - obj->getPosition();
+		bool collision;
+		GenericCAO* gcao = dynamic_cast<GenericCAO*>(obj);
+		if (gcao != nullptr && gcao->getProperties().rotate_selectionbox) {
+			gcao->getSceneNode()->updateAbsolutePosition();
+			const v3f deg = obj->getSceneNode()->getAbsoluteTransformation().getRotationDegrees();
+			collision = boxLineCollision(selection_box, deg,
+				rel_pos, line_vector, &current_intersection, &current_normal, &current_raw_normal);
+		} else {
+			collision = boxLineCollision(selection_box, rel_pos, line_vector,
+				&current_intersection, &current_normal);
+			current_raw_normal = current_normal;
 		}
+		if (collision) {
+			PointabilityType pointable;
+			if (pointabilities) {
+				if (gcao->isPlayer()) {
+					pointable = pointabilities->matchPlayer(gcao->getGroups()).value_or(
+							gcao->getProperties().pointable);
+				} else {
+					pointable = pointabilities->matchObject(gcao->getName(),
+							gcao->getGroups()).value_or(gcao->getProperties().pointable);
+				}
+			} else {
+				pointable = gcao->getProperties().pointable;
+			}
+			if (pointable != PointabilityType::POINTABLE_NOT) {
+				current_intersection += obj->getPosition();
+				objects.emplace_back(obj->getId(), current_intersection, current_normal, current_raw_normal,
+					(current_intersection - shootline_on_map.start).getLengthSQ(), pointable);
+			}
+		}
+	}
+}
+
+void ClientEnvironment::updateFrameTime(bool is_paused)
+{
+	// if paused, m_frame_time_pause_accumulator increases by dtime,
+	// otherwise, m_frame_time increases by dtime
+	if (is_paused) {
+		m_frame_dtime = 0;
+		m_frame_time_pause_accumulator = porting::getTimeMs() - m_frame_time;
+	}
+	else {
+		auto new_frame_time = porting::getTimeMs() - m_frame_time_pause_accumulator;
+		m_frame_dtime = new_frame_time - MYMAX(m_frame_time, m_frame_time_pause_accumulator);
+		m_frame_time = new_frame_time;
 	}
 }

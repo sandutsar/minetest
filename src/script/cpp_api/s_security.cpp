@@ -22,11 +22,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "filesys.h"
 #include "porting.h"
 #include "server.h"
+#ifndef SERVER
 #include "client/client.h"
+#endif
 #include "settings.h"
 
 #include <cerrno>
 #include <string>
+#include <algorithm>
 #include <iostream>
 
 
@@ -120,21 +123,15 @@ void ScriptApiSecurity::initializeSecurity()
 		"date",
 		"difftime",
 		"getenv",
-		"setlocale",
 		"time",
-		"tmpname",
 	};
 	static const char *debug_whitelist[] = {
 		"gethook",
 		"traceback",
 		"getinfo",
-		"getmetatable",
-		"setupvalue",
-		"setmetatable",
 		"upvalueid",
 		"sethook",
 		"debug",
-		"setlocal",
 	};
 	static const char *package_whitelist[] = {
 		"config",
@@ -220,6 +217,7 @@ void ScriptApiSecurity::initializeSecurity()
 	// And replace unsafe ones
 	SECURE_API(os, remove);
 	SECURE_API(os, rename);
+	SECURE_API(os, setlocale);
 
 	lua_setglobal(L, "os");
 	lua_pop(L, 1);  // Pop old OS
@@ -250,6 +248,11 @@ void ScriptApiSecurity::initializeSecurity()
 	}
 	lua_pop(L, 1);  // Pop old jit
 #endif
+
+	// Get rid of 'core' in the old globals, we don't want anyone thinking it's
+	// safe or even usable.
+	lua_pushnil(L);
+	lua_setfield(L, old_globals, "core");
 
 	lua_pop(L, 1); // Pop globals_backup
 
@@ -286,7 +289,7 @@ void ScriptApiSecurity::initializeSecurityClient()
 		"rawset",
 		"select",
 		"setfenv",
-		// getmetatable can be used to escape the sandbox
+		"getmetatable",
 		"setmetatable",
 		"tonumber",
 		"tostring",
@@ -308,7 +311,7 @@ void ScriptApiSecurity::initializeSecurityClient()
 		"time"
 	};
 	static const char *debug_whitelist[] = {
-		"getinfo",
+		"getinfo", // used by builtin and unset before mods load
 		"traceback"
 	};
 
@@ -410,6 +413,12 @@ void ScriptApiSecurity::setLuaEnv(lua_State *L, int thread)
 
 bool ScriptApiSecurity::isSecure(lua_State *L)
 {
+#ifndef SERVER
+	auto script = ModApiBase::getScriptApiBase(L);
+	// CSM keeps no globals backup but is always secure
+	if (script->getType() == ScriptingType::Client)
+		return true;
+#endif
 	lua_rawgeti(L, LUA_REGISTRYINDEX, CUSTOM_RIDX_GLOBALS_BACKUP);
 	bool secure = !lua_isnil(L, -1);
 	lua_pop(L, 1);
@@ -450,11 +459,10 @@ bool ScriptApiSecurity::safeLoadFile(lua_State *L, const char *path, const char 
 	size_t start = 0;
 	int c = std::getc(fp);
 	if (c == '#') {
-		// Skip the first line
-		while ((c = std::getc(fp)) != EOF && c != '\n') {}
-		if (c == '\n')
-			std::getc(fp);
-		start = std::ftell(fp);
+		// Skip the shebang line (but keep line-ending)
+		while (c != EOF && c != '\n')
+			c = std::getc(fp);
+		start = std::ftell(fp) - 1;
 	}
 
 	// Read the file
@@ -547,10 +555,9 @@ bool ScriptApiSecurity::checkPath(lua_State *L, const char *path,
 		return false;
 
 	// Get mod name
-	lua_rawgeti(L, LUA_REGISTRYINDEX, CUSTOM_RIDX_CURRENT_MOD_NAME);
-	if (lua_isstring(L, -1)) {
-		std::string mod_name = readParam<std::string>(L, -1);
-
+	// FIXME: insecure = problem here?
+	std::string mod_name = ScriptApiBase::getCurrentModNameInsecure(L);
+	if (!mod_name.empty()) {
 		// Builtin can access anything
 		if (mod_name == BUILTIN_MOD_NAME) {
 			if (write_allowed) *write_allowed = true;
@@ -570,7 +577,17 @@ bool ScriptApiSecurity::checkPath(lua_State *L, const char *path,
 			}
 		}
 	}
-	lua_pop(L, 1);  // Pop mod name
+
+	// Allow read-only access to game directory
+	if (!write_required) {
+		const SubgameSpec *game_spec = gamedef->getGameSpec();
+		if (game_spec && !game_spec->path.empty()) {
+			str = fs::AbsolutePath(game_spec->path);
+			if (!str.empty() && fs::PathStartsWith(abs_path, str)) {
+				return true;
+			}
+		}
+	}
 
 	// Allow read-only access to all mod directories
 	if (!write_required) {
@@ -604,6 +621,21 @@ bool ScriptApiSecurity::checkPath(lua_State *L, const char *path,
 
 	// Default to disallowing
 	return false;
+}
+
+bool ScriptApiSecurity::checkWhitelisted(lua_State *L, const std::string &setting)
+{
+	assert(str_starts_with(setting, "secure."));
+
+	std::string mod_name = ScriptApiBase::getCurrentModName(L);
+	if (mod_name.empty())
+		return false;
+
+	std::string value = g_settings->get(setting);
+	value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
+	auto mod_list = str_split(value, ',');
+
+	return CONTAINS(mod_list, mod_name);
 }
 
 
@@ -835,4 +867,22 @@ int ScriptApiSecurity::sl_os_remove(lua_State *L)
 	lua_pushvalue(L, 1);
 	lua_call(L, 1, 2);
 	return 2;
+}
+
+
+int ScriptApiSecurity::sl_os_setlocale(lua_State *L)
+{
+	const bool cat = lua_gettop(L) > 1;
+	// Don't allow changes
+	if (!lua_isnoneornil(L, 1)) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	push_original(L, "os", "setlocale");
+	lua_pushnil(L);
+	if (cat)
+		lua_pushvalue(L, 2);
+	lua_call(L, cat ? 2 : 1, 1);
+	return 1;
 }

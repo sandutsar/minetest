@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2013 xyz, Ilya Zhuravlev <whatever@xyz.is>
-Copyright (C) 2016 Nore, Nathanaël Courant <nore@mesecons.net>
+Copyright (C) 2016 Nore, Nathanaëlle Courant <nore@mesecons.net>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -59,10 +59,11 @@ void EnrichedString::clear()
 	m_background = irr::video::SColor(0, 0, 0, 0);
 }
 
-void EnrichedString::operator=(const wchar_t *str)
+EnrichedString &EnrichedString::operator=(const wchar_t *str)
 {
 	clear();
 	addAtEnd(translate_string(std::wstring(str)), m_default_color);
+	return *this;
 }
 
 void EnrichedString::addAtEnd(const std::wstring &s, SColor initial_color)

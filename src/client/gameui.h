@@ -57,7 +57,6 @@ public:
 	{
 		bool show_chat = true;
 		bool show_hud = true;
-		bool show_minimap = false;
 		bool show_minimal_debug = false;
 		bool show_basic_debug = false;
 		bool show_profiler_graph = false;
@@ -70,8 +69,6 @@ public:
 
 	void initFlags();
 	const Flags &getFlags() const { return m_flags; }
-
-	void showMinimap(bool show);
 
 	inline void setInfoText(const std::wstring &str) { m_infotext = str; }
 	inline void clearInfoText() { m_infotext.clear(); }
@@ -93,7 +90,7 @@ public:
 
 	void updateProfiler();
 
-	void toggleChat();
+	void toggleChat(Client *client);
 	void toggleHud();
 	void toggleProfiler();
 
@@ -106,9 +103,12 @@ public:
 	const std::string &getFormspecName() { return m_formname; }
 	GUIFormSpecMenu *&getFormspecGUI() { return m_formspec; }
 	void deleteFormspec();
+	void clearText();
 
 private:
 	Flags m_flags;
+
+	float m_drawtime_avg = 0;
 
 	gui::IGUIStaticText *m_guitext = nullptr;  // First line of debug text
 	gui::IGUIStaticText *m_guitext2 = nullptr; // Second line of debug text

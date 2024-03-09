@@ -22,17 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irrlichttypes.h"
 #include "irr_v3d.h"
 
-extern const v3s16 g_6dirs[6];
-
-extern const v3s16 g_7dirs[7];
-
-extern const v3s16 g_26dirs[26];
-
-// 26th is (0,0,0)
-extern const v3s16 g_27dirs[27];
-
-extern const u8 wallmounted_to_facedir[6];
-
 /// Direction in the 6D format. g_27dirs contains corresponding vectors.
 /// Here P means Positive, N stands for Negative.
 enum Direction6D {
@@ -80,10 +69,34 @@ enum Direction6D {
 /// Direction in the wallmounted format.
 /// P is Positive, N is Negative.
 enum DirectionWallmounted {
+	// The 6 wallmounted directions
 	DWM_YP,
 	DWM_YN,
 	DWM_XP,
 	DWM_XN,
 	DWM_ZP,
 	DWM_ZN,
+	// There are 6 wallmounted directions, but 8 possible states (3 bits).
+	// So we have 2 additional states, which drawtypes might use for
+	// special ("S") behavior.
+	DWM_S1,
+	DWM_S2,
+	DWM_COUNT
 };
+
+extern const v3s16 g_6dirs[6];
+
+extern const v3s16 g_7dirs[7];
+
+extern const v3s16 g_26dirs[26];
+
+// 26th is (0,0,0)
+extern const v3s16 g_27dirs[27];
+
+extern const u8 wallmounted_to_facedir[DWM_COUNT];
+
+extern const v3s16 wallmounted_dirs[DWM_COUNT];
+
+extern const v3s16 facedir_dirs[32];
+
+extern const v3s16 fourdir_dirs[4];

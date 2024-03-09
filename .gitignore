@@ -28,8 +28,17 @@ gtags.files
 # Visual Studio Code & plugins
 .vscode/
 build/.cmake/
+# Fleet
+.fleet
 # Gradle
 .gradle
+# Clang
+.cache
+# AppImage
+*.AppImage
+*.zsync
+appimage-build
+AppDir
 
 ## Files related to Minetest development cycle
 /*.patch
@@ -41,17 +50,17 @@ build/.cmake/
 /bin/
 /games/*
 !/games/devtest/
+/games/devtest/mods/soundstuff/sounds/gitignored_sounds/*
+!/games/devtest/mods/soundstuff/sounds/gitignored_sounds/custom_sounds_here.txt
 /cache
 /textures/*
 !/textures/base/
 /screenshots
 /sounds
 /mods/*
-!/mods/minetest/
-/mods/minetest/*
-!/mods/minetest/mods_here.txt
-/worlds
-/world/
+!/mods/mods_here.txt
+/worlds/*
+!/worlds/worlds_here.txt
 /clientmods/*
 !/clientmods/preview/
 /client/mod_storage/
@@ -83,11 +92,8 @@ cmake_install.cmake
 CMakeCache.txt
 CPackConfig.cmake
 CPackSourceConfig.cmake
-src/test_config.h
 src/cmake_config.h
 src/cmake_config_githash.h
-src/unittest/test_world/world.mt
-games/devtest/mods/testnodes/textures/testnodes_generated_*.png
 /locale/
 .directory
 *.cbp
@@ -114,3 +120,6 @@ compile_commands.json
 
 # Optional user provided library folder
 lib/irrlichtmt
+
+# Generated mod storage database
+client/mod_storage.sqlite

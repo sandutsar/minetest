@@ -24,6 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "network/networkprotocol.h"
 #include "irr_v3d.h"
 #include "util/container.h"
+#include "util/metricsbackend.h"
 #include "mapgen/mapgen.h" // for MapgenParams
 #include "map.h"
 
@@ -69,6 +70,14 @@ enum EmergeAction {
 	EMERGE_GENERATED,
 };
 
+const static std::string emergeActionStrs[] = {
+	"cancelled",
+	"errored",
+	"from_memory",
+	"from_disk",
+	"generated",
+};
+
 // Callback
 typedef void (*EmergeCompletionCallback)(
 	v3s16 blockpos, EmergeAction action, void *param);
@@ -98,12 +107,18 @@ public:
 
 	u32 gen_notify_on;
 	const std::set<u32> *gen_notify_on_deco_ids; // shared
+	const std::set<std::string> *gen_notify_on_custom; // shared
 
 	BiomeGen *biomegen;
 	BiomeManager *biomemgr;
 	OreManager *oremgr;
 	DecorationManager *decomgr;
 	SchematicManager *schemmgr;
+
+	inline GenerateNotifier createNotifier() const {
+		return GenerateNotifier(gen_notify_on, gen_notify_on_deco_ids,
+			gen_notify_on_custom);
+	}
 
 private:
 	EmergeParams(EmergeManager *parent, const BiomeGen *biomegen,
@@ -125,6 +140,7 @@ public:
 	// Generation Notify
 	u32 gen_notify_on = 0;
 	std::set<u32> gen_notify_on_deco_ids;
+	std::set<std::string> gen_notify_on_custom;
 
 	// Parameters passed to mapgens owned by ServerMap
 	// TODO(hmmmm): Remove this after mapgen helper methods using them
@@ -138,7 +154,7 @@ public:
 	MapSettingsManager *map_settings_mgr;
 
 	// Methods
-	EmergeManager(Server *server);
+	EmergeManager(Server *server, MetricsBackend *mb);
 	~EmergeManager();
 	DISABLE_CLASS_COPY(EmergeManager);
 
@@ -197,6 +213,9 @@ private:
 	u32 m_qlimit_diskonly;
 	u32 m_qlimit_generate;
 
+	// Emerge metrics
+	MetricCounterPtr m_completed_emerge_counter[5];
+
 	// Managers of various map generation-related components
 	// Note that each Mapgen gets a copy(!) of these to work with
 	BiomeGen *biomegen;
@@ -217,6 +236,8 @@ private:
 		bool *entry_already_exists);
 
 	bool popBlockEmergeData(v3s16 pos, BlockEmergeData *bedata);
+
+	void reportCompletedEmerge(EmergeAction action);
 
 	friend class EmergeThread;
 };

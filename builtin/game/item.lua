@@ -5,8 +5,8 @@ local builtin_shared = ...
 local function copy_pointed_thing(pointed_thing)
 	return {
 		type  = pointed_thing.type,
-		above = vector.new(pointed_thing.above),
-		under = vector.new(pointed_thing.under),
+		above = pointed_thing.above and vector.copy(pointed_thing.above),
+		under = pointed_thing.under and vector.copy(pointed_thing.under),
 		ref   = pointed_thing.ref,
 	}
 end
@@ -14,15 +14,6 @@ end
 --
 -- Item definition helpers
 --
-
-function core.inventorycube(img1, img2, img3)
-	img2 = img2 or img1
-	img3 = img3 or img1
-	return "[inventorycube"
-			.. "{" .. img1:gsub("%^", "&")
-			.. "{" .. img2:gsub("%^", "&")
-			.. "{" .. img3:gsub("%^", "&")
-end
 
 function core.get_pointed_thing_position(pointed_thing, above)
 	if pointed_thing.type == "node" then
@@ -35,144 +26,6 @@ function core.get_pointed_thing_position(pointed_thing, above)
 	elseif pointed_thing.type == "object" then
 		return pointed_thing.ref and pointed_thing.ref:get_pos()
 	end
-end
-
-function core.dir_to_facedir(dir, is6d)
-	--account for y if requested
-	if is6d and math.abs(dir.y) > math.abs(dir.x) and math.abs(dir.y) > math.abs(dir.z) then
-
-		--from above
-		if dir.y < 0 then
-			if math.abs(dir.x) > math.abs(dir.z) then
-				if dir.x < 0 then
-					return 19
-				else
-					return 13
-				end
-			else
-				if dir.z < 0 then
-					return 10
-				else
-					return 4
-				end
-			end
-
-		--from below
-		else
-			if math.abs(dir.x) > math.abs(dir.z) then
-				if dir.x < 0 then
-					return 15
-				else
-					return 17
-				end
-			else
-				if dir.z < 0 then
-					return 6
-				else
-					return 8
-				end
-			end
-		end
-
-	--otherwise, place horizontally
-	elseif math.abs(dir.x) > math.abs(dir.z) then
-		if dir.x < 0 then
-			return 3
-		else
-			return 1
-		end
-	else
-		if dir.z < 0 then
-			return 2
-		else
-			return 0
-		end
-	end
-end
-
--- Table of possible dirs
-local facedir_to_dir = {
-	vector.new( 0,  0,  1),
-	vector.new( 1,  0,  0),
-	vector.new( 0,  0, -1),
-	vector.new(-1,  0,  0),
-	vector.new( 0, -1,  0),
-	vector.new( 0,  1,  0),
-}
--- Mapping from facedir value to index in facedir_to_dir.
-local facedir_to_dir_map = {
-	[0]=1, 2, 3, 4,
-	5, 2, 6, 4,
-	6, 2, 5, 4,
-	1, 5, 3, 6,
-	1, 6, 3, 5,
-	1, 4, 3, 2,
-}
-function core.facedir_to_dir(facedir)
-	return facedir_to_dir[facedir_to_dir_map[facedir % 32]]
-end
-
-function core.dir_to_wallmounted(dir)
-	if math.abs(dir.y) > math.max(math.abs(dir.x), math.abs(dir.z)) then
-		if dir.y < 0 then
-			return 1
-		else
-			return 0
-		end
-	elseif math.abs(dir.x) > math.abs(dir.z) then
-		if dir.x < 0 then
-			return 3
-		else
-			return 2
-		end
-	else
-		if dir.z < 0 then
-			return 5
-		else
-			return 4
-		end
-	end
-end
-
--- table of dirs in wallmounted order
-local wallmounted_to_dir = {
-	[0] = vector.new( 0,  1,  0),
-	vector.new( 0, -1,  0),
-	vector.new( 1,  0,  0),
-	vector.new(-1,  0,  0),
-	vector.new( 0,  0,  1),
-	vector.new( 0,  0, -1),
-}
-function core.wallmounted_to_dir(wallmounted)
-	return wallmounted_to_dir[wallmounted % 8]
-end
-
-function core.dir_to_yaw(dir)
-	return -math.atan2(dir.x, dir.z)
-end
-
-function core.yaw_to_dir(yaw)
-	return vector.new(-math.sin(yaw), 0, math.cos(yaw))
-end
-
-function core.is_colored_paramtype(ptype)
-	return (ptype == "color") or (ptype == "colorfacedir") or
-		(ptype == "colorwallmounted") or (ptype == "colordegrotate")
-end
-
-function core.strip_param2_color(param2, paramtype2)
-	if not core.is_colored_paramtype(paramtype2) then
-		return nil
-	end
-	if paramtype2 == "colorfacedir" then
-		param2 = math.floor(param2 / 32) * 32
-	elseif paramtype2 == "colorwallmounted" then
-		param2 = math.floor(param2 / 8) * 8
-	elseif paramtype2 == "colordegrotate" then
-		param2 = math.floor(param2 / 32) * 32
-	end
-	-- paramtype2 == "color" requires no modification.
-	return param2
 end
 
 local function has_all_groups(tbl, required_groups)
@@ -323,12 +176,12 @@ function core.item_place_node(itemstack, placer, pointed_thing, param2,
 	end
 
 	-- Place above pointed node
-	local place_to = vector.new(above)
+	local place_to = vector.copy(above)
 
 	-- If node under is buildable_to, place into it instead (eg. snow)
 	if olddef_under.buildable_to then
 		log("info", "node under is buildable to")
-		place_to = vector.new(under)
+		place_to = vector.copy(under)
 	end
 
 	if core.is_protected(place_to, playername) then
@@ -349,10 +202,45 @@ function core.item_place_node(itemstack, placer, pointed_thing, param2,
 	elseif (def.paramtype2 == "wallmounted" or
 			def.paramtype2 == "colorwallmounted") and not param2 then
 		local dir = vector.subtract(under, above)
+		-- If you change this code, also change src/client/game.cpp
 		newnode.param2 = core.dir_to_wallmounted(dir)
+		if def.wallmounted_rotate_vertical and
+				(newnode.param2 == 0 or newnode.param2 == 1) then
+			local placer_pos = placer and placer:get_pos()
+			if placer_pos then
+				local pdir = {
+					x = above.x - placer_pos.x,
+					y = dir.y,
+					z = above.z - placer_pos.z
+				}
+				local rotate = false
+				if def.drawtype == "torchlike" then
+					if not ((pdir.x < 0 and pdir.z > 0) or
+							(pdir.x > 0 and pdir.z < 0)) then
+						rotate = true
+					end
+					if pdir.y > 0 then
+						rotate = not rotate
+					end
+				elseif def.drawtype == "signlike" then
+					if math.abs(pdir.x) < math.abs(pdir.z) then
+						rotate = true
+					end
+				else
+					if math.abs(pdir.x) > math.abs(pdir.z) then
+						rotate = true
+					end
+				end
+				if rotate then
+					newnode.param2 = newnode.param2 + 6
+				end
+			end
+		end
 	-- Calculate the direction for furnaces and chests and stuff
 	elseif (def.paramtype2 == "facedir" or
-			def.paramtype2 == "colorfacedir") and not param2 then
+			def.paramtype2 == "colorfacedir" or
+			def.paramtype2 == "4dir" or
+			def.paramtype2 == "color4dir") and not param2 then
 		local placer_pos = placer and placer:get_pos()
 		if placer_pos then
 			local dir = vector.subtract(above, placer_pos)
@@ -372,6 +260,8 @@ function core.item_place_node(itemstack, placer, pointed_thing, param2,
 			color_divisor = 8
 		elseif def.paramtype2 == "colorfacedir" then
 			color_divisor = 32
+		elseif def.paramtype2 == "color4dir" then
+			color_divisor = 4
 		elseif def.paramtype2 == "colordegrotate" then
 			color_divisor = 32
 		end
@@ -383,10 +273,11 @@ function core.item_place_node(itemstack, placer, pointed_thing, param2,
 	end
 
 	-- Check if the node is attached and if it can be placed there
-	if core.get_item_group(def.name, "attached_node") ~= 0 and
-		not builtin_shared.check_attached_node(place_to, newnode) then
+	local an = core.get_item_group(def.name, "attached_node")
+	if an ~= 0 and
+		not builtin_shared.check_attached_node(place_to, newnode, an) then
 		log("action", "attached node " .. def.name ..
-			" can not be placed at " .. core.pos_to_string(place_to))
+			" cannot be placed at " .. core.pos_to_string(place_to))
 		return itemstack, nil
 	end
 
@@ -409,7 +300,7 @@ function core.item_place_node(itemstack, placer, pointed_thing, param2,
 	-- Run callback
 	if def.after_place_node and not prevent_after_place then
 		-- Deepcopy place_to and pointed_thing because callback can modify it
-		local place_to_copy = vector.new(place_to)
+		local place_to_copy = vector.copy(place_to)
 		local pointed_thing_copy = copy_pointed_thing(pointed_thing)
 		if def.after_place_node(place_to_copy, placer, itemstack,
 				pointed_thing_copy) then
@@ -420,7 +311,7 @@ function core.item_place_node(itemstack, placer, pointed_thing, param2,
 	-- Run script hook
 	for _, callback in ipairs(core.registered_on_placenodes) do
 		-- Deepcopy pos, node and pointed_thing because callback can modify them
-		local place_to_copy = vector.new(place_to)
+		local place_to_copy = vector.copy(place_to)
 		local newnode_copy = {name=newnode.name, param1=newnode.param1, param2=newnode.param2}
 		local oldnode_copy = {name=oldnode.name, param1=oldnode.param1, param2=oldnode.param2}
 		local pointed_thing_copy = copy_pointed_thing(pointed_thing)
@@ -492,8 +383,26 @@ function core.item_drop(itemstack, dropper, pos)
 	-- environment failed
 end
 
+function core.item_pickup(itemstack, picker, pointed_thing, ...)
+	itemstack = ItemStack(itemstack)
+	-- Invoke global on_item_pickup callbacks.
+	for _, callback in ipairs(core.registered_on_item_pickups) do
+		local result = callback(itemstack, picker, pointed_thing, ...)
+		if result then
+			return ItemStack(result)
+		end
+	end
+
+	-- Pickup item.
+	local inv = picker and picker:get_inventory()
+	if inv then
+		return inv:add_item("main", itemstack)
+	end
+	return itemstack
+end
+
 function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing)
-	for _, callback in pairs(core.registered_on_item_eats) do
+	for _, callback in ipairs(core.registered_on_item_eats) do
 		local result = callback(hp_change, replace_with_item, itemstack, user, pointed_thing)
 		if result then
 			return result
@@ -514,22 +423,20 @@ function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed
 
 	-- Changing hp might kill the player causing mods to do who-knows-what to the
 	-- inventory, so do this before set_hp().
-	if replace_with_item then
-		if itemstack:is_empty() then
-			itemstack:add_item(replace_with_item)
-		else
-			local inv = user:get_inventory()
-			-- Check if inv is null, since non-players don't have one
-			if inv and inv:room_for_item("main", {name=replace_with_item}) then
-				inv:add_item("main", replace_with_item)
-			else
-				local pos = user:get_pos()
-				pos.y = math.floor(pos.y + 0.5)
-				core.add_item(pos, replace_with_item)
-			end
+	replace_with_item = itemstack:add_item(replace_with_item)
+	user:set_wielded_item(itemstack)
+	if not replace_with_item:is_empty() then
+		local inv = user:get_inventory()
+		-- Check if inv is null, since non-players don't have one
+		if inv then
+			replace_with_item = inv:add_item("main", replace_with_item)
 		end
 	end
-	user:set_wielded_item(itemstack)
+	if not replace_with_item:is_empty() then
+		local pos = user:get_pos()
+		pos.y = math.floor(pos.y + 0.5)
+		core.add_item(pos, replace_with_item)
+	end
 
 	user:set_hp(user:get_hp() + hp_change)
 
@@ -548,7 +455,7 @@ function core.node_punch(pos, node, puncher, pointed_thing)
 	-- Run script hook
 	for _, callback in ipairs(core.registered_on_punchnodes) do
 		-- Copy pos and node because callback can modify them
-		local pos_copy = vector.new(pos)
+		local pos_copy = vector.copy(pos)
 		local node_copy = {name=node.name, param1=node.param1, param2=node.param2}
 		local pointed_thing_copy = pointed_thing and copy_pointed_thing(pointed_thing) or nil
 		callback(pos_copy, node_copy, puncher, pointed_thing_copy)
@@ -589,7 +496,7 @@ function core.node_dig(pos, node, digger)
 	local def = core.registered_nodes[node.name]
 	-- Copy pos because the callback could modify it
 	if def and (not def.diggable or
-			(def.can_dig and not def.can_dig(vector.new(pos), digger))) then
+			(def.can_dig and not def.can_dig(vector.copy(pos), digger))) then
 		log("info", diggername .. " tried to dig "
 			.. node.name .. " which is not diggable "
 			.. core.pos_to_string(pos))
@@ -636,7 +543,7 @@ function core.node_dig(pos, node, digger)
 	if def and def.preserve_metadata then
 		local oldmeta = core.get_meta(pos):to_table().fields
 		-- Copy pos and node because the callback can modify them.
-		local pos_copy = vector.new(pos)
+		local pos_copy = vector.copy(pos)
 		local node_copy = {name=node.name, param1=node.param1, param2=node.param2}
 		local drop_stacks = {}
 		for k, v in pairs(drops) do
@@ -668,7 +575,7 @@ function core.node_dig(pos, node, digger)
 	-- Run callback
 	if def and def.after_dig_node then
 		-- Copy pos and node because callback can modify them
-		local pos_copy = vector.new(pos)
+		local pos_copy = vector.copy(pos)
 		local node_copy = {name=node.name, param1=node.param1, param2=node.param2}
 		def.after_dig_node(pos_copy, node_copy, oldmetadata, digger)
 	end
@@ -676,12 +583,10 @@ function core.node_dig(pos, node, digger)
 	-- Run script hook
 	for _, callback in ipairs(core.registered_on_dignodes) do
 		local origin = core.callback_origins[callback]
-		if origin then
-			core.set_last_run_mod(origin.mod)
-		end
+		core.set_last_run_mod(origin.mod)
 
 		-- Copy pos and node because callback can modify them
-		local pos_copy = vector.new(pos)
+		local pos_copy = vector.copy(pos)
 		local node_copy = {name=node.name, param1=node.param1, param2=node.param2}
 		callback(pos_copy, node_copy, digger)
 	end
@@ -734,6 +639,7 @@ core.nodedef_default = {
 	-- Interaction callbacks
 	on_place = redef_wrapper(core, 'item_place'), -- core.item_place
 	on_drop = redef_wrapper(core, 'item_drop'), -- core.item_drop
+	on_pickup = redef_wrapper(core, 'item_pickup'), -- core.item_pickup
 	on_use = nil,
 	can_dig = nil,
 
@@ -746,13 +652,8 @@ core.nodedef_default = {
 	-- Node properties
 	drawtype = "normal",
 	visual_scale = 1.0,
-	-- Don't define these because otherwise the old tile_images and
-	-- special_materials wouldn't be read
-	--tiles ={""},
-	--special_tiles = {
-	--	{name="", backface_culling=true},
-	--	{name="", backface_culling=true},
-	--},
+	tiles = nil,
+	special_tiles = nil,
 	post_effect_color = {a=0, r=0, g=0, b=0},
 	paramtype = "none",
 	paramtype2 = "none",
@@ -791,6 +692,7 @@ core.craftitemdef_default = {
 	-- Interaction callbacks
 	on_place = redef_wrapper(core, 'item_place'), -- core.item_place
 	on_drop = redef_wrapper(core, 'item_drop'), -- core.item_drop
+	on_pickup = redef_wrapper(core, 'item_pickup'), -- core.item_pickup
 	on_secondary_use = redef_wrapper(core, 'item_secondary_use'),
 	on_use = nil,
 }
@@ -811,6 +713,7 @@ core.tooldef_default = {
 	on_place = redef_wrapper(core, 'item_place'), -- core.item_place
 	on_secondary_use = redef_wrapper(core, 'item_secondary_use'),
 	on_drop = redef_wrapper(core, 'item_drop'), -- core.item_drop
+	on_pickup = redef_wrapper(core, 'item_pickup'), -- core.item_pickup
 	on_use = nil,
 }
 
@@ -827,8 +730,28 @@ core.noneitemdef_default = {  -- This is used for the hand and unknown items
 	tool_capabilities = nil,
 
 	-- Interaction callbacks
-	on_place = redef_wrapper(core, 'item_place'),
+	on_place = redef_wrapper(core, 'item_place'), -- core.item_place
 	on_secondary_use = redef_wrapper(core, 'item_secondary_use'),
+	on_pickup = redef_wrapper(core, 'item_pickup'), -- core.item_pickup
 	on_drop = nil,
 	on_use = nil,
 }
+
+--
+-- get_node implementation
+--
+
+local get_node_raw = core.get_node_raw
+core.get_node_raw = nil
+
+function core.get_node(pos)
+	local content, param1, param2 = get_node_raw(pos.x, pos.y, pos.z)
+	return {name = core.get_name_from_content_id(content), param1 = param1, param2 = param2}
+end
+
+function core.get_node_or_nil(pos)
+	local content, param1, param2, pos_ok = get_node_raw(pos.x, pos.y, pos.z)
+	return pos_ok and
+			{name = core.get_name_from_content_id(content), param1 = param1, param2 = param2}
+			or nil
+end

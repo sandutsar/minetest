@@ -1,6 +1,6 @@
 #!/bin/bash
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-gameid=devtest
+gameid=${gameid:-devtest}
 minetest=$dir/../bin/minetest
 testspath=$dir/../tests
 conf_client1=$testspath/client1.conf
@@ -19,42 +19,35 @@ waitfor () {
 	exit 1
 }
 
-gdbrun () {
-	gdb -q -ex 'set confirm off' -ex 'r' -ex 'bt' -ex 'quit' --args "$@"
-}
+[ -e "$minetest" ] || { echo "executable $minetest missing"; exit 1; }
 
-[ -e $minetest ] || { echo "executable $minetest missing"; exit 1; }
+rm -rf "$worldpath"
+mkdir -p "$worldpath/worldmods"
 
-rm -rf $worldpath
-mkdir -p $worldpath/worldmods/test
-
-printf '%s\n' >$testspath/client1.conf \
+printf '%s\n' >"$testspath/client1.conf" \
 	video_driver=null name=client1 viewing_range=10 \
 	enable_{sound,minimap,shaders}=false
 
-printf '%s\n' >$testspath/server.conf \
-	max_block_send_distance=1
+printf '%s\n' >"$testspath/server.conf" \
+	max_block_send_distance=1 active_block_range=1 \
+	devtest_unittests_autostart=true helper_mode=devtest
 
-cat >$worldpath/worldmods/test/init.lua <<"LUA"
-core.after(0, function()
-	io.close(io.open(core.get_worldpath() .. "/startup", "w"))
-end)
-core.register_on_joinplayer(function(player)
-	io.close(io.open(core.get_worldpath() .. "/player_joined", "w"))
-	core.request_shutdown("", false, 2)
-end)
-LUA
+ln -s "$dir/helper_mod" "$worldpath/worldmods/"
 
 echo "Starting server"
-gdbrun $minetest --server --config $conf_server --world $worldpath --gameid $gameid 2>&1 | sed -u 's/^/(server) /' &
-waitfor $worldpath/startup
+"$minetest" --debugger --server --config "$conf_server" --world "$worldpath" --gameid $gameid 2>&1 | sed -u 's/^/(server) /' &
+waitfor "$worldpath/startup"
 
 echo "Starting client"
-gdbrun $minetest --config $conf_client1 --go --address 127.0.0.1 2>&1 | sed -u 's/^/(client) /' &
-waitfor $worldpath/player_joined
+"$minetest" --debugger --config "$conf_client1" --go --address 127.0.0.1 2>&1 | sed -u 's/^/(client) /' &
+waitfor "$worldpath/done"
 
 echo "Waiting for client and server to exit"
 wait
 
+if [ -f "$worldpath/test_failure" ]; then
+	echo "There were test failures."
+	exit 1
+fi
 echo "Success"
 exit 0

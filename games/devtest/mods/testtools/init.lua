@@ -1,7 +1,26 @@
 local S = minetest.get_translator("testtools")
 local F = minetest.formspec_escape
 
+testtools = {}
+
 dofile(minetest.get_modpath("testtools") .. "/light.lua")
+dofile(minetest.get_modpath("testtools") .. "/privatizer.lua")
+dofile(minetest.get_modpath("testtools") .. "/particles.lua")
+dofile(minetest.get_modpath("testtools") .. "/node_box_visualizer.lua")
+
+local pointabilities_nodes = {
+	nodes = {
+		["group:blocking_pointable_test"] = true,
+		["group:not_pointable_test"] = true,
+	},
+}
+
+local pointabilities_objects = {
+	objects = {
+		["group:blocking_pointable_test"] = true,
+		["group:not_pointable_test"] = true,
+	},
+}
 
 minetest.register_tool("testtools:param2tool", {
 	description = S("Param2 Tool") .."\n"..
@@ -12,6 +31,7 @@ minetest.register_tool("testtools:param2tool", {
 		S("Sneak+Place: -8"),
 	inventory_image = "testtools_param2tool.png",
 	groups = { testtool = 1, disable_repair = 1 },
+	pointabilities = pointabilities_nodes,
 	on_use = function(itemstack, user, pointed_thing)
 		local pos = minetest.get_pointed_thing_position(pointed_thing)
 		if pointed_thing.type ~= "node" or (not pos) then
@@ -54,6 +74,7 @@ minetest.register_tool("testtools:node_setter", {
 		S("Place in air: Manually select a node"),
 	inventory_image = "testtools_node_setter.png",
 	groups = { testtool = 1, disable_repair = 1 },
+	pointabilities = pointabilities_nodes,
 	on_use = function(itemstack, user, pointed_thing)
 		local pos = minetest.get_pointed_thing_position(pointed_thing)
 		if pointed_thing.type == "nothing" then
@@ -114,6 +135,10 @@ minetest.register_tool("testtools:remover", {
 		S("Punch: Remove pointed node or object"),
 	inventory_image = "testtools_remover.png",
 	groups = { testtool = 1, disable_repair = 1 },
+	pointabilities = {
+		nodes = pointabilities_nodes.nodes,
+		objects = pointabilities_objects.objects,
+	},
 	on_use = function(itemstack, user, pointed_thing)
 		local pos = minetest.get_pointed_thing_position(pointed_thing)
 		if pointed_thing.type == "node" and pos ~= nil then
@@ -135,6 +160,7 @@ minetest.register_tool("testtools:falling_node_tool", {
 		S("Place: Move pointed node 2 units upwards, then make it fall"),
 	inventory_image = "testtools_falling_node_tool.png",
 	groups = { testtool = 1, disable_repair = 1 },
+	pointabilities = pointabilities_nodes,
 	on_place = function(itemstack, user, pointed_thing)
 		-- Teleport node 1-2 units upwards (if possible) and make it fall
 		local pos = minetest.get_pointed_thing_position(pointed_thing)
@@ -188,6 +214,7 @@ minetest.register_tool("testtools:rotator", {
 		S("Aux1+Punch: Roll"),
 	inventory_image = "testtools_entity_rotator.png",
 	groups = { testtool = 1, disable_repair = 1 },
+	pointabilities = pointabilities_objects,
 	on_use = function(itemstack, user, pointed_thing)
 		if pointed_thing.type ~= "object" then
 			return
@@ -246,6 +273,7 @@ minetest.register_tool("testtools:object_mover", {
 		S("Sneak+Place: Decrease distance"),
 	inventory_image = "testtools_object_mover.png",
 	groups = { testtool = 1, disable_repair = 1 },
+	pointabilities = pointabilities_objects,
 	on_place = mover_config,
 	on_secondary_use = mover_config,
 	on_use = function(itemstack, user, pointed_thing)
@@ -292,6 +320,7 @@ minetest.register_tool("testtools:entity_scaler", {
 		S("Sneak+Punch: Decrease scale"),
 	inventory_image = "testtools_entity_scaler.png",
 	groups = { testtool = 1, disable_repair = 1 },
+	pointabilities = pointabilities_objects,
 	on_use = function(itemstack, user, pointed_thing)
 		if pointed_thing.type ~= "object" then
 			return
@@ -327,6 +356,52 @@ minetest.register_tool("testtools:entity_scaler", {
 		end
 	end,
 })
+
+
+-- value-weak tables, because we don't want to keep the objrefs of unloaded objects
+local branded_objects = setmetatable({}, {__mode = "v"})
+local next_brand_num = 1
+
+function testtools.get_branded_object(name)
+	if name:sub(1, 7) == "player:" then
+		return minetest.get_player_by_name(name:sub(8))
+	elseif name:sub(1, 4) == "obj:" then
+		return branded_objects[tonumber(name:sub(5)) or 0]
+	end
+	return nil
+end
+
+minetest.register_tool("testtools:branding_iron", {
+	description = S("Branding Iron") .."\n"..
+		S("Give an object a temporary name.") .."\n"..
+		S("Punch object: Brand the object") .."\n"..
+		S("Punch air: Brand yourself") .."\n"..
+		S("The name is valid until the object unloads.") .."\n"..
+		S("Devices that accept the returned name also accept \"player:<playername>\" for players."),
+	inventory_image = "testtools_branding_iron.png",
+	groups = { testtool = 1, disable_repair = 1 },
+	pointabilities = pointabilities_objects,
+	on_use = function(_itemstack, user, pointed_thing)
+		local obj
+		local msg
+		if pointed_thing.type == "object" then
+			obj = pointed_thing.ref
+			msg = "You can now refer to this object with: \"@1\""
+		elseif pointed_thing.type == "nothing" then
+			obj = user
+			msg = "You can now refer to yourself with: \"@1\""
+		else
+			return
+		end
+
+		local brand_num = next_brand_num
+		next_brand_num = next_brand_num + 1
+		branded_objects[brand_num] = obj
+
+		minetest.chat_send_player(user:get_player_name(), S(msg, "obj:"..brand_num))
+	end,
+})
+
 
 local selections = {}
 local entity_list
@@ -450,6 +525,7 @@ minetest.register_tool("testtools:object_editor", {
 		S("Punch air: Edit yourself"),
 	inventory_image = "testtools_object_editor.png",
 	groups = { testtool = 1, disable_repair = 1 },
+	pointabilities = pointabilities_objects,
 	on_use = function(itemstack, user, pointed_thing)
 		if user and user:is_player() then
 			local name = user:get_player_name()
@@ -537,6 +613,7 @@ minetest.register_tool("testtools:object_attacher", {
 		S("Aux1+Sneak+Place: Decrease attachment rotation"),
 	inventory_image = "testtools_object_attacher.png",
 	groups = { testtool = 1, disable_repair = 1 },
+	pointabilities = pointabilities_objects,
 	on_place = attacher_config,
 	on_secondary_use = attacher_config,
 	on_use = function(itemstack, user, pointed_thing)
@@ -630,6 +707,7 @@ minetest.register_tool("testtools:children_getter", {
 		S("Punch air to show your own 'children'"),
 	inventory_image = "testtools_children_getter.png",
 	groups = { testtool = 1, disable_repair = 1 },
+	pointabilities = pointabilities_objects,
 	on_use = function(itemstack, user, pointed_thing)
 		if user and user:is_player() then
 			local name = user:get_player_name()
@@ -693,30 +771,40 @@ local function use_loadstring(param, player)
 	return true, errOrResult
 end
 
--- Node Meta Editor
+-- Item Meta Editor + Node Meta Editor
 local node_meta_posses = {}
-local node_meta_latest_keylist = {}
+local meta_latest_keylist = {}
 
-local function show_node_meta_formspec(user, pos, key, value, keylist)
+local function show_meta_formspec(user, metatype, pos_or_item, key, value, keylist)
 	local textlist
 	if keylist then
 		textlist = "textlist[0,0.5;2.5,6.5;keylist;"..keylist.."]"
 	else
 		textlist = ""
 	end
-	minetest.show_formspec(user:get_player_name(),
-		"testtools:node_meta_editor",
-		"size[15,9]"..
+
+	local form = "size[15,9]"..
 		"label[0,0;"..F(S("Current keys:")).."]"..
 		textlist..
 		"field[3,0.5;12,1;key;"..F(S("Key"))..";"..F(key).."]"..
 		"textarea[3,1.5;12,6;value;"..F(S("Value (use empty value to delete key)"))..";"..F(value).."]"..
-		"button[0,8;3,1;get;"..F(S("Get value")).."]"..
-		"button[4,8;3,1;set;"..F(S("Set value")).."]"..
-		"label[0,7.2;"..F(S("pos = @1", minetest.pos_to_string(pos))).."]")
+		"button[4,8;3,1;set;"..F(S("Set value")).."]"
+
+	local extra_label
+	local formname
+	if metatype == "node" then
+		formname = "testtools:node_meta_editor"
+		extra_label = S("pos = @1", minetest.pos_to_string(pos_or_item))
+	else
+		formname = "testtools:item_meta_editor"
+		extra_label = S("item = @1", pos_or_item:get_name())
+	end
+	form = form .. "label[0,7.2;"..F(extra_label).."]"
+
+	minetest.show_formspec(user:get_player_name(), formname, form)
 end
 
-local function get_node_meta_keylist(meta, playername, escaped)
+local function get_meta_keylist(meta, playername, escaped)
 	local keys = {}
 	local ekeys = {}
 	local mtable = meta:to_table()
@@ -729,7 +817,7 @@ local function get_node_meta_keylist(meta, playername, escaped)
 		end
 	end
 	if playername then
-		node_meta_latest_keylist[playername] = keys
+		meta_latest_keylist[playername] = keys
 	end
 	return table.concat(ekeys, ",")
 end
@@ -750,9 +838,45 @@ minetest.register_tool("testtools:node_meta_editor", {
 		node_meta_posses[user:get_player_name()] = pos
 		local meta = minetest.get_meta(pos)
 		local inv = meta:get_inventory()
-		show_node_meta_formspec(user, pos, "", "", get_node_meta_keylist(meta, user:get_player_name(), true))
+		show_meta_formspec(user, "node", pos, "", "", get_meta_keylist(meta, user:get_player_name(), true))
 		return itemstack
 	end,
+})
+
+local function get_item_next_to_wielded_item(player)
+	local inv = player:get_inventory()
+	local wield = player:get_wield_index()
+	local itemstack = inv:get_stack("main", wield+1)
+	return itemstack
+end
+local function set_item_next_to_wielded_item(player, itemstack)
+	local inv = player:get_inventory()
+	local wield = player:get_wield_index()
+	inv:set_stack("main", wield+1, itemstack)
+end
+
+local function use_item_meta_editor(itemstack, user, pointed_thing)
+	if not user:is_player() then
+		return itemstack
+	end
+	local item_to_edit = get_item_next_to_wielded_item(user)
+	if item_to_edit:is_empty() then
+		minetest.chat_send_player(user:get_player_name(), S("Place an item next to the Item Meta Editor in your inventory first!"))
+		return itemstack
+	end
+	local meta = item_to_edit:get_meta()
+	show_meta_formspec(user, "item", item_to_edit, "", "", get_meta_keylist(meta, user:get_player_name(), true))
+	return itemstack
+end
+
+minetest.register_tool("testtools:item_meta_editor", {
+	description = S("Item Meta Editor") .. "\n" ..
+		S("Punch/Place: Edit item metadata of item in the next inventory slot"),
+	inventory_image = "testtools_item_meta_editor.png",
+	groups = { testtool = 1, disable_repair = 1 },
+	on_use = use_item_meta_editor,
+	on_secondary_use = use_item_meta_editor,
+	on_place = use_item_meta_editor,
 })
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
@@ -832,17 +956,30 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 				player:set_wielded_item(witem)
 			end
 		end
-	elseif formname == "testtools:node_meta_editor" then
+	elseif formname == "testtools:node_meta_editor" or formname == "testtools:item_meta_editor" then
 		local name = player:get_player_name()
-		local pos = node_meta_posses[name]
+		local metatype
+		local pos_or_item
+		if formname == "testtools:node_meta_editor" then
+			metatype = "node"
+			pos_or_item = node_meta_posses[name]
+		else
+			metatype = "item"
+			pos_or_item = get_item_next_to_wielded_item(player)
+		end
 		if fields.keylist then
 			local evnt = minetest.explode_textlist_event(fields.keylist)
 			if evnt.type == "DCL" or evnt.type == "CHG" then
-				local keylist_table = node_meta_latest_keylist[name]
-				if not pos then
+				local keylist_table = meta_latest_keylist[name]
+				if metatype == "node" and not pos_or_item then
 					return
 				end
-				local meta = minetest.get_meta(pos)
+				local meta
+				if metatype == "node" then
+					meta = minetest.get_meta(pos_or_item)
+				else
+					meta = pos_or_item:get_meta()
+				end
 				if not keylist_table then
 					return
 				end
@@ -856,31 +993,75 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 					keylist_escaped[k] = F(v)
 				end
 				local keylist = table.concat(keylist_escaped, ",")
-				show_node_meta_formspec(player, pos, key, value, keylist)
+				show_meta_formspec(player, metatype, pos_or_item, key, value, keylist)
 				return
 			end
 		elseif fields.key and fields.key ~= "" and fields.value then
-			if not pos then
+			if metatype == "node" and not pos_or_item then
 				return
 			end
-			local meta = minetest.get_meta(pos)
-			if fields.get then
-				local value = meta:get_string(fields.key)
-				show_node_meta_formspec(player, pos, fields.key, value,
-						get_node_meta_keylist(meta, name, true))
-				return
-			elseif fields.set then
+			local meta
+			if metatype == "node" then
+				meta = minetest.get_meta(pos_or_item)
+			elseif metatype == "item" then
+				if pos_or_item:is_empty() then
+					return
+				end
+				meta = pos_or_item:get_meta()
+			end
+			if fields.set then
 				meta:set_string(fields.key, fields.value)
-				show_node_meta_formspec(player, pos, fields.key, fields.value,
-						get_node_meta_keylist(meta, name, true))
-				return
+				if metatype == "item" then
+					set_item_next_to_wielded_item(player, pos_or_item)
+				end
+				show_meta_formspec(player, metatype, pos_or_item, fields.key, fields.value,
+						get_meta_keylist(meta, name, true))
 			end
+			return
 		end
 	end
 end)
 
 minetest.register_on_leaveplayer(function(player)
 	local name = player:get_player_name()
-	node_meta_latest_keylist[name] = nil
+	meta_latest_keylist[name] = nil
 	node_meta_posses[name] = nil
 end)
+
+-- Pointing Staffs
+
+minetest.register_tool("testtools:blocked_pointing_staff", {
+	description = S("Blocked Pointing Staff").."\n"..
+			S("Can point the Blocking Pointable Node/Object and "..
+			"the Pointable Node/Object is point blocking."),
+	inventory_image = "testtools_blocked_pointing_staff.png",
+	pointabilities = {
+		nodes = {
+			["testnodes:blocking_pointable"] = true,
+			["group:pointable_test"] = "blocking"
+		},
+		objects = {
+			["testentities:blocking_pointable"] = true,
+			["group:pointable_test"] = "blocking"
+		}
+	}
+})
+
+minetest.register_tool("testtools:ultimate_pointing_staff", {
+	description = S("Ultimate Pointing Staff").."\n"..
+			S("Can point all pointable test nodes, objects and liquids."),
+	inventory_image = "testtools_ultimate_pointing_staff.png",
+	liquids_pointable = true,
+	pointabilities = {
+		nodes = {
+			["group:blocking_pointable_test"] = true,
+			["group:pointable_test"] = true,
+			["testnodes:not_pointable"] = true
+		},
+		objects = {
+			["group:blocking_pointable_test"] = true,
+			["group:pointable_test"] = true,
+			["testentities:not_pointable"] = true
+		}
+	}
+})

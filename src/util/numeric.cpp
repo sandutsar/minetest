@@ -46,9 +46,20 @@ void myrand_bytes(void *out, size_t len)
 	g_pcgrand.bytes(out, len);
 }
 
+float myrand_float()
+{
+	u32 uv = g_pcgrand.next();
+	return (float)uv / (float)U32_MAX;
+}
+
 int myrand_range(int min, int max)
 {
 	return g_pcgrand.range(min, max);
+}
+
+float myrand_range(float min, float max)
+{
+	return (max-min) * myrand_float() + min;
 }
 
 
@@ -79,12 +90,12 @@ u64 murmur_hash_64_ua(const void *key, int len, unsigned int seed)
 
 	const unsigned char *data2 = (const unsigned char *)data;
 	switch (len & 7) {
-		case 7: h ^= (u64)data2[6] << 48;
-		case 6: h ^= (u64)data2[5] << 40;
-		case 5: h ^= (u64)data2[4] << 32;
-		case 4: h ^= (u64)data2[3] << 24;
-		case 3: h ^= (u64)data2[2] << 16;
-		case 2: h ^= (u64)data2[1] << 8;
+		case 7: h ^= (u64)data2[6] << 48; [[fallthrough]];
+		case 6: h ^= (u64)data2[5] << 40; [[fallthrough]];
+		case 5: h ^= (u64)data2[4] << 32; [[fallthrough]];
+		case 4: h ^= (u64)data2[3] << 24; [[fallthrough]];
+		case 3: h ^= (u64)data2[2] << 16; [[fallthrough]];
+		case 2: h ^= (u64)data2[1] << 8;  [[fallthrough]];
 		case 1: h ^= (u64)data2[0];
 				h *= m;
 	}
@@ -136,7 +147,7 @@ bool isBlockInSight(v3s16 blockpos_b, v3f camera_pos, v3f camera_dir,
 	// Adjust camera position, for purposes of computing the angle,
 	// such that a block that has any portion visible with the
 	// current camera position will have the center visible at the
-	// adjusted postion
+	// adjusted position
 	f32 adjdist = BLOCK_MAX_RADIUS / cos((M_PI - camera_fov) / 2);
 
 	// Block position relative to adjusted camera
@@ -150,7 +161,7 @@ bool isBlockInSight(v3s16 blockpos_b, v3f camera_pos, v3f camera_dir,
 	f32 cosangle = dforward / blockpos_adj.getLength();
 
 	// If block is not in the field of view, skip it
-	// HOTFIX: use sligthly increased angle (+10%) to fix too agressive
+	// HOTFIX: use sligthly increased angle (+10%) to fix too aggressive
 	// culling. Somebody have to find out whats wrong with the math here.
 	// Previous value: camera_fov / 2
 	if (cosangle < std::cos(camera_fov * 0.55f))

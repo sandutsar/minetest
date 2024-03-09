@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <iostream>
 #include "irrlichttypes_bloated.h"
 
-enum TileAnimationType
+enum TileAnimationType : u8
 {
 	TAT_NONE = 0,
 	TAT_VERTICAL_FRAMES = 1,
@@ -50,8 +50,8 @@ struct TileAnimationParams
 		} sheet_2d;
 	};
 
-	void serialize(std::ostream &os, u8 tiledef_version) const;
-	void deSerialize(std::istream &is, u8 tiledef_version);
+	void serialize(std::ostream &os, u16 protocol_ver) const;
+	void deSerialize(std::istream &is, u16 protocol_ver);
 	void determineParams(v2u32 texture_size, int *frame_count, int *frame_length_ms,
 			v2u32 *frame_size) const;
 	void getTextureModifer(std::ostream &os, v2u32 texture_size, int frame) const;

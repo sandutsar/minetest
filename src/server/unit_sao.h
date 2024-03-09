@@ -22,6 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "object_properties.h"
 #include "serveractiveobject.h"
+#include <quaternion.h>
+#include "util/numeric.h"
 
 class UnitSAO : public ServerActiveObject
 {
@@ -36,6 +38,17 @@ public:
 	// Rotation
 	void setRotation(v3f rotation) { m_rotation = rotation; }
 	const v3f &getRotation() const { return m_rotation; }
+	const v3f getTotalRotation() const {
+		// This replicates what happens clientside serverside
+		core::matrix4 rot;
+		setPitchYawRoll(rot, -m_rotation);
+		v3f res;
+		// First rotate by m_rotation, then rotate by the automatic rotate yaw
+		(core::quaternion(v3f(0, -m_rotation_add_yaw * core::DEGTORAD, 0))
+				* core::quaternion(rot.getRotationDegrees() * core::DEGTORAD))
+				.toEuler(res);
+		return res * core::RADTODEG;
+	}
 	v3f getRadRotation() { return m_rotation * core::DEGTORAD; }
 
 	// Deprecated
@@ -57,8 +70,10 @@ public:
 	void setAnimationSpeed(float frame_speed);
 
 	// Bone position
-	void setBonePosition(const std::string &bone, v3f position, v3f rotation);
-	void getBonePosition(const std::string &bone, v3f *position, v3f *rotation);
+	void setBoneOverride(const std::string &bone, const BoneOverride &props);
+	BoneOverride getBoneOverride(const std::string &bone);
+	const std::unordered_map<std::string, BoneOverride>
+			&getBoneOverrides() const { return m_bone_override; };
 
 	// Attachments
 	ServerActiveObject *getParent() const;
@@ -87,14 +102,15 @@ public:
 			const v3f &velocity, const v3f &acceleration, const v3f &rotation,
 			bool do_interpolate, bool is_movement_end, f32 update_interval);
 	std::string generateSetPropertiesCommand(const ObjectProperties &prop) const;
-	static std::string generateUpdateBonePositionCommand(const std::string &bone,
-			const v3f &position, const v3f &rotation);
+	static std::string generateUpdateBoneOverrideCommand(
+			const std::string &bone, const BoneOverride &props);
 	void sendPunchCommand();
 
 protected:
 	u16 m_hp = 1;
 
 	v3f m_rotation;
+	f32 m_rotation_add_yaw = 0;
 
 	ItemGroupList m_armor_groups;
 
@@ -103,7 +119,7 @@ protected:
 	ObjectProperties m_prop;
 
 	// Stores position and rotation for each bone name
-	std::unordered_map<std::string, core::vector2d<v3f>> m_bone_position;
+	std::unordered_map<std::string, BoneOverride> m_bone_override;
 
 	int m_attachment_parent_id = 0;
 
@@ -125,7 +141,7 @@ private:
 	bool m_animation_speed_sent = false;
 
 	// Bone positions
-	bool m_bone_position_sent = false;
+	bool m_bone_override_sent = false;
 
 	// Attachments
 	std::unordered_set<int> m_attachment_child_ids;

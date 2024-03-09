@@ -6,7 +6,6 @@
 
 
 #include "client/guiscalingfilter.h"
-#include "client/tile.h"
 #include "IGUISkin.h"
 #include "IGUIEnvironment.h"
 #include "IVideoDriver.h"
@@ -27,15 +26,10 @@ using namespace gui;
 
 //! constructor
 GUIButton::GUIButton(IGUIEnvironment* environment, IGUIElement* parent,
-			s32 id, core::rect<s32> rectangle, ISimpleTextureSource *tsrc,
-			bool noclip)
-: IGUIButton(environment, parent, id, rectangle),
-	SpriteBank(0), OverrideFont(0),
-	OverrideColorEnabled(false), OverrideColor(video::SColor(101,255,255,255)),
-	ClickTime(0), HoverTime(0), FocusTime(0),
-	ClickShiftState(false), ClickControlState(false),
-	IsPushButton(false), Pressed(false),
-	UseAlphaChannel(false), DrawBorder(true), ScaleImage(false), TSrc(tsrc)
+		s32 id, core::rect<s32> rectangle, ISimpleTextureSource *tsrc,
+		bool noclip) :
+	IGUIButton(environment, parent, id, rectangle),
+	TSrc(tsrc)
 {
 	setNotClipped(noclip);
 
@@ -200,6 +194,7 @@ bool GUIButton::OnEvent(const SEvent& event)
 			// mouse is outside of the formspec. Thus, we test the position here.
 			if ( !IsPushButton && AbsoluteClippingRect.isPointInside(
 						core::position2d<s32>(event.MouseInput.X, event.MouseInput.Y ))) {
+				Environment->setFocus(this);
 				setPressed(true);
 			}
 
@@ -258,8 +253,10 @@ void GUIButton::draw()
 	// PATCH
 	// Track hovered state, if it has changed then we need to update the style.
 	bool hovered = isHovered();
-	if (hovered != WasHovered) {
+	bool focused = isFocused();
+	if (hovered != WasHovered || focused != WasFocused) {
 		WasHovered = hovered;
+		WasFocused = focused;
 		setFromState();
 	}
 
@@ -320,25 +317,18 @@ void GUIButton::draw()
 					sourceRect, &AbsoluteClippingRect,
 					image_colors, UseAlphaChannel);
 		} else {
-			core::rect<s32> middle = BgMiddle;
-			// `-x` is interpreted as `w - x`
-			if (middle.LowerRightCorner.X < 0)
-				middle.LowerRightCorner.X += texture->getOriginalSize().Width;
-			if (middle.LowerRightCorner.Y < 0)
-				middle.LowerRightCorner.Y += texture->getOriginalSize().Height;
 			draw2DImage9Slice(driver, texture,
 					ScaleImage ? AbsoluteRect : core::rect<s32>(pos, sourceRect.getSize()),
-					middle, &AbsoluteClippingRect, image_colors);
+					sourceRect, BgMiddle, &AbsoluteClippingRect, image_colors);
 		}
 		// END PATCH
 	}
 
 	if (SpriteBank)
 	{
-		core::position2di pos(buttonCenter);
-
 		if (isEnabled())
 		{
+			core::position2di pos(buttonCenter);
 			// pressed / unpressed animation
 			EGUI_BUTTON_STATE state = Pressed ? EGBS_BUTTON_DOWN : EGBS_BUTTON_UP;
 			drawSprite(state, ClickTime, pos);
@@ -394,7 +384,7 @@ EGUI_BUTTON_IMAGE_STATE GUIButton::getImageState(bool pressed, const ButtonImage
 {
 	// figure state we should have
 	EGUI_BUTTON_IMAGE_STATE state = EGBIS_IMAGE_DISABLED;
-	bool focused = Environment->hasFocus((IGUIElement*)this);
+	bool focused = isFocused();
 	bool mouseOver = isHovered();
 	if (isEnabled())
 	{
@@ -506,12 +496,10 @@ video::SColor GUIButton::getOverrideColor() const
 	return OverrideColor;
 }
 
-#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR > 8
 video::SColor GUIButton::getActiveColor() const
 {
 	return video::SColor(0,0,0,0); // unused?
 }
-#endif
 
 void GUIButton::enableOverrideColor(bool enable)
 {
@@ -591,6 +579,12 @@ bool GUIButton::isHovered() const
 	IGUIElement *hovered = Environment->getHovered();
 	return  hovered == this || (hovered != nullptr && hovered->getParent() == this);
 }
+
+//! Returns if this element (or one of its direct children) is focused
+bool GUIButton::isFocused() const
+{
+	return Environment->hasFocus((IGUIElement*)this, true);
+}
 // END PATCH
 
 //! Sets the pressed state of the button if this is a pushbutton
@@ -632,85 +626,6 @@ bool GUIButton::isDrawingBorder() const
 }
 
 
-//! Writes attributes of the element.
-void GUIButton::serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options=0) const
-{
-	IGUIButton::serializeAttributes(out,options);
-
-	out->addBool	("PushButton",		IsPushButton );
-	if (IsPushButton)
-		out->addBool("Pressed",		    Pressed);
-
-	for ( u32 i=0; i<(u32)EGBIS_COUNT; ++i )
-	{
-		if ( ButtonImages[i].Texture )
-		{
-			core::stringc name( GUIButtonImageStateNames[i] );
-			out->addTexture(name.c_str(), ButtonImages[i].Texture);
-			name += "Rect";
-			out->addRect(name.c_str(), ButtonImages[i].SourceRect);
-		}
-	}
-
-	out->addBool	("UseAlphaChannel",	UseAlphaChannel);
-	out->addBool	("Border",		    DrawBorder);
-	out->addBool	("ScaleImage",		ScaleImage);
-
-	for ( u32 i=0; i<(u32)EGBS_COUNT; ++i )
-	{
-		if ( ButtonSprites[i].Index >= 0 )
-		{
-			core::stringc nameIndex( GUIButtonStateNames[i] );
-			nameIndex += "Index";
-			out->addInt(nameIndex.c_str(), ButtonSprites[i].Index );
-
-			core::stringc nameColor( GUIButtonStateNames[i] );
-			nameColor += "Color";
-			out->addColor(nameColor.c_str(), ButtonSprites[i].Color );
-
-			core::stringc nameLoop( GUIButtonStateNames[i] );
-			nameLoop += "Loop";
-			out->addBool(nameLoop.c_str(), ButtonSprites[i].Loop );
-
-			core::stringc nameScale( GUIButtonStateNames[i] );
-			nameScale += "Scale";
-			out->addBool(nameScale.c_str(), ButtonSprites[i].Scale );
-		}
-	}
-
-	//   out->addString  ("OverrideFont",	OverrideFont);
-}
-
-
-//! Reads attributes of the element
-void GUIButton::deserializeAttributes(io::IAttributes* in, io::SAttributeReadWriteOptions* options=0)
-{
-	IGUIButton::deserializeAttributes(in,options);
-
-	IsPushButton	= in->getAttributeAsBool("PushButton");
-	Pressed		= IsPushButton ? in->getAttributeAsBool("Pressed") : false;
-
-	core::rect<s32> rec = in->getAttributeAsRect("ImageRect");
-	if (rec.isValid())
-		setImage( in->getAttributeAsTexture("Image"), rec);
-	else
-		setImage( in->getAttributeAsTexture("Image") );
-
-	rec = in->getAttributeAsRect("PressedImageRect");
-	if (rec.isValid())
-		setPressedImage( in->getAttributeAsTexture("PressedImage"), rec);
-	else
-		setPressedImage( in->getAttributeAsTexture("PressedImage") );
-
-	setDrawBorder(in->getAttributeAsBool("Border"));
-	setUseAlphaChannel(in->getAttributeAsBool("UseAlphaChannel"));
-	setScaleImage(in->getAttributeAsBool("ScaleImage"));
-
-	//   setOverrideFont(in->getAttributeAsString("OverrideFont"));
-
-	updateAbsolutePosition();
-}
-
 // PATCH
 GUIButton* GUIButton::addButton(IGUIEnvironment *environment,
 		const core::rect<s32>& rectangle, ISimpleTextureSource *tsrc,
@@ -749,6 +664,9 @@ void GUIButton::setFromState()
 
 	if (isHovered())
 		state = static_cast<StyleSpec::State>(state | StyleSpec::STATE_HOVERED);
+
+	if (isFocused())
+		state = static_cast<StyleSpec::State>(state | StyleSpec::STATE_FOCUSED);
 
 	setFromStyle(StyleSpec::getStyleFromStatePropagation(Styles, state));
 }

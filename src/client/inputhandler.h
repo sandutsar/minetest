@@ -24,10 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <list>
 #include "keycode.h"
 #include "renderingengine.h"
-
-#ifdef HAVE_TOUCHSCREENGUI
 #include "gui/touchscreengui.h"
-#endif
 
 class InputHandler;
 
@@ -124,6 +121,13 @@ public:
 			push_back(key);
 	}
 
+	void append(const KeyList &other)
+	{
+		for (const KeyPress &key : other) {
+			set(key);
+		}
+	}
+
 	bool operator[](const KeyPress &key) const { return find(key) != end(); }
 };
 
@@ -152,8 +156,14 @@ public:
 	// in the subsequent iteration of Game::processPlayerInteraction
 	bool WasKeyReleased(const KeyPress &keycode) const { return keyWasReleased[keycode]; }
 
-	void listenForKey(const KeyPress &keyCode) { keysListenedFor.set(keyCode); }
-	void dontListenForKeys() { keysListenedFor.clear(); }
+	void listenForKey(const KeyPress &keyCode)
+	{
+		keysListenedFor.set(keyCode);
+	}
+	void dontListenForKeys()
+	{
+		keysListenedFor.clear();
+	}
 
 	s32 getMouseWheel()
 	{
@@ -172,6 +182,12 @@ public:
 		mouse_wheel = 0;
 	}
 
+	void releaseAllKeys()
+	{
+		keyWasReleased.append(keyIsDown);
+		keyIsDown.clear();
+	}
+
 	void clearWasKeyPressed()
 	{
 		keyWasPressed.clear();
@@ -184,20 +200,16 @@ public:
 
 	MyEventReceiver()
 	{
-#ifdef HAVE_TOUCHSCREENGUI
 		m_touchscreengui = NULL;
-#endif
 	}
-
-	s32 mouse_wheel = 0;
 
 	JoystickController *joystick = nullptr;
 
-#ifdef HAVE_TOUCHSCREENGUI
 	TouchScreenGUI *m_touchscreengui;
-#endif
 
 private:
+	s32 mouse_wheel = 0;
+
 	// The current state of keys
 	KeyList keyIsDown;
 
@@ -257,6 +269,7 @@ public:
 	virtual void step(float dtime) {}
 
 	virtual void clear() {}
+	virtual void releaseAllKeys() {}
 
 	JoystickController joystick;
 	KeyCache keycache;
@@ -272,6 +285,12 @@ public:
 	{
 		m_receiver->joystick = &joystick;
 	}
+
+	virtual ~RealInputHandler()
+	{
+		m_receiver->joystick = nullptr;
+	}
+
 	virtual bool isKeyDown(GameKeyType k)
 	{
 		return m_receiver->IsKeyDown(keycache.key[k]) || joystick.isKeyDown(k);
@@ -288,6 +307,7 @@ public:
 	{
 		return m_receiver->WasKeyReleased(keycache.key[k]) || joystick.wasKeyReleased(k);
 	}
+
 	virtual float getMovementSpeed()
 	{
 		bool f = m_receiver->IsKeyDown(keycache.key[KeyType::FORWARD]),
@@ -305,8 +325,11 @@ public:
 				return 0.0f;
 			return 1.0f; // If there is a keyboard event, assume maximum speed
 		}
+		if (m_receiver->m_touchscreengui && m_receiver->m_touchscreengui->getMovementSpeed())
+			return m_receiver->m_touchscreengui->getMovementSpeed();
 		return joystick.getMovementSpeed();
 	}
+
 	virtual float getMovementDirection()
 	{
 		float x = 0, z = 0;
@@ -323,13 +346,16 @@ public:
 
 		if (x != 0 || z != 0) /* If there is a keyboard event, it takes priority */
 			return atan2(x, z);
-		else
-			return joystick.getMovementDirection();
+		else if (m_receiver->m_touchscreengui && m_receiver->m_touchscreengui->getMovementDirection())
+			return m_receiver->m_touchscreengui->getMovementDirection();
+		return joystick.getMovementDirection();
 	}
+
 	virtual bool cancelPressed()
 	{
 		return wasKeyDown(KeyType::ESC) || m_receiver->WasKeyDown(CancelKey);
 	}
+
 	virtual void clearWasKeyPressed()
 	{
 		m_receiver->clearWasKeyPressed();
@@ -338,17 +364,21 @@ public:
 	{
 		m_receiver->clearWasKeyReleased();
 	}
+
 	virtual void listenForKey(const KeyPress &keyCode)
 	{
 		m_receiver->listenForKey(keyCode);
 	}
-	virtual void dontListenForKeys() { m_receiver->dontListenForKeys(); }
+	virtual void dontListenForKeys()
+	{
+		m_receiver->dontListenForKeys();
+	}
+
 	virtual v2s32 getMousePos()
 	{
-		if (RenderingEngine::get_raw_device()->getCursorControl()) {
-			return RenderingEngine::get_raw_device()
-					->getCursorControl()
-					->getPosition();
+		auto control = RenderingEngine::get_raw_device()->getCursorControl();
+		if (control) {
+			return control->getPosition();
 		}
 
 		return m_mousepos;
@@ -356,21 +386,29 @@ public:
 
 	virtual void setMousePos(s32 x, s32 y)
 	{
-		if (RenderingEngine::get_raw_device()->getCursorControl()) {
-			RenderingEngine::get_raw_device()
-					->getCursorControl()
-					->setPosition(x, y);
+		auto control = RenderingEngine::get_raw_device()->getCursorControl();
+		if (control) {
+			control->setPosition(x, y);
 		} else {
 			m_mousepos = v2s32(x, y);
 		}
 	}
 
-	virtual s32 getMouseWheel() { return m_receiver->getMouseWheel(); }
+	virtual s32 getMouseWheel()
+	{
+		return m_receiver->getMouseWheel();
+	}
 
 	void clear()
 	{
 		joystick.clear();
 		m_receiver->clearInput();
+	}
+
+	void releaseAllKeys()
+	{
+		joystick.releaseAllKeys();
+		m_receiver->releaseAllKeys();
 	}
 
 private:

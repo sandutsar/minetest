@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "client/tile.h" // ITextureSource
+#include "client/texturesource.h"
 #include "client/fontengine.h"
 #include "debug.h"
 #include "irrlichttypes_extrabloated.h"
@@ -45,6 +45,7 @@ public:
 		BGIMG_PRESSED, // Note: Deprecated property
 		FGIMG,
 		FGIMG_HOVERED, // Note: Deprecated property
+		FGIMG_MIDDLE,
 		FGIMG_PRESSED, // Note: Deprecated property
 		ALPHA,
 		CONTENT_OFFSET,
@@ -60,13 +61,16 @@ public:
 		NUM_PROPERTIES,
 		NONE
 	};
-	enum State
+
+	// State is a bitfield, it's possible to have multiple of these at once
+	enum State : u8
 	{
 		STATE_DEFAULT = 0,
-		STATE_HOVERED = 1 << 0,
-		STATE_PRESSED = 1 << 1,
-		NUM_STATES = 1 << 2,
-		STATE_INVALID = 1 << 3,
+		STATE_FOCUSED = 1 << 0,
+		STATE_HOVERED = 1 << 1,
+		STATE_PRESSED = 1 << 2,
+		NUM_STATES = 1 << 3, // This includes all permutations
+		STATE_INVALID = 1 << 4,
 	};
 
 private:
@@ -101,6 +105,8 @@ public:
 			return FGIMG;
 		} else if (name == "fgimg_hovered") {
 			return FGIMG_HOVERED;
+		} else if (name == "fgimg_middle") {
+			return FGIMG_MIDDLE;
 		} else if (name == "fgimg_pressed") {
 			return FGIMG_PRESSED;
 		} else if (name == "alpha") {
@@ -147,6 +153,8 @@ public:
 	{
 		if (name == "default") {
 			return STATE_DEFAULT;
+		} else if (name == "focused") {
+			return STATE_FOCUSED;
 		} else if (name == "hovered") {
 			return STATE_HOVERED;
 		} else if (name == "pressed") {

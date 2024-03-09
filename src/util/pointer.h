@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "debug.h" // For assert()
 #include <cstring>
 #include <memory> // std::shared_ptr
+#include <string_view>
 
 
 template<typename T> class ConstSharedPtr {
@@ -45,7 +46,7 @@ public:
 	Buffer()
 	{
 		m_size = 0;
-		data = NULL;
+		data = nullptr;
 	}
 	Buffer(unsigned int size)
 	{
@@ -53,7 +54,7 @@ public:
 		if(size != 0)
 			data = new T[size];
 		else
-			data = NULL;
+			data = nullptr;
 	}
 
 	// Disable class copy
@@ -82,7 +83,7 @@ public:
 			memcpy(data, t, size);
 		}
 		else
-			data = NULL;
+			data = nullptr;
 	}
 
 	~Buffer()
@@ -133,6 +134,13 @@ public:
 		return m_size;
 	}
 
+	operator std::string_view() const
+	{
+		if (!data)
+			return std::string_view();
+		return std::string_view(reinterpret_cast<char*>(data), m_size);
+	}
+
 private:
 	void drop()
 	{
@@ -166,7 +174,7 @@ public:
 		if(m_size != 0)
 			data = new T[m_size];
 		else
-			data = NULL;
+			data = nullptr;
 		refcount = new unsigned int;
 		memset(data,0,sizeof(T)*m_size);
 		(*refcount) = 1;
@@ -201,7 +209,7 @@ public:
 			memcpy(data, t, m_size);
 		}
 		else
-			data = NULL;
+			data = nullptr;
 		refcount = new unsigned int;
 		(*refcount) = 1;
 	}
@@ -216,7 +224,7 @@ public:
 				memcpy(data, *buffer, buffer.getSize());
 		}
 		else
-			data = NULL;
+			data = nullptr;
 		refcount = new unsigned int;
 		(*refcount) = 1;
 	}
@@ -255,4 +263,19 @@ private:
 	T *data;
 	unsigned int m_size;
 	unsigned int *refcount;
+};
+
+// This class is not thread-safe!
+class IntrusiveReferenceCounted {
+public:
+	IntrusiveReferenceCounted() = default;
+	virtual ~IntrusiveReferenceCounted() = default;
+	void grab() noexcept { ++m_refcount; }
+	void drop() noexcept { if (--m_refcount == 0) delete this; }
+
+	// Preserve own reference count.
+	IntrusiveReferenceCounted(const IntrusiveReferenceCounted &) {}
+	IntrusiveReferenceCounted &operator=(const IntrusiveReferenceCounted &) { return *this; }
+private:
+	u32 m_refcount = 1;
 };

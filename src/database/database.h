@@ -19,12 +19,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
-#include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 #include "irr_v3d.h"
 #include "irrlichttypes.h"
-#include "util/basic_macros.h"
+#include "util/string.h"
 
 class Database
 {
@@ -39,7 +39,7 @@ class MapDatabase : public Database
 public:
 	virtual ~MapDatabase() = default;
 
-	virtual bool saveBlock(const v3s16 &pos, const std::string &data) = 0;
+	virtual bool saveBlock(const v3s16 &pos, std::string_view data) = 0;
 	virtual void loadBlock(const v3s16 &pos, std::string *block) = 0;
 	virtual bool deleteBlock(const v3s16 &pos) = 0;
 
@@ -83,4 +83,21 @@ public:
 	virtual bool deleteAuth(const std::string &name) = 0;
 	virtual void listNames(std::vector<std::string> &res) = 0;
 	virtual void reload() = 0;
+};
+
+class ModStorageDatabase : public Database
+{
+public:
+	virtual ~ModStorageDatabase() = default;
+
+	virtual void getModEntries(const std::string &modname, StringMap *storage) = 0;
+	virtual void getModKeys(const std::string &modname, std::vector<std::string> *storage) = 0;
+	virtual bool hasModEntry(const std::string &modname, const std::string &key) = 0;
+	virtual bool getModEntry(const std::string &modname,
+		const std::string &key, std::string *value) = 0;
+	virtual bool setModEntry(const std::string &modname,
+		const std::string &key, std::string_view value) = 0;
+	virtual bool removeModEntry(const std::string &modname, const std::string &key) = 0;
+	virtual bool removeModEntries(const std::string &modname) = 0;
+	virtual void listMods(std::vector<std::string> *res) = 0;
 };

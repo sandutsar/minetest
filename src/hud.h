@@ -47,6 +47,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define HUD_FLAG_BREATHBAR_VISIBLE     (1 << 4)
 #define HUD_FLAG_MINIMAP_VISIBLE       (1 << 5)
 #define HUD_FLAG_MINIMAP_RADAR_VISIBLE (1 << 6)
+#define HUD_FLAG_BASIC_DEBUG           (1 << 7)
+#define HUD_FLAG_CHAT_VISIBLE          (1 << 8)
 
 #define HUD_PARAM_HOTBAR_ITEMCOUNT 1
 #define HUD_PARAM_HOTBAR_IMAGE 2
@@ -68,7 +70,7 @@ enum HudElementType {
 	HUD_ELEM_MINIMAP   = 7
 };
 
-enum HudElementStat {
+enum HudElementStat : u8 {
 	HUD_STAT_POS = 0,
 	HUD_STAT_NAME,
 	HUD_STAT_SCALE,
@@ -83,6 +85,7 @@ enum HudElementStat {
 	HUD_STAT_Z_INDEX,
 	HUD_STAT_TEXT2,
 	HUD_STAT_STYLE,
+	HudElementStat_END // Dummy for validity check
 };
 
 enum HudCompassDir {

@@ -69,7 +69,7 @@ void AreaStore::serialize(std::ostream &os) const
 	// After 5.1.0-dev:  version >= 5 throws SerializationError
 	// Forwards-compatibility is assumed before version 5.
 
-	writeU8(os, 0); // Serialisation version
+	writeU8(os, 0); // Serialization version
 
 	// TODO: Compression?
 	writeU16(os, areas_map.size());
@@ -308,6 +308,7 @@ void SpatialAreaStore::getAreasInArea(std::vector<Area *> *result,
 SpatialAreaStore::~SpatialAreaStore()
 {
 	delete m_tree;
+	delete m_storagemanager;
 }
 
 SpatialAreaStore::SpatialAreaStore()

@@ -128,6 +128,14 @@ describe("vector", function()
 		assert.equal(vector.new(4.1, 5.9, 5.5), a:apply(f))
 	end)
 
+	it("combine()", function()
+		local a = vector.new(1, 2, 3)
+		local b = vector.new(3, 2, 1)
+		assert.equal(vector.add(a, b), vector.combine(a, b, function(x, y) return x + y end))
+		assert.equal(vector.new(3, 2, 3), vector.combine(a, b, math.max))
+		assert.equal(vector.new(1, 2, 1), vector.combine(a, b, math.min))
+	end)
+
 	it("equals()", function()
 		local function assertE(a, b)
 			assert.is_true(vector.equals(a, b))
@@ -300,6 +308,7 @@ describe("vector", function()
 
 	it("from_string()", function()
 		local v = vector.new(1, 2, 3.14)
+		assert.is_true(vector.check(vector.from_string("(1, 2, 3.14)")))
 		assert.same({v, 13}, {vector.from_string("(1, 2, 3.14)")})
 		assert.same({v, 12}, {vector.from_string("(1,2 ,3.14)")})
 		assert.same({v, 12}, {vector.from_string("(1,2,3.14,)")})
@@ -452,5 +461,12 @@ describe("vector", function()
 			end
 		end
 
+	end)
+
+	it("in_area()", function()
+		assert.True(vector.in_area(vector.zero(), vector.new(-10, -10, -10), vector.new(10, 10, 10)))
+		assert.True(vector.in_area(vector.new(-2, 5, -8), vector.new(-10, -10, -10), vector.new(10, 10, 10)))
+		assert.True(vector.in_area(vector.new(-10, -10, -10), vector.new(-10, -10, -10), vector.new(10, 10, 10)))
+		assert.False(vector.in_area(vector.new(-10, -10, -10), vector.new(10, 10, 10), vector.new(-11, -10, -10)))
 	end)
 end)

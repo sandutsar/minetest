@@ -20,14 +20,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #pragma once
 
 #include <string>
+#include <string_view>
 
+// FIXME: convert this class to string_view
 template <typename T>
 class BasicStrfnd {
 	typedef std::basic_string<T> String;
 	String str;
 	size_t pos;
 public:
-	BasicStrfnd(const String &s) : str(s), pos(0) {}
+	BasicStrfnd(const String &s) { start(s); }
+	BasicStrfnd(const T *ptr) { str = ptr; pos = 0; }
+	BasicStrfnd(std::basic_string_view<T> sv) { str = sv; pos = 0; }
+
 	void start(const String &s) { str = s; pos = 0; }
 	size_t where() { return pos; }
 	void to(size_t i) { pos = i; }
@@ -48,7 +53,7 @@ public:
 		return ret;
 	}
 
-	// Returns substr up to the next occurence of sep that isn't escaped with esc ('\\')
+	// Returns substr up to the next occurrence of sep that isn't escaped with esc ('\\')
 	String next_esc(const String &sep, T esc=static_cast<T>('\\'))
 	{
 		if (pos >= str.size())

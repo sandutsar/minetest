@@ -29,30 +29,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define CONTAINS(c, v) (std::find((c).begin(), (c).end(), (v)) != (c).end())
 
 // To disable copy constructors and assignment operations for some class
-// 'Foobar', add the macro DISABLE_CLASS_COPY(Foobar) as a private member.
+// 'Foobar', add the macro DISABLE_CLASS_COPY(Foobar) in the class definition.
 // Note this also disables copying for any classes derived from 'Foobar' as well
 // as classes having a 'Foobar' member.
 #define DISABLE_CLASS_COPY(C)        \
 	C(const C &) = delete;           \
 	C &operator=(const C &) = delete;
 
-#ifndef _MSC_VER
-	#define UNUSED_ATTRIBUTE __attribute__ ((unused))
-#else
-	#define UNUSED_ATTRIBUTE
-#endif
+// If you have used DISABLE_CLASS_COPY with a class but still want to permit moving
+// use this macro to add the default move constructors back.
+#define ALLOW_CLASS_MOVE(C)      \
+	C(C &&other) = default;      \
+	C &operator=(C &&) = default;
 
-// Fail compilation if condition expr is not met.
-// Note that 'msg' must follow the format of a valid identifier, e.g.
-// STATIC_ASSERT(sizeof(foobar_t) == 40), foobar_t_is_wrong_size);
-#define STATIC_ASSERT(expr, msg) \
-	UNUSED_ATTRIBUTE typedef char msg[!!(expr) * 2 - 1]
-
-// Macros to facilitate writing position vectors to a stream
-// Usage:
-//	v3s16 pos(1,2,3);
-//	mystream << "message " << PP(pos) << std::endl;
-
-#define PP(x) "("<<(x).X<<","<<(x).Y<<","<<(x).Z<<")"
-
-#define PP2(x) "("<<(x).X<<","<<(x).Y<<")"

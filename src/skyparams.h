@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
+
 struct SkyColor
 {
 	video::SColor day_sky;
@@ -32,6 +33,8 @@ struct SkyColor
 
 struct SkyboxParams
 {
+	static constexpr float INVALID_SKYBOX_TILT = -1024.f;
+
 	video::SColor bgcolor;
 	std::string type;
 	std::vector<std::string> textures;
@@ -40,6 +43,10 @@ struct SkyboxParams
 	video::SColor fog_sun_tint;
 	video::SColor fog_moon_tint;
 	std::string fog_tint_type;
+	float body_orbit_tilt { INVALID_SKYBOX_TILT };
+	s16 fog_distance { -1 };
+	float fog_start { -1.0f };
+	video::SColor fog_color; // override, only used if alpha > 0
 };
 
 struct SunParams
@@ -66,13 +73,40 @@ struct StarParams
 	u32 count;
 	video::SColor starcolor;
 	f32 scale;
+	f32 day_opacity;
+};
+
+struct CloudParams
+{
+	float density;
+	video::SColor color_bright;
+	video::SColor color_ambient;
+	float thickness;
+	float height;
+	v2f speed;
 };
 
 // Utility class for setting default sky, sun, moon, stars values:
 class SkyboxDefaults
 {
 public:
-	const SkyColor getSkyColorDefaults()
+	SkyboxDefaults() = delete;
+
+	static const SkyboxParams getSkyDefaults()
+	{
+		SkyboxParams sky;
+		sky.bgcolor = video::SColor(255, 255, 255, 255);
+		sky.type = "regular";
+		sky.clouds = true;
+		sky.sky_color = getSkyColorDefaults();
+		sky.fog_sun_tint = video::SColor(255, 244, 125, 29);
+		sky.fog_moon_tint = video::SColorf(0.5, 0.6, 0.8, 1).toSColor();
+		sky.fog_tint_type = "default";
+		sky.fog_color = video::SColor(0);
+		return sky;
+	}
+
+	static const SkyColor getSkyColorDefaults()
 	{
 		SkyColor sky;
 		// Horizon colors
@@ -87,7 +121,7 @@ public:
 		return sky;
 	}
 
-	const SunParams getSunDefaults()
+	static const SunParams getSunDefaults()
 	{
 		SunParams sun;
 		sun.visible = true;
@@ -99,7 +133,7 @@ public:
 		return sun;
 	}
 
-	const MoonParams getMoonDefaults()
+	static const MoonParams getMoonDefaults()
 	{
 		MoonParams moon;
 		moon.visible = true;
@@ -109,13 +143,26 @@ public:
 		return moon;
 	}
 
-	const StarParams getStarDefaults()
+	static const StarParams getStarDefaults()
 	{
 		StarParams stars;
 		stars.visible = true;
 		stars.count = 1000;
 		stars.starcolor = video::SColor(105, 235, 235, 255);
 		stars.scale = 1;
+		stars.day_opacity = 0;
 		return stars;
+	}
+
+	static const CloudParams getCloudDefaults()
+	{
+		CloudParams clouds;
+		clouds.density = 0.4f;
+		clouds.color_bright = video::SColor(229, 240, 240, 255);
+		clouds.color_ambient = video::SColor(255, 0, 0, 0);
+		clouds.thickness = 16.0f;
+		clouds.height = 120;
+		clouds.speed = v2f(0.0f, -2.0f);
+		return clouds;
 	}
 };

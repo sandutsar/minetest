@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2013 xyz, Ilya Zhuravlev <whatever@xyz.is>
-Copyright (C) 2016 Nore, Nathanaël Courant <nore@mesecons.net>
+Copyright (C) 2016 Nore, Nathanaëlle Courant <nore@mesecons.net>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -34,7 +34,7 @@ public:
 		const video::SColor &color = video::SColor(255, 255, 255, 255));
 	EnrichedString(const std::wstring &string,
 		const std::vector<video::SColor> &colors);
-	void operator=(const wchar_t *str);
+	EnrichedString &operator=(const wchar_t *str);
 
 	void clear();
 

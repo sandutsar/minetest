@@ -79,6 +79,7 @@ struct MinimapData {
 	video::IImage *minimap_mask_square = nullptr;
 	video::ITexture *texture = nullptr;
 	video::ITexture *heightmap_texture = nullptr;
+	bool textures_initialised = false; // True if the following textures are not nullptrs.
 	video::ITexture *minimap_overlay_round = nullptr;
 	video::ITexture *minimap_overlay_square = nullptr;
 	video::ITexture *player_marker = nullptr;
@@ -130,8 +131,8 @@ public:
 
 	void clearModes() { m_modes.clear(); };
 	void addMode(MinimapModeDef mode);
-	void addMode(MinimapType type, u16 size = 0, std::string label = "",
-			std::string texture = "", u16 scale = 1);
+	void addMode(MinimapType type, u16 size = 0, const std::string &label = "",
+			const std::string &texture = "", u16 scale = 1);
 
 	void setModeIndex(size_t index);
 	size_t getModeIndex() const { return m_current_mode_index; };
@@ -140,6 +141,7 @@ public:
 
 	MinimapModeDef getModeDef() const { return data->mode; }
 
+	video::IImage *getMinimapMask();
 	video::ITexture *getMinimapTexture();
 
 	void blitMinimapPixelsToImageRadar(video::IImage *map_image);
@@ -152,7 +154,6 @@ public:
 	void removeMarker(MinimapMarker **marker);
 
 	void updateActiveMarkers();
-	void drawMinimap();
 	void drawMinimap(core::rect<s32> rect);
 
 	video::IVideoDriver *driver;

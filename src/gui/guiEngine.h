@@ -24,9 +24,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /******************************************************************************/
 #include "irrlichttypes.h"
 #include "guiFormSpecMenu.h"
+#include "client/clouds.h"
 #include "client/sound.h"
-#include "client/tile.h"
 #include "util/enriched_string.h"
+#include "translation.h"
 
 /******************************************************************************/
 /* Structs and macros                                                         */
@@ -52,7 +53,7 @@ struct image_definition {
 class GUIEngine;
 class RenderingEngine;
 class MainMenuScripting;
-class Clouds;
+class IWritableShaderSource;
 struct MainMenuData;
 
 /******************************************************************************/
@@ -111,34 +112,24 @@ public:
 private:
 	/** driver to get textures from */
 	video::IVideoDriver *m_driver = nullptr;
-	/** set of texture names to delete */
-	std::set<std::string> m_to_delete;
+	/** set of textures to delete */
+	std::vector<video::ITexture*> m_to_delete;
 };
 
-/** GUIEngine specific implementation of OnDemandSoundFetcher */
-class MenuMusicFetcher: public OnDemandSoundFetcher
+/** GUIEngine specific implementation of SoundFallbackPathProvider */
+class MenuMusicFetcher final : public SoundFallbackPathProvider
 {
-public:
-	/**
-	 * get sound file paths according to sound name
-	 * @param name sound name
-	 * @param dst_paths receives possible paths to sound files
-	 * @param dst_datas receives binary sound data (not used here)
-	 */
-	void fetchSounds(const std::string &name,
-			std::set<std::string> &dst_paths,
-			std::set<std::string> &dst_datas);
-
-private:
-	/** set of fetched sound names */
-	std::set<std::string> m_fetched;
+protected:
+	void addThePaths(const std::string &name,
+			std::vector<std::string> &paths) override;
 };
 
 /** implementation of main menu based uppon formspecs */
 class GUIEngine {
 	/** grant ModApiMainMenu access to private members */
 	friend class ModApiMainMenu;
-	friend class ModApiSound;
+	friend class ModApiMainMenuSound;
+	friend class MainMenuSoundHandle;
 
 public:
 	/**
@@ -164,7 +155,7 @@ public:
 	 */
 	MainMenuScripting *getScriptIface()
 	{
-		return m_script;
+		return m_script.get();
 	}
 
 	/**
@@ -175,7 +166,22 @@ public:
 		return m_scriptdir;
 	}
 
+	/**
+	 * Get translations for content
+	 *
+	 * Only loads a single textdomain from the path, as specified by `domain`,
+	 * for performance reasons.
+	 *
+	 * WARNING: Do not store the returned pointer for long as the contents may
+	 * change with the next call to `getContentTranslations`.
+	 * */
+	Translations *getContentTranslations(const std::string &path,
+			const std::string &domain, const std::string &lang_code);
+
 private:
+	std::string m_last_translations_key;
+	/** Only the most recently used translation set is kept loaded */
+	Translations m_last_translations;
 
 	/** find and run the main menu script */
 	bool loadMainMenuScript();
@@ -186,38 +192,40 @@ private:
 	/** update size of topleftext element */
 	void updateTopLeftTextSize();
 
-	RenderingEngine         *m_rendering_engine = nullptr;
+	RenderingEngine                      *m_rendering_engine = nullptr;
 	/** parent gui element */
-	gui::IGUIElement        *m_parent = nullptr;
+	gui::IGUIElement                     *m_parent = nullptr;
 	/** manager to add menus to */
-	IMenuManager            *m_menumanager = nullptr;
+	IMenuManager                         *m_menumanager = nullptr;
 	/** scene manager to add scene elements to */
-	scene::ISceneManager    *m_smgr = nullptr;
+	scene::ISceneManager                 *m_smgr = nullptr;
 	/** pointer to data beeing transfered back to main game handling */
-	MainMenuData            *m_data = nullptr;
-	/** pointer to texture source */
-	ISimpleTextureSource    *m_texture_source = nullptr;
-	/** pointer to soundmanager*/
-	ISoundManager           *m_sound_manager = nullptr;
+	MainMenuData                         *m_data = nullptr;
+	/** texture source */
+	std::unique_ptr<ISimpleTextureSource> m_texture_source;
+	/** shader source */
+	std::unique_ptr<IWritableShaderSource> m_shader_source;
+	/** sound manager */
+	std::unique_ptr<ISoundManager>        m_sound_manager;
 
 	/** representation of form source to be used in mainmenu formspec */
-	FormspecFormSource      *m_formspecgui = nullptr;
+	FormspecFormSource                   *m_formspecgui = nullptr;
 	/** formspec input receiver */
-	TextDestGuiEngine       *m_buttonhandler = nullptr;
+	TextDestGuiEngine                    *m_buttonhandler = nullptr;
 	/** the formspec menu */
-	GUIFormSpecMenu         *m_menu = nullptr;
+	irr_ptr<GUIFormSpecMenu>              m_menu;
 
 	/** reference to kill variable managed by SIGINT handler */
-	bool                    &m_kill;
+	bool                                 &m_kill;
 
 	/** variable used to abort menu and return back to main game handling */
-	bool                     m_startgame = false;
+	bool                                  m_startgame = false;
 
 	/** scripting interface */
-	MainMenuScripting       *m_script = nullptr;
+	std::unique_ptr<MainMenuScripting>    m_script;
 
 	/** script basefolder */
-	std::string              m_scriptdir = "";
+	std::string                           m_scriptdir = "";
 
 	void setFormspecPrepend(const std::string &fs);
 
@@ -274,18 +282,12 @@ private:
 	/** initialize cloud subsystem */
 	void cloudInit();
 	/** do preprocessing for cloud subsystem */
-	void cloudPreProcess();
-	/** do postprocessing for cloud subsystem */
-	void cloudPostProcess(u32 frametime_min, IrrlichtDevice *device);
+	void drawClouds(float dtime);
 
 	/** internam data required for drawing clouds */
 	struct clouddata {
-		/** delta time since last cloud processing */
-		f32     dtime;
-		/** absolute time of last cloud processing */
-		u32     lasttime;
 		/** pointer to cloud class */
-		Clouds *clouds = nullptr;
+		irr_ptr<Clouds> clouds;
 		/** camera required for drawing clouds */
 		scene::ICameraSceneNode *camera = nullptr;
 	};
@@ -294,11 +296,4 @@ private:
 	bool        m_clouds_enabled = true;
 	/** data used to draw clouds */
 	clouddata   m_cloud;
-
-	/** start playing a sound and return handle */
-	s32 playSound(const SimpleSoundSpec &spec, bool looped);
-	/** stop playing a sound started with playSound() */
-	void stopSound(s32 handle);
-
-
 };

@@ -27,35 +27,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 struct MapDrawControl
 {
-	// Overrides limits by drawing everything
-	bool range_all = false;
 	// Wanted drawing range
 	float wanted_range = 0.0f;
+	// Overrides limits by drawing everything
+	bool range_all = false;
+	// Allow rendering out of bounds
+	bool allow_noclip = false;
 	// show a wire frame for debugging
 	bool show_wireframe = false;
 };
 
-struct MeshBufList
-{
-	video::SMaterial m;
-	std::vector<std::pair<v3s16,scene::IMeshBuffer*>> bufs;
-};
-
-struct MeshBufListList
-{
-	/*!
-	 * Stores the mesh buffers of the world.
-	 * The array index is the material's layer.
-	 * The vector part groups vertices by material.
-	 */
-	std::vector<MeshBufList> lists[MAX_TILE_LAYERS];
-
-	void clear();
-	void add(scene::IMeshBuffer *buf, v3s16 position, u8 layer);
-};
-
 class Client;
 class ITextureSource;
+class PartialMeshBuffer;
 
 /*
 	ClientMap
@@ -73,55 +57,39 @@ public:
 			s32 id
 	);
 
-	virtual ~ClientMap() = default;
+	virtual ~ClientMap();
 
-	s32 mapType() const
+	bool maySaveBlocks() override
 	{
-		return MAPTYPE_CLIENT;
+		return false;
 	}
 
-	void drop()
+	void drop() override
 	{
-		ISceneNode::drop();
+		ISceneNode::drop(); // calls destructor
 	}
 
-	void updateCamera(const v3f &pos, const v3f &dir, f32 fov, const v3s16 &offset)
-	{
-		v3s16 previous_block = getContainerPos(floatToInt(m_camera_position, BS) + m_camera_offset, MAP_BLOCKSIZE);
-
-		m_camera_position = pos;
-		m_camera_direction = dir;
-		m_camera_fov = fov;
-		m_camera_offset = offset;
-
-		v3s16 current_block = getContainerPos(floatToInt(m_camera_position, BS) + m_camera_offset, MAP_BLOCKSIZE);
-
-		// reorder the blocks when camera crosses block boundary
-		if (previous_block != current_block)
-			m_needs_update_drawlist = true;
-	}
+	void updateCamera(v3f pos, v3f dir, f32 fov, v3s16 offset, video::SColor light_color);
 
 	/*
 		Forcefully get a sector from somewhere
 	*/
-	MapSector * emergeSector(v2s16 p);
-
-	//void deSerializeSector(v2s16 p2d, std::istream &is);
+	MapSector * emergeSector(v2s16 p) override;
 
 	/*
 		ISceneNode methods
 	*/
 
-	virtual void OnRegisterSceneNode();
+	virtual void OnRegisterSceneNode() override;
 
-	virtual void render()
+	virtual void render() override
 	{
 		video::IVideoDriver* driver = SceneManager->getVideoDriver();
 		driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
 		renderMap(driver, SceneManager->getSceneNodeRenderPass());
 	}
 
-	virtual const aabb3f &getBoundingBox() const
+	virtual const aabb3f &getBoundingBox() const override
 	{
 		return m_box;
 	}
@@ -129,7 +97,9 @@ public:
 	void getBlocksInViewRange(v3s16 cam_pos_nodes,
 		v3s16 *p_blocks_min, v3s16 *p_blocks_max, float range=-1.0f);
 	void updateDrawList();
-	void updateDrawListShadow(const v3f &shadow_light_pos, const v3f &shadow_light_dir, float shadow_range);
+	// @brief Calculate statistics about the map and keep the blocks alive
+	void touchMapBlocks();
+	void updateDrawListShadow(v3f shadow_light_pos, v3f shadow_light_dir, float radius, float length);
 	// Returns true if draw list needs updating before drawing the next frame.
 	bool needsUpdateDrawList() { return m_needs_update_drawlist; }
 	void renderMap(video::IVideoDriver* driver, s32 pass);
@@ -143,13 +113,23 @@ public:
 	void renderPostFx(CameraMode cam_mode);
 
 	// For debug printing
-	virtual void PrintInfo(std::ostream &out);
+	void PrintInfo(std::ostream &out) override;
 
 	const MapDrawControl & getControl() const { return m_control; }
 	f32 getWantedRange() const { return m_control.wanted_range; }
 	f32 getCameraFov() const { return m_camera_fov; }
 
+	void onSettingChanged(const std::string &name);
+
+protected:
+	void reportMetrics(u64 save_time_us, u32 saved_blocks, u32 all_blocks) override;
 private:
+	bool isMeshOccluded(MapBlock *mesh_block, u16 mesh_size, v3s16 cam_pos_nodes);
+
+	// update the vertex order in transparent mesh buffers
+	void updateTransparentMeshBuffers();
+
+
 	// Orders blocks by distance to the camera
 	class MapBlockComparer
 	{
@@ -167,6 +147,29 @@ private:
 		v3s16 m_camera_block;
 	};
 
+
+	// reference to a mesh buffer used when rendering the map.
+	struct DrawDescriptor {
+		v3s16 m_pos;
+		union {
+			scene::IMeshBuffer *m_buffer;
+			const PartialMeshBuffer *m_partial_buffer;
+		};
+		bool m_reuse_material:1;
+		bool m_use_partial_buffer:1;
+
+		DrawDescriptor(v3s16 pos, scene::IMeshBuffer *buffer, bool reuse_material) :
+			m_pos(pos), m_buffer(buffer), m_reuse_material(reuse_material), m_use_partial_buffer(false)
+		{}
+
+		DrawDescriptor(v3s16 pos, const PartialMeshBuffer *buffer) :
+			m_pos(pos), m_partial_buffer(buffer), m_reuse_material(false), m_use_partial_buffer(true)
+		{}
+
+		scene::IMeshBuffer* getBuffer();
+		void draw(video::IVideoDriver* driver);
+	};
+
 	Client *m_client;
 	RenderingEngine *m_rendering_engine;
 
@@ -179,8 +182,11 @@ private:
 	v3f m_camera_direction = v3f(0,0,1);
 	f32 m_camera_fov = M_PI;
 	v3s16 m_camera_offset;
+	video::SColor m_camera_light_color = video::SColor(0xFFFFFFFF);
+	bool m_needs_update_transparent_meshes = true;
 
 	std::map<v3s16, MapBlock*, MapBlockComparer> m_drawlist;
+	std::vector<MapBlock*> m_keeplist;
 	std::map<v3s16, MapBlock*> m_drawlist_shadow;
 	bool m_needs_update_drawlist;
 
@@ -189,5 +195,8 @@ private:
 	bool m_cache_trilinear_filter;
 	bool m_cache_bilinear_filter;
 	bool m_cache_anistropic_filter;
-	bool m_added_to_shadow_renderer{false};
+	u16 m_cache_transparency_sorting_distance;
+
+	bool m_loops_occlusion_culler;
+	bool m_enable_raytraced_culling;
 };

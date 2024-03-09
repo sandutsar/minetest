@@ -29,13 +29,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /*
 	InvRef
 */
-InvRef* InvRef::checkobject(lua_State *L, int narg)
-{
-	luaL_checktype(L, narg, LUA_TUSERDATA);
-	void *ud = luaL_checkudata(L, narg, className);
-	if(!ud) luaL_typerror(L, narg, className);
-	return *(InvRef**)ud;  // unbox pointer
-}
 
 Inventory* InvRef::getinv(lua_State *L, InvRef *ref)
 {
@@ -71,7 +64,7 @@ int InvRef::gc_object(lua_State *L) {
 int InvRef::l_is_empty(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	const char *listname = luaL_checkstring(L, 2);
 	InventoryList *list = getlist(L, ref, listname);
 	if(list && list->getUsedSlots() > 0){
@@ -86,7 +79,7 @@ int InvRef::l_is_empty(lua_State *L)
 int InvRef::l_get_size(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	const char *listname = luaL_checkstring(L, 2);
 	InventoryList *list = getlist(L, ref, listname);
 	if(list){
@@ -101,7 +94,7 @@ int InvRef::l_get_size(lua_State *L)
 int InvRef::l_get_width(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	const char *listname = luaL_checkstring(L, 2);
 	InventoryList *list = getlist(L, ref, listname);
 	if(list){
@@ -116,7 +109,7 @@ int InvRef::l_get_width(lua_State *L)
 int InvRef::l_set_size(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	const char *listname = luaL_checkstring(L, 2);
 
 	int newsize = luaL_checknumber(L, 3);
@@ -156,7 +149,7 @@ int InvRef::l_set_size(lua_State *L)
 int InvRef::l_set_width(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	const char *listname = luaL_checkstring(L, 2);
 	int newwidth = luaL_checknumber(L, 3);
 	Inventory *inv = getinv(L, ref);
@@ -177,7 +170,7 @@ int InvRef::l_set_width(lua_State *L)
 int InvRef::l_get_stack(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	const char *listname = luaL_checkstring(L, 2);
 	int i = luaL_checknumber(L, 3) - 1;
 	InventoryList *list = getlist(L, ref, listname);
@@ -192,7 +185,7 @@ int InvRef::l_get_stack(lua_State *L)
 int InvRef::l_set_stack(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	const char *listname = luaL_checkstring(L, 2);
 	int i = luaL_checknumber(L, 3) - 1;
 	ItemStack newitem = read_item(L, 4, getServer(L)->idef());
@@ -211,14 +204,19 @@ int InvRef::l_set_stack(lua_State *L)
 int InvRef::l_get_list(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	const char *listname = luaL_checkstring(L, 2);
 	Inventory *inv = getinv(L, ref);
-	if(inv){
-		push_inventory_list(L, inv, listname);
-	} else {
+	if (!inv) {
 		lua_pushnil(L);
+		return 1;
 	}
+	InventoryList *invlist = inv->getList(listname);
+	if (!invlist) {
+		lua_pushnil(L);
+		return 1;
+	}
+	push_inventory_list(L, *invlist);
 	return 1;
 }
 
@@ -226,7 +224,7 @@ int InvRef::l_get_list(lua_State *L)
 int InvRef::l_set_list(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	const char *listname = luaL_checkstring(L, 2);
 	Inventory *inv = getinv(L, ref);
 	if(inv == NULL){
@@ -242,24 +240,16 @@ int InvRef::l_set_list(lua_State *L)
 	return 0;
 }
 
-// get_lists(self) -> list of InventoryLists
+// get_lists(self) -> table that maps listnames to InventoryLists
 int InvRef::l_get_lists(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	Inventory *inv = getinv(L, ref);
 	if (!inv) {
 		return 0;
 	}
-	std::vector<const InventoryList*> lists = inv->getLists();
-	std::vector<const InventoryList*>::iterator iter = lists.begin();
-	lua_createtable(L, 0, lists.size());
-	for (; iter != lists.end(); iter++) {
-		const char* name = (*iter)->getName().c_str();
-		lua_pushstring(L, name);
-		push_inventory_list(L, inv, name);
-		lua_rawset(L, -3);
-	}
+	push_inventory_lists(L, *inv);
 	return 1;
 }
 
@@ -267,7 +257,7 @@ int InvRef::l_get_lists(lua_State *L)
 int InvRef::l_set_lists(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	Inventory *inv = getinv(L, ref);
 	if (!inv) {
 		return 0;
@@ -295,7 +285,7 @@ int InvRef::l_set_lists(lua_State *L)
 int InvRef::l_add_item(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	const char *listname = luaL_checkstring(L, 2);
 	ItemStack item = read_item(L, 3, getServer(L)->idef());
 	InventoryList *list = getlist(L, ref, listname);
@@ -315,7 +305,7 @@ int InvRef::l_add_item(lua_State *L)
 int InvRef::l_room_for_item(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	const char *listname = luaL_checkstring(L, 2);
 	ItemStack item = read_item(L, 3, getServer(L)->idef());
 	InventoryList *list = getlist(L, ref, listname);
@@ -332,7 +322,7 @@ int InvRef::l_room_for_item(lua_State *L)
 int InvRef::l_contains_item(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	const char *listname = luaL_checkstring(L, 2);
 	ItemStack item = read_item(L, 3, getServer(L)->idef());
 	InventoryList *list = getlist(L, ref, listname);
@@ -352,7 +342,7 @@ int InvRef::l_contains_item(lua_State *L)
 int InvRef::l_remove_item(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	const char *listname = luaL_checkstring(L, 2);
 	ItemStack item = read_item(L, 3, getServer(L)->idef());
 	InventoryList *list = getlist(L, ref, listname);
@@ -371,7 +361,7 @@ int InvRef::l_remove_item(lua_State *L)
 int InvRef::l_get_location(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-	InvRef *ref = checkobject(L, 1);
+	InvRef *ref = checkObject<InvRef>(L, 1);
 	const InventoryLocation &loc = ref->m_loc;
 	switch(loc.type){
 	case InventoryLocation::PLAYER:
@@ -424,27 +414,11 @@ void InvRef::create(lua_State *L, const InventoryLocation &loc)
 
 void InvRef::Register(lua_State *L)
 {
-	lua_newtable(L);
-	int methodtable = lua_gettop(L);
-	luaL_newmetatable(L, className);
-	int metatable = lua_gettop(L);
-
-	lua_pushliteral(L, "__metatable");
-	lua_pushvalue(L, methodtable);
-	lua_settable(L, metatable);  // hide metatable from Lua getmetatable()
-
-	lua_pushliteral(L, "__index");
-	lua_pushvalue(L, methodtable);
-	lua_settable(L, metatable);
-
-	lua_pushliteral(L, "__gc");
-	lua_pushcfunction(L, gc_object);
-	lua_settable(L, metatable);
-
-	lua_pop(L, 1);  // drop metatable
-
-	luaL_register(L, nullptr, methods);  // fill methodtable
-	lua_pop(L, 1);  // drop methodtable
+	static const luaL_Reg metamethods[] = {
+		{"__gc", gc_object},
+		{0, 0}
+	};
+	registerClass(L, className, methods, metamethods);
 
 	// Cannot be created from Lua
 	//lua_register(L, className, create_object);

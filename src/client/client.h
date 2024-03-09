@@ -23,21 +23,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irrlichttypes_extrabloated.h"
 #include <ostream>
 #include <map>
+#include <memory>
 #include <set>
 #include <vector>
 #include <unordered_set>
 #include "clientobject.h"
 #include "gamedef.h"
 #include "inventorymanager.h"
-#include "localplayer.h"
 #include "client/hud.h"
-#include "particles.h"
-#include "mapnode.h"
 #include "tileanimation.h"
-#include "mesh_generator_thread.h"
 #include "network/address.h"
 #include "network/peerhandler.h"
+#include "gameparams.h"
+#include "clientdynamicinfo.h"
 #include <fstream>
+#include "util/numeric.h"
 
 #define CLIENT_CHAT_MESSAGE_LIMIT_PER_10S 10.0f
 
@@ -58,14 +58,19 @@ struct MapDrawControl;
 class ModChannelMgr;
 class MtEventManager;
 struct PointedThing;
+struct MapNode;
 class MapDatabase;
 class Minimap;
 struct MinimapMapblock;
+class MeshUpdateManager;
+class ParticleManager;
 class Camera;
+struct PlayerControl;
 class NetworkPacket;
 namespace con {
 class Connection;
 }
+using sound_handle_t = int;
 
 enum LocalClientState {
 	LC_Created,
@@ -117,7 +122,6 @@ public:
 	Client(
 			const char *playername,
 			const std::string &password,
-			const std::string &address_name,
 			MapDrawControl &control,
 			IWritableTextureSource *tsrc,
 			IWritableShaderSource *shsrc,
@@ -126,8 +130,8 @@ public:
 			ISoundManager *sound,
 			MtEventManager *event,
 			RenderingEngine *rendering_engine,
-			bool ipv6,
-			GameUI *game_ui
+			GameUI *game_ui,
+			ELoginRegister allow_login_or_register
 	);
 
 	~Client();
@@ -149,11 +153,8 @@ public:
 
 	bool isShutdown();
 
-	/*
-		The name of the local player should already be set when
-		calling this, as it is sent in the initialization.
-	*/
-	void connect(Address address, bool is_local_server);
+	void connect(const Address &address, const std::string &address_name,
+		bool is_local_server);
 
 	/*
 		Stuff that references the environment is valid only as
@@ -190,6 +191,7 @@ public:
 	void handleCommand_HP(NetworkPacket* pkt);
 	void handleCommand_Breath(NetworkPacket* pkt);
 	void handleCommand_MovePlayer(NetworkPacket* pkt);
+	void handleCommand_MovePlayerRel(NetworkPacket* pkt);
 	void handleCommand_DeathScreen(NetworkPacket* pkt);
 	void handleCommand_AnnounceMedia(NetworkPacket* pkt);
 	void handleCommand_Media(NetworkPacket* pkt);
@@ -227,6 +229,7 @@ public:
 	void handleCommand_PlayerSpeed(NetworkPacket *pkt);
 	void handleCommand_MediaPush(NetworkPacket *pkt);
 	void handleCommand_MinimapModes(NetworkPacket *pkt);
+	void handleCommand_SetLighting(NetworkPacket *pkt);
 
 	void ProcessData(NetworkPacket *pkt);
 
@@ -247,6 +250,7 @@ public:
 	void sendRespawn();
 	void sendReady();
 	void sendHaveMedia(const std::vector<u32> &tokens);
+	void sendUpdateClientInfo(const ClientDynamicInfo &info);
 
 	ClientEnvironment& getEnv() { return m_env; }
 	ITextureSource *tsrc() { return getTextureSource(); }
@@ -280,7 +284,7 @@ public:
 	// Send the item number 'item' as player item to the server
 	void setPlayerItem(u16 item);
 
-	const std::list<std::string> &getConnectedPlayerNames()
+	const std::set<std::string> &getConnectedPlayerNames()
 	{
 		return m_env.getPlayerNames();
 	}
@@ -309,8 +313,7 @@ public:
 	void addUpdateMeshTaskWithEdge(v3s16 blockpos, bool ack_to_server=false, bool urgent=false);
 	void addUpdateMeshTaskForNode(v3s16 nodepos, bool ack_to_server=false, bool urgent=false);
 
-	void updateCameraOffset(v3s16 camera_offset)
-	{ m_mesh_update_thread.m_camera_offset = camera_offset; }
+	void updateCameraOffset(v3s16 camera_offset);
 
 	bool hasClientEvents() const { return !m_client_event_queue.empty(); }
 	// Get event from queue. If queue is empty, it triggers an assertion failure.
@@ -343,11 +346,9 @@ public:
 	bool activeObjectsReceived() const
 	{ return m_activeobjects_received; }
 
-	u16 getProtoVersion()
+	u16 getProtoVersion() const
 	{ return m_proto_ver; }
 
-	void confirmRegistration();
-	bool m_is_registration_confirmation_state = false;
 	bool m_simple_singleplayer_mode;
 
 	float mediaReceiveProgress();
@@ -357,14 +358,16 @@ public:
 
 	float getRTT();
 	float getCurRate();
+	// has the server ever replied to us, used for connection retry/fallback
+	bool hasServerReplied() const {
+		return getProtoVersion() != 0; // (set in TOCLIENT_HELLO)
+	}
 
 	Minimap* getMinimap() { return m_minimap; }
 	void setCamera(Camera* camera) { m_camera = camera; }
 
 	Camera* getCamera () { return m_camera; }
 	scene::ISceneManager *getSceneManager();
-
-	bool shouldShowMinimap() const;
 
 	// IGameDef interface
 	IItemDefManager* getItemDefManager() override;
@@ -380,10 +383,10 @@ public:
 	{ return checkPrivilege(priv); }
 	virtual scene::IAnimatedMesh* getMesh(const std::string &filename, bool cache = false);
 	const std::string* getModFile(std::string filename);
+	ModStorageDatabase *getModStorageDatabase() override { return m_mod_storage_database; }
 
-	std::string getModStoragePath() const override;
-	bool registerModStorage(ModMetadata *meta) override;
-	void unregisterModStorage(const std::string &name) override;
+	// Migrates away old files-based mod storage if necessary
+	void migrateModStorage();
 
 	// The following set of functions is used by ClientMediaDownloader
 	// Insert a media file appropriately into the appropriate manager
@@ -403,14 +406,14 @@ public:
 	}
 
 	ClientScripting *getScript() { return m_script; }
-	const bool modsLoaded() const { return m_mods_loaded; }
+	bool modsLoaded() const { return m_mods_loaded; }
 
 	void pushToEventQueue(ClientEvent *event);
 
-	void showMinimap(bool show = true);
-
+	// IP and port we're connected to
 	const Address getServerAddress();
 
+	// Hostname of the connected server (but can also be a numerical IP)
 	const std::string &getAddressName() const
 	{
 		return m_address_name;
@@ -432,10 +435,15 @@ public:
 			const std::string &message) override;
 	ModChannel *getModChannel(const std::string &channel) override;
 
-	const std::string &getFormspecPrepend() const
+	const std::string &getFormspecPrepend() const;
+
+	inline MeshGrid getMeshGrid()
 	{
-		return m_env.getLocalPlayer()->formspec_prepend;
+		return m_mesh_grid;
 	}
+
+	bool inhibit_inventory_revert = false;
+
 private:
 	void loadMods();
 
@@ -456,15 +464,10 @@ private:
 	static AuthMechanism choseAuthMech(const u32 mechs);
 
 	void sendInit(const std::string &playerName);
-	void promptConfirmRegistration(AuthMechanism chosen_auth_mechanism);
 	void startAuth(AuthMechanism chosen_auth_mechanism);
 	void sendDeletedBlocks(std::vector<v3s16> &blocks);
 	void sendGotBlocks(const std::vector<v3s16> &blocks);
-	void sendRemovedSounds(std::vector<s32> &soundList);
-
-	// Helper function
-	inline std::string getPlayerName()
-	{ return m_env.getLocalPlayer()->getName(); }
+	void sendRemovedSounds(const std::vector<s32> &soundList);
 
 	bool canSendChatMessage() const;
 
@@ -483,14 +486,14 @@ private:
 	RenderingEngine *m_rendering_engine;
 
 
-	MeshUpdateThread m_mesh_update_thread;
+	std::unique_ptr<MeshUpdateManager> m_mesh_update_manager;
 	ClientEnvironment m_env;
-	ParticleManager m_particle_manager;
+	std::unique_ptr<ParticleManager> m_particle_manager;
 	std::unique_ptr<con::Connection> m_con;
 	std::string m_address_name;
+	ELoginRegister m_allow_login_or_register = ELoginRegister::Any;
 	Camera *m_camera = nullptr;
 	Minimap *m_minimap = nullptr;
-	bool m_minimap_disabled_by_server = false;
 
 	// Server serialization version
 	u8 m_server_ser_ver;
@@ -545,10 +548,8 @@ private:
 	std::vector<std::string> m_remote_media_servers;
 	// Media downloader, only exists during init
 	ClientMediaDownloader *m_media_downloader;
-	// Set of media filenames pushed by server at runtime
-	std::unordered_set<std::string> m_media_pushed_files;
 	// Pending downloads of dynamic media (key: token)
-	std::vector<std::pair<u32, std::unique_ptr<SingleMediaDownloader>>> m_pending_media_downloads;
+	std::vector<std::pair<u32, std::shared_ptr<SingleMediaDownloader>>> m_pending_media_downloads;
 
 	// time_of_day speed approximation for old protocol
 	bool m_time_of_day_set = false;
@@ -561,11 +562,12 @@ private:
 	// Sounds
 	float m_removed_sounds_check_timer = 0.0f;
 	// Mapping from server sound ids to our sound ids
-	std::unordered_map<s32, int> m_sounds_server_to_client;
+	std::unordered_map<s32, sound_handle_t> m_sounds_server_to_client;
 	// And the other way!
-	std::unordered_map<int, s32> m_sounds_client_to_server;
+	// This takes ownership for the sound handles.
+	std::unordered_map<sound_handle_t, s32> m_sounds_client_to_server;
 	// Relation of client id to object id
-	std::unordered_map<int, u16> m_sounds_to_objects;
+	std::unordered_map<sound_handle_t, u16> m_sounds_to_objects;
 
 	// Privileges
 	std::unordered_set<std::string> m_privileges;
@@ -589,7 +591,7 @@ private:
 
 	// Client modding
 	ClientScripting *m_script = nullptr;
-	std::unordered_map<std::string, ModMetadata *> m_mod_storages;
+	ModStorageDatabase *m_mod_storage_database = nullptr;
 	float m_mod_storage_save_timer = 10.0f;
 	std::vector<ModSpec> m_mods;
 	StringMap m_mod_vfs;
@@ -601,4 +603,7 @@ private:
 	u32 m_csm_restriction_noderange = 8;
 
 	std::unique_ptr<ModChannelMgr> m_modchannel_mgr;
+
+	// The number of blocks the client will combine for mesh generation.
+	MeshGrid m_mesh_grid;
 };

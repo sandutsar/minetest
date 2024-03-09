@@ -33,16 +33,15 @@ class NodeMetadata;
 
 class NodeMetaRef : public MetaDataRef {
 private:
+	bool m_is_local = false;
+	// Set for server metadata
 	v3s16 m_p;
 	ServerEnvironment *m_env = nullptr;
-	Metadata *m_meta = nullptr;
-	bool m_is_local = false;
+	// Set for client metadata
+	IMetadata *m_local_meta = nullptr;
 
-	static const char className[];
 	static const luaL_Reg methodsServer[];
 	static const luaL_Reg methodsClient[];
-
-	static NodeMetaRef *checkobject(lua_State *L, int narg);
 
 	/**
 	 * Retrieve metadata for a node.
@@ -57,18 +56,15 @@ private:
 	 * @param auto_create when true, try to create metadata information for the node if it has none.
 	 * @return pointer to a @c NodeMetadata object or @c NULL in case of error.
 	 */
-	virtual Metadata* getmeta(bool auto_create);
+	virtual IMetadata* getmeta(bool auto_create);
 	virtual void clearMeta();
 
 	virtual void reportMetadataChange(const std::string *name = nullptr);
 
-	virtual void handleToTable(lua_State *L, Metadata *_meta);
-	virtual bool handleFromTable(lua_State *L, int table, Metadata *_meta);
+	virtual void handleToTable(lua_State *L, IMetadata *_meta);
+	virtual bool handleFromTable(lua_State *L, int table, IMetadata *_meta);
 
 	// Exported functions
-
-	// garbage collector
-	static int gc_object(lua_State *L);
 
 	// get_inventory(self)
 	static int l_get_inventory(lua_State *L);
@@ -78,7 +74,7 @@ private:
 
 public:
 	NodeMetaRef(v3s16 p, ServerEnvironment *env);
-	NodeMetaRef(Metadata *meta);
+	NodeMetaRef(IMetadata *meta);
 
 	~NodeMetaRef() = default;
 
@@ -87,9 +83,10 @@ public:
 	static void create(lua_State *L, v3s16 p, ServerEnvironment *env);
 
 	// Client-sided version of the above
-	static void createClient(lua_State *L, Metadata *meta);
+	static void createClient(lua_State *L, IMetadata *meta);
 
-	static void RegisterCommon(lua_State *L);
 	static void Register(lua_State *L);
 	static void RegisterClient(lua_State *L);
+
+	static const char className[];
 };

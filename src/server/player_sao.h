@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #pragma once
 
 #include "constants.h"
+#include "metadata.h"
 #include "network/networkprotocol.h"
 #include "unit_sao.h"
 #include "util/numeric.h"
@@ -72,24 +73,25 @@ public:
 	PlayerSAO(ServerEnvironment *env_, RemotePlayer *player_, session_t peer_id_,
 			bool is_singleplayer);
 
-	ActiveObjectType getType() const { return ACTIVEOBJECT_TYPE_PLAYER; }
-	ActiveObjectType getSendType() const { return ACTIVEOBJECT_TYPE_GENERIC; }
-	std::string getDescription();
+	ActiveObjectType getType() const override { return ACTIVEOBJECT_TYPE_PLAYER; }
+	ActiveObjectType getSendType() const override { return ACTIVEOBJECT_TYPE_GENERIC; }
+	std::string getDescription() override;
 
 	/*
 		Active object <-> environment interface
 	*/
 
-	void addedToEnvironment(u32 dtime_s);
-	void removingFromEnvironment();
-	bool isStaticAllowed() const { return false; }
-	bool shouldUnload() const { return false; }
-	std::string getClientInitializationData(u16 protocol_version);
-	void getStaticData(std::string *result) const;
-	void step(float dtime, bool send_recommended);
-	void setBasePosition(const v3f &position);
-	void setPos(const v3f &pos);
-	void moveTo(v3f pos, bool continuous);
+	void addedToEnvironment(u32 dtime_s) override;
+	void removingFromEnvironment() override;
+	bool isStaticAllowed() const override { return false; }
+	bool shouldUnload() const override { return false; }
+	std::string getClientInitializationData(u16 protocol_version) override;
+	void getStaticData(std::string *result) const override;
+	void step(float dtime, bool send_recommended) override;
+	void setBasePosition(v3f position);
+	void setPos(const v3f &pos) override;
+	void addPos(const v3f &added_pos) override;
+	void moveTo(v3f pos, bool continuous) override;
 	void setPlayerYaw(const float yaw);
 	// Data should not be sent at player initialization
 	void setPlayerYawAndSend(const float yaw);
@@ -104,19 +106,21 @@ public:
 	f32 getFov() const { return m_fov; }
 	void setWantedRange(const s16 range);
 	s16 getWantedRange() const { return m_wanted_range; }
+	void setCameraInverted(bool camera_inverted) { m_camera_inverted = camera_inverted; }
+	bool getCameraInverted() const { return m_camera_inverted; }
 
 	/*
 		Interaction interface
 	*/
 
 	u32 punch(v3f dir, const ToolCapabilities *toolcap, ServerActiveObject *puncher,
-			float time_from_last_punch, u16 initial_wear = 0);
-	void rightClick(ServerActiveObject *clicker);
+			float time_from_last_punch, u16 initial_wear = 0) override;
+	void rightClick(ServerActiveObject *clicker) override;
 	void setHP(s32 hp, const PlayerHPChangeReason &reason) override
 	{
-		return setHP(hp, reason, true);
+		return setHP(hp, reason, false);
 	}
-	void setHP(s32 hp, const PlayerHPChangeReason &reason, bool send);
+	void setHP(s32 hp, const PlayerHPChangeReason &reason, bool from_client);
 	void setHPRaw(u16 hp) { m_hp = hp; }
 	u16 getBreath() const { return m_breath; }
 	void setBreath(const u16 breath, bool send = true);
@@ -124,13 +128,13 @@ public:
 	/*
 		Inventory interface
 	*/
-	Inventory *getInventory() const;
-	InventoryLocation getInventoryLocation() const;
-	void setInventoryModified() {}
-	std::string getWieldList() const { return "main"; }
-	u16 getWieldIndex() const;
-	ItemStack getWieldedItem(ItemStack *selected, ItemStack *hand = nullptr) const;
-	bool setWieldedItem(const ItemStack &item);
+	Inventory *getInventory() const override;
+	InventoryLocation getInventoryLocation() const override;
+	void setInventoryModified() override {}
+	std::string getWieldList() const override { return "main"; }
+	u16 getWieldIndex() const override;
+	ItemStack getWieldedItem(ItemStack *selected, ItemStack *hand = nullptr) const override;
+	bool setWieldedItem(const ItemStack &item) override;
 
 	/*
 		PlayerSAO-specific
@@ -138,8 +142,9 @@ public:
 
 	void disconnected();
 
+	void setPlayer(RemotePlayer *player) { m_player = player; }
 	RemotePlayer *getPlayer() { return m_player; }
-	session_t getPeerID() const { return m_peer_id; }
+	session_t getPeerID() const;
 
 	// Cheat prevention
 
@@ -171,9 +176,9 @@ public:
 		m_is_singleplayer = is_singleplayer;
 	}
 
-	bool getCollisionBox(aabb3f *toset) const;
-	bool getSelectionBox(aabb3f *toset) const;
-	bool collideWithObjects() const { return true; }
+	bool getCollisionBox(aabb3f *toset) const override;
+	bool getSelectionBox(aabb3f *toset) const override;
+	bool collideWithObjects() const override { return true; }
 
 	void finalize(RemotePlayer *player, const std::set<std::string> &privs);
 
@@ -181,7 +186,7 @@ public:
 	v3f getEyeOffset() const;
 	float getZoomFOV() const;
 
-	inline Metadata &getMeta() { return m_meta; }
+	inline SimpleMetadata &getMeta() { return m_meta; }
 
 private:
 	std::string getPropertyPacket();
@@ -189,7 +194,7 @@ private:
 	std::string generateUpdatePhysicsOverrideCommand() const;
 
 	RemotePlayer *m_player = nullptr;
-	session_t m_peer_id = 0;
+	session_t m_peer_id_initial = 0; ///< only used to initialize RemotePlayer
 
 	// Cheat prevention
 	LagPool m_dig_pool;
@@ -218,15 +223,11 @@ private:
 	f32 m_fov = 0.0f;
 	s16 m_wanted_range = 0.0f;
 
-	Metadata m_meta;
+	bool m_camera_inverted = false; // this is not store in the player db
+
+	SimpleMetadata m_meta;
 
 public:
-	float m_physics_override_speed = 1.0f;
-	float m_physics_override_jump = 1.0f;
-	float m_physics_override_gravity = 1.0f;
-	bool m_physics_override_sneak = true;
-	bool m_physics_override_sneak_glitch = false;
-	bool m_physics_override_new_move = true;
 	bool m_physics_override_sent = false;
 };
 
@@ -235,6 +236,7 @@ struct PlayerHPChangeReason
 	enum Type : u8
 	{
 		SET_HP,
+		SET_HP_MAX, // internal type to allow distinguishing hp reset and damage (for effects)
 		PLAYER_PUNCH,
 		FALL,
 		NODE_DAMAGE,
@@ -250,6 +252,7 @@ struct PlayerHPChangeReason
 	ServerActiveObject *object = nullptr;
 	// For NODE_DAMAGE
 	std::string node;
+	v3s16 node_pos;
 
 	inline bool hasLuaReference() const { return lua_reference >= 0; }
 
@@ -277,6 +280,7 @@ struct PlayerHPChangeReason
 	{
 		switch (type) {
 		case PlayerHPChangeReason::SET_HP:
+		case PlayerHPChangeReason::SET_HP_MAX:
 			return "set_hp";
 		case PlayerHPChangeReason::PLAYER_PUNCH:
 			return "punch";
@@ -300,5 +304,5 @@ struct PlayerHPChangeReason
 	{
 	}
 
-	PlayerHPChangeReason(Type type, std::string node) : type(type), node(node) {}
+	PlayerHPChangeReason(Type type, std::string node, v3s16 node_pos) : type(type), node(node), node_pos(node_pos) {}
 };

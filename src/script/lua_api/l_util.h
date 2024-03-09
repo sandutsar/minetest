@@ -50,6 +50,9 @@ private:
 	// write_json(data[, styled])
 	static int l_write_json(lua_State *L);
 
+	// get_tool_wear_after_use(uses[, initial_wear])
+	static int l_get_tool_wear_after_use(lua_State *L);
+
 	// get_dig_params(groups, tool_capabilities[, wear])
 	static int l_get_dig_params(lua_State *L);
 
@@ -110,6 +113,9 @@ private:
 	// sha1(string, raw)
 	static int l_sha1(lua_State *L);
 
+	// sha256(string, raw)
+	static int l_sha256(lua_State *L);
+
 	// colorspec_to_colorstring(colorspec)
 	static int l_colorspec_to_colorstring(lua_State *L);
 
@@ -125,10 +131,11 @@ private:
 	// set_last_run_mod(modname)
 	static int l_set_last_run_mod(lua_State *L);
 
+	// urlencode(value)
+	static int l_urlencode(lua_State *L);
+
 public:
 	static void Initialize(lua_State *L, int top);
 	static void InitializeAsync(lua_State *L, int top);
 	static void InitializeClient(lua_State *L, int top);
-
-	static void InitializeAsync(AsyncEngine &engine);
 };

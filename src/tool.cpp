@@ -26,6 +26,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "convert_json.h"
 #include "util/serialize.h"
 #include "util/numeric.h"
+#include "util/hex.h"
+#include "common/c_content.h"
+#include <json/json.h>
+	
 
 void ToolGroupCap::toJson(Json::Value &object) const
 {
@@ -35,7 +39,7 @@ void ToolGroupCap::toJson(Json::Value &object) const
 	Json::Value times_object;
 	for (auto time : times)
 		times_object[time.first] = time.second;
-	object["times"] = times_object;
+	object["times"] = std::move(times_object);
 }
 
 void ToolGroupCap::fromJson(const Json::Value &json)
@@ -134,14 +138,13 @@ void ToolCapabilities::serializeJson(std::ostream &os) const
 	for (const auto &groupcap : groupcaps) {
 		groupcap.second.toJson(groupcaps_object[groupcap.first]);
 	}
-	root["groupcaps"] = groupcaps_object;
+	root["groupcaps"] = std::move(groupcaps_object);
 
 	Json::Value damage_groups_object;
-	DamageGroup::const_iterator dgiter;
-	for (dgiter = damageGroups.begin(); dgiter != damageGroups.end(); ++dgiter) {
-		damage_groups_object[dgiter->first] = dgiter->second;
+	for (const auto &damagegroup : damageGroups) {
+		damage_groups_object[damagegroup.first] = damagegroup.second;
 	}
-	root["damage_groups"] = damage_groups_object;
+	root["damage_groups"] = std::move(damage_groups_object);
 
 	fastWriteJson(root, os);
 }
@@ -183,7 +186,128 @@ void ToolCapabilities::deserializeJson(std::istream &is)
 	}
 }
 
-static u32 calculateResultWear(const u32 uses, const u16 initial_wear)
+void WearBarParams::serialize(std::ostream &os) const
+{
+	writeU8(os, 1); // Version for future-proofing
+	writeU8(os, blend);
+	writeU16(os, colorStops.size());
+	for (const std::pair<f32, video::SColor> item : colorStops) {
+		writeF32(os, item.first);
+		writeARGB8(os, item.second);
+	}
+}
+
+WearBarParams WearBarParams::deserialize(std::istream &is)
+{
+	u8 version = readU8(is);
+	if (version > 1)
+		throw SerializationError("unsupported WearBarParams version");
+
+	auto blend = static_cast<WearBarParams::BlendMode>(readU8(is));
+	if (blend >= BlendMode_END)
+		throw SerializationError("invalid blend mode");
+	u16 count = readU16(is);
+	if (count == 0)
+		throw SerializationError("no stops");
+	std::map<f32, video::SColor> colorStops;
+	for (u16 i = 0; i < count; i++) {
+		f32 key = readF32(is);
+		if (key < 0 || key > 1)
+			throw SerializationError("key out of range");
+		video::SColor color = readARGB8(is);
+		colorStops.emplace(key, color);
+	}
+	return WearBarParams(colorStops, blend);
+}
+
+void WearBarParams::serializeJson(std::ostream &os) const
+{
+	Json::Value root;
+	Json::Value color_stops;
+	for (const std::pair<f32, video::SColor> item : colorStops) {
+		color_stops[ftos(item.first)] = encodeHexColorString(item.second);
+	}
+	root["color_stops"] = color_stops;
+	root["blend"] = WearBarParams::es_BlendMode[blend].str;
+
+	fastWriteJson(root, os);
+}
+
+std::optional<WearBarParams> WearBarParams::deserializeJson(std::istream &is)
+{
+	Json::Value root;
+	is >> root;
+	if (!root.isObject() || !root["color_stops"].isObject() || !root["blend"].isString())
+		return std::nullopt;
+
+	int blendInt;
+	WearBarParams::BlendMode blend;
+	if (string_to_enum(WearBarParams::es_BlendMode, blendInt, root["blend"].asString()))
+		blend = static_cast<WearBarParams::BlendMode>(blendInt);
+	else
+		return std::nullopt;
+	
+	const Json::Value &color_stops_object = root["color_stops"];
+	std::map<f32, video::SColor> colorStops;
+	for (const std::string &key : color_stops_object.getMemberNames()) {
+		f32 stop = stof(key);
+		if (stop < 0 || stop > 1)
+			return std::nullopt;
+		const Json::Value &value = color_stops_object[key];
+		if (value.isString()) {
+			video::SColor color;
+			parseColorString(value.asString(), color, false);
+			colorStops.emplace(stop, color);
+		}
+	}
+	if (colorStops.empty())
+		return std::nullopt;
+	return WearBarParams(colorStops, blend);
+}
+
+video::SColor WearBarParams::getWearBarColor(f32 durabilityPercent) {
+	if (colorStops.empty())
+		return video::SColor();
+
+	/*
+	 * Strategy:
+	 * Find upper bound of durabilityPercent
+	 *
+	 * if it == stops.end() -> return last color in the map
+	 * if it == stops.begin() -> return first color in the map
+	 *
+	 * else:
+	 * 	lower_bound = it - 1
+	 * 	interpolate/do constant
+	 */
+	auto upper = colorStops.upper_bound(durabilityPercent);
+
+	if (upper == colorStops.end()) // durability is >= the highest defined color stop
+		return std::prev(colorStops.end())->second; // return last element of the map
+
+	if (upper == colorStops.begin()) // durability is <= the lowest defined color stop
+		return upper->second;
+
+	auto lower = std::prev(upper);
+	f32 lower_bound = lower->first;
+	video::SColor lower_color = lower->second;
+	f32 upper_bound = upper->first;
+	video::SColor upper_color = upper->second;
+
+	f32 progress = (durabilityPercent - lower_bound) / (upper_bound - lower_bound);
+
+	switch (blend) {
+		case BLEND_MODE_CONSTANT:
+			return lower_color;
+		case BLEND_MODE_LINEAR:
+			return upper_color.getInterpolated(lower_color, progress);
+		case BlendMode_END:
+			throw std::logic_error("dummy value");
+	}
+	throw std::logic_error("invalid blend value");
+}
+
+u32 calculateResultWear(const u32 uses, const u16 initial_wear)
 {
 	if (uses == 0) {
 		// Trivial case: Infinite uses
@@ -234,7 +358,7 @@ static u32 calculateResultWear(const u32 uses, const u16 initial_wear)
 		   only oversized blocks remain.
 		   This also implies the raw tool wear number
 		   increases a bit faster after this point,
-		   but this should be barely noticable by the
+		   but this should be barely noticeable by the
 		   player.
 		*/
 		u16 wear_extra_at = blocks_normal * wear_normal;
@@ -292,8 +416,7 @@ DigParams getDigParams(const ItemGroupList &groups,
 			// The actual number of uses increases
 			// exponentially with leveldiff.
 			// If the levels are equal, real_uses equals cap.uses.
-			u32 real_uses = cap.uses * pow(3.0, leveldiff);
-			real_uses = MYMIN(real_uses, U16_MAX);
+			const u32 real_uses = std::min<f64>(cap.uses * pow(3.0, leveldiff), U16_MAX);
 			result_wear = calculateResultWear(real_uses, initial_wear);
 			result_main_group = groupname;
 		}
@@ -306,7 +429,7 @@ HitParams getHitParams(const ItemGroupList &armor_groups,
 		const ToolCapabilities *tp, float time_from_last_punch,
 		u16 initial_wear)
 {
-	s16 damage = 0;
+	s32 damage = 0;
 	float result_wear = 0.0f;
 	float punch_interval_multiplier =
 			rangelim(time_from_last_punch / tp->full_punch_interval, 0.0f, 1.0f);
@@ -320,6 +443,8 @@ HitParams getHitParams(const ItemGroupList &armor_groups,
 		result_wear = calculateResultWear(tp->punch_attack_uses, initial_wear);
 		result_wear *= punch_interval_multiplier;
 	}
+	// Keep damage in sane bounds for simplicity
+	damage = rangelim(damage, -U16_MAX, U16_MAX);
 
 	u32 wear_i = (u32) result_wear;
 	return {damage, wear_i};

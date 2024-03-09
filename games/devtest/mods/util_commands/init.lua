@@ -28,37 +28,11 @@ minetest.register_chatcommand("hp", {
 			return false, "No player."
 		end
 		local hp = tonumber(param)
-		if not hp then
+		if not hp or minetest.is_nan(hp) or hp < 0 or hp > 65535 then
 			return false, "Missing or incorrect hp parameter!"
 		end
 		player:set_hp(hp)
 		return true
-	end,
-})
-
-minetest.register_on_joinplayer(function(player)
-	player:set_properties({zoom_fov = 15})
-end)
-
-minetest.register_chatcommand("zoomfov", {
-	params = "[<FOV>]",
-	description = "Set or display your zoom_fov",
-	func = function(name, param)
-		local player = minetest.get_player_by_name(name)
-		if not player then
-			return false, "No player."
-		end
-		if param == "" then
-			local fov = player:get_properties().zoom_fov
-			return true, "zoom_fov = "..tostring(fov)
-		end
-		local fov = tonumber(param)
-		if not fov then
-			return false, "Missing or incorrect zoom_fov parameter!"
-		end
-		player:set_properties({zoom_fov = fov})
-		fov = player:get_properties().zoom_fov
-		return true, "zoom_fov = "..tostring(fov)
 	end,
 })
 
@@ -166,64 +140,6 @@ minetest.register_chatcommand("use_tool", {
 })
 
 
-
--- Use this to test waypoint capabilities
-minetest.register_chatcommand("test_waypoints", {
-	params = "[change_immediate]",
-	description = "tests waypoint capabilities",
-	func = function(name, params)
-		local player = minetest.get_player_by_name(name)
-		local regular = player:hud_add {
-			hud_elem_type = "waypoint",
-			name = "regular waypoint",
-			text = "m",
-			number = 0xFF0000,
-			world_pos = vector.add(player:get_pos(), {x = 0, y = 1.5, z = 0})
-		}
-		local reduced_precision = player:hud_add {
-			hud_elem_type = "waypoint",
-			name = "better waypoint",
-			text = "m (0.5 steps, precision = 2)",
-			precision = 10,
-			number = 0xFFFF00,
-			world_pos = vector.add(player:get_pos(), {x = 0, y = 1, z = 0})
-		}
-		local function change()
-			if regular then
-				player:hud_change(regular, "world_pos", vector.add(player:get_pos(), {x = 0, y = 3, z = 0}))
-			end
-			if reduced_precision then
-				player:hud_change(reduced_precision, "precision", 2)
-			end
-		end
-		if params ~= "" then
-			-- change immediate
-			change()
-		else
-			minetest.after(0.5, change)
-		end
-		regular = regular or "error"
-		reduced_precision = reduced_precision or "error"
-		local hidden_distance = player:hud_add {
-			hud_elem_type = "waypoint",
-			name = "waypoint with hidden distance",
-			text = "this text is hidden as well (precision = 0)",
-			precision = 0,
-			number = 0x0000FF,
-			world_pos = vector.add(player:get_pos(), {x = 0, y = 0.5, z = 0})
-		} or "error"
-		local image_waypoint = player:hud_add {
-			hud_elem_type = "image_waypoint",
-			text = "wieldhand.png",
-			world_pos = player:get_pos(),
-			scale = {x = 10, y = 10},
-			offset = {x = 0, y = -32}
-		} or "error"
-		minetest.chat_send_player(name, "Waypoint IDs: regular: " .. regular .. ", reduced precision: " .. reduced_precision ..
-			", hidden distance: " .. hidden_distance .. ", image waypoint: " .. image_waypoint)
-	end
-})
-
 -- Unlimited node placement
 minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack)
 	if placer and placer:is_player() then
@@ -246,3 +162,82 @@ function minetest.handle_node_drops(pos, drops, digger)
 		end
 	end
 end
+
+minetest.register_chatcommand("set_displayed_itemcount", {
+	params = "(-s \"<string>\" [-c <color>]) | -a <alignment_num>",
+	description = "Set the displayed itemcount of the wielded item",
+	func = function(name, param)
+		local player = minetest.get_player_by_name(name)
+		local item = player:get_wielded_item()
+		local meta = item:get_meta()
+		local flag1 = param:sub(1, 2)
+		if flag1 == "-s" then
+			if param:sub(3, 4) ~= " \"" then
+				return false, "Error: Space and string with \"s expected after -s."
+			end
+			local se = param:find("\"", 5, true)
+			if not se then
+				return false, "Error: String with two \"s expected after -s."
+			end
+			local s = param:sub(5, se - 1)
+			if param:sub(se + 1, se + 4) == " -c " then
+				s = minetest.colorize(param:sub(se + 5), s)
+			end
+			meta:set_string("count_meta", s)
+		elseif flag1 == "-a" then
+			local num = tonumber(param:sub(4))
+			if not num then
+				return false, "Error: Invalid number: "..param:sub(4)
+			end
+			meta:set_int("count_alignment", num)
+		else
+			return false
+		end
+		player:set_wielded_item(item)
+		return true, "Displayed itemcount set."
+	end,
+})
+
+minetest.register_chatcommand("dump_item", {
+	params = "",
+	description = "Prints a dump of the wielded item in table form",
+	func = function(name, param)
+		local player = minetest.get_player_by_name(name)
+		local item = player:get_wielded_item()
+		local str = dump(item:to_table())
+		print(str)
+		return true, str
+	end,
+})
+
+minetest.register_chatcommand("dump_itemdef", {
+	params = "",
+	description = "Prints a dump of the wielded item's definition in table form",
+	func = function(name, param)
+		local player = minetest.get_player_by_name(name)
+		local str = dump(player:get_wielded_item():get_definition())
+		print(str)
+		return true, str
+	end,
+})
+
+minetest.register_chatcommand("dump_wear_bar", {
+	params = "",
+	description = "Prints a dump of the wielded item's wear bar parameters in table form",
+	func = function(name, param)
+		local player = minetest.get_player_by_name(name)
+		local item = player:get_wielded_item()
+		local str = dump(item:get_wear_bar_params())
+		print(str)
+		return true, str
+	end,
+})
+
+core.register_chatcommand("set_saturation", {
+    params = "<saturation>",
+    description = "Set the saturation for current player.",
+    func = function(player_name, param)
+        local saturation = tonumber(param)
+        minetest.get_player_by_name(player_name):set_lighting({saturation = saturation })
+    end
+})

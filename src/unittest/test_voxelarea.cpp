@@ -38,6 +38,7 @@ public:
 	void test_equal();
 	void test_plus();
 	void test_minor();
+	void test_intersect();
 	void test_index_xyz_all_pos();
 	void test_index_xyz_x_neg();
 	void test_index_xyz_y_neg();
@@ -74,6 +75,7 @@ void TestVoxelArea::runTests(IGameDef *gamedef)
 	TEST(test_equal);
 	TEST(test_plus);
 	TEST(test_minor);
+	TEST(test_intersect);
 	TEST(test_index_xyz_all_pos);
 	TEST(test_index_xyz_x_neg);
 	TEST(test_index_xyz_y_neg);
@@ -120,7 +122,7 @@ void TestVoxelArea::test_extent()
 	VoxelArea v1(v3s16(-1337, -547, -789), v3s16(-147, 447, 669));
 	UASSERT(v1.getExtent() == v3s16(1191, 995, 1459));
 
-	VoxelArea v2(v3s16(32493, -32507, 32753), v3s16(32508, -32492, 32768));
+	VoxelArea v2(v3s16(32493, -32507, 32752), v3s16(32508, -32492, 32767));
 	UASSERT(v2.getExtent() == v3s16(16, 16, 16));
 }
 
@@ -129,7 +131,7 @@ void TestVoxelArea::test_volume()
 	VoxelArea v1(v3s16(-1337, -547, -789), v3s16(-147, 447, 669));
 	UASSERTEQ(s32, v1.getVolume(), 1728980655);
 
-	VoxelArea v2(v3s16(32493, -32507, 32753), v3s16(32508, -32492, 32768));
+	VoxelArea v2(v3s16(32493, -32507, 32752), v3s16(32508, -32492, 32767));
 	UASSERTEQ(s32, v2.getVolume(), 4096);
 }
 
@@ -208,6 +210,20 @@ void TestVoxelArea::test_minor()
 			VoxelArea(v3s16(-20, 0, -10), v3s16(90, 110, 100)));
 	UASSERT(v1 - v3s16(0, 0, 35) ==
 			VoxelArea(v3s16(-10, -10, -45), v3s16(100, 100, 65)));
+}
+
+void TestVoxelArea::test_intersect()
+{
+	VoxelArea v1({-10, -10, -10}, {10, 10, 10});
+	VoxelArea v2({1, 2, 3}, {4, 5, 6});
+	VoxelArea v3({11, 11, 11}, {11, 11, 11});
+	VoxelArea v4({-11, -2, -10}, {10, 2, 11});
+	UASSERT(v2.intersect(v1) == v2);
+	UASSERT(v1.intersect(v2) == v2.intersect(v1));
+	UASSERT(v1.intersect(v3).hasEmptyExtent());
+	UASSERT(v3.intersect(v1) == v1.intersect(v3));
+	UASSERT(v1.intersect(v4) ==
+			VoxelArea({-10, -2, -10}, {10, 2, 10}));
 }
 
 void TestVoxelArea::test_index_xyz_all_pos()

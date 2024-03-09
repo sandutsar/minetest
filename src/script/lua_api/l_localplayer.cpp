@@ -157,24 +157,46 @@ int LuaLocalPlayer::l_get_physics_override(lua_State *L)
 {
 	LocalPlayer *player = getobject(L, 1);
 
+	const auto &phys = player->physics_override;
 	lua_newtable(L);
-	lua_pushnumber(L, player->physics_override_speed);
+	lua_pushnumber(L, phys.speed);
 	lua_setfield(L, -2, "speed");
 
-	lua_pushnumber(L, player->physics_override_jump);
+	lua_pushnumber(L, phys.jump);
 	lua_setfield(L, -2, "jump");
 
-	lua_pushnumber(L, player->physics_override_gravity);
+	lua_pushnumber(L, phys.gravity);
 	lua_setfield(L, -2, "gravity");
 
-	lua_pushboolean(L, player->physics_override_sneak);
+	lua_pushboolean(L, phys.sneak);
 	lua_setfield(L, -2, "sneak");
 
-	lua_pushboolean(L, player->physics_override_sneak_glitch);
+	lua_pushboolean(L, phys.sneak_glitch);
 	lua_setfield(L, -2, "sneak_glitch");
 
-	lua_pushboolean(L, player->physics_override_new_move);
+	lua_pushboolean(L, phys.new_move);
 	lua_setfield(L, -2, "new_move");
+
+	lua_pushnumber(L, phys.speed_climb);
+	lua_setfield(L, -2, "speed_climb");
+
+	lua_pushnumber(L, phys.speed_crouch);
+	lua_setfield(L, -2, "speed_crouch");
+
+	lua_pushnumber(L, phys.liquid_fluidity);
+	lua_setfield(L, -2, "liquid_fluidity");
+
+	lua_pushnumber(L, phys.liquid_fluidity_smooth);
+	lua_setfield(L, -2, "liquid_fluidity_smooth");
+
+	lua_pushnumber(L, phys.liquid_sink);
+	lua_setfield(L, -2, "liquid_sink");
+
+	lua_pushnumber(L, phys.acceleration_default);
+	lua_setfield(L, -2, "acceleration_default");
+
+	lua_pushnumber(L, phys.acceleration_air);
+	lua_setfield(L, -2, "acceleration_air");
 
 	return 1;
 }
@@ -230,13 +252,15 @@ int LuaLocalPlayer::l_get_control(lua_State *L)
 	set("dig",   c.dig);
 	set("place", c.place);
 	// Player movement in polar coordinates and non-binary speed
-	set("movement_speed",     c.movement_speed);
-	set("movement_direction", c.movement_direction);
+	lua_pushnumber(L, c.movement_speed);
+	lua_setfield(L, -2, "movement_speed");
+	lua_pushnumber(L, c.movement_direction);
+	lua_setfield(L, -2, "movement_direction");
 	// Provide direction keys to ensure compatibility
-	set("up",    player->keyPressed & (1 << 0)); // Up, down, left, and right were removed in favor of
-	set("down",  player->keyPressed & (1 << 1)); // analog  direction indicators and are therefore not
-	set("left",  player->keyPressed & (1 << 2)); // available as booleans anymore. The corresponding values
-	set("right", player->keyPressed & (1 << 3)); // can still be read from the keyPressed bits though.
+	set("up",    c.direction_keys & (1 << 0));
+	set("down",  c.direction_keys & (1 << 1));
+	set("left",  c.direction_keys & (1 << 2));
+	set("right", c.direction_keys & (1 << 3));
 
 	return 1;
 }
@@ -398,15 +422,24 @@ int LuaLocalPlayer::l_hud_get(lua_State *L)
 	return 1;
 }
 
-LuaLocalPlayer *LuaLocalPlayer::checkobject(lua_State *L, int narg)
+// hud_get_all(self)
+int LuaLocalPlayer::l_hud_get_all(lua_State *L)
 {
-	luaL_checktype(L, narg, LUA_TUSERDATA);
+	LocalPlayer *player = getobject(L, 1);
+	if (player == nullptr)
+		return 0;
 
-	void *ud = luaL_checkudata(L, narg, className);
-	if (!ud)
-		luaL_typerror(L, narg, className);
-
-	return *(LuaLocalPlayer **)ud;
+	lua_newtable(L);
+	player->hudApply([&](const std::vector<HudElement*>& hud) {
+		for (std::size_t id = 0; id < hud.size(); ++id) {
+			HudElement *elem = hud[id];
+			if (elem != nullptr) {
+				push_hud_element(L, elem);
+				lua_rawseti(L, -2, id);
+			}
+		}
+	});
+	return 1;
 }
 
 LocalPlayer *LuaLocalPlayer::getobject(LuaLocalPlayer *ref)
@@ -416,7 +449,7 @@ LocalPlayer *LuaLocalPlayer::getobject(LuaLocalPlayer *ref)
 
 LocalPlayer *LuaLocalPlayer::getobject(lua_State *L, int narg)
 {
-	LuaLocalPlayer *ref = checkobject(L, narg);
+	LuaLocalPlayer *ref = checkObject<LuaLocalPlayer>(L, narg);
 	assert(ref);
 	LocalPlayer *player = getobject(ref);
 	assert(player);
@@ -432,27 +465,11 @@ int LuaLocalPlayer::gc_object(lua_State *L)
 
 void LuaLocalPlayer::Register(lua_State *L)
 {
-	lua_newtable(L);
-	int methodtable = lua_gettop(L);
-	luaL_newmetatable(L, className);
-	int metatable = lua_gettop(L);
-
-	lua_pushliteral(L, "__metatable");
-	lua_pushvalue(L, methodtable);
-	lua_settable(L, metatable); // hide metatable from lua getmetatable()
-
-	lua_pushliteral(L, "__index");
-	lua_pushvalue(L, methodtable);
-	lua_settable(L, metatable);
-
-	lua_pushliteral(L, "__gc");
-	lua_pushcfunction(L, gc_object);
-	lua_settable(L, metatable);
-
-	lua_pop(L, 1); // Drop metatable
-
-	luaL_register(L, nullptr, methods); // fill methodtable
-	lua_pop(L, 1);			// Drop methodtable
+	static const luaL_Reg metamethods[] = {
+		{"__gc", gc_object},
+		{0, 0}
+	};
+	registerClass(L, className, methods, metamethods);
 }
 
 const char LuaLocalPlayer::className[] = "LocalPlayer";
@@ -486,6 +503,7 @@ const luaL_Reg LuaLocalPlayer::methods[] = {
 		luamethod(LuaLocalPlayer, hud_remove),
 		luamethod(LuaLocalPlayer, hud_change),
 		luamethod(LuaLocalPlayer, hud_get),
+		luamethod(LuaLocalPlayer, hud_get_all),
 
 		luamethod(LuaLocalPlayer, get_move_resistance),
 

@@ -42,11 +42,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define CONNECTION_TIMEOUT 30
 
-#define RESEND_TIMEOUT_MIN 0.1
-#define RESEND_TIMEOUT_MAX 3.0
-// resend_timeout = avg_rtt * this
-#define RESEND_TIMEOUT_FACTOR 4
-
 /*
     Server
 */
@@ -57,6 +52,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define BLOCK_SEND_DISABLE_LIMITS_MAX_D 1
 
 /*
+    Client/Server
+*/
+
+// Limit maximum dtime in client/server step(...) and for collision detection
+#define DTIME_LIMIT 2.5f
+
+/*
     Map-related things
 */
 
@@ -64,7 +66,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // I really don't want to make every algorithm to check if it's going near
 // the limit or not, so this is lower.
 // This is the maximum value the setting map_generation_limit can be
-#define MAX_MAP_GENERATION_LIMIT (31000)
+#define MAX_MAP_GENERATION_LIMIT (31007)
 
 // Size of node in floating-point units
 // The original idea behind this is to disallow plain casts between
@@ -111,4 +113,3 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #define TTF_DEFAULT_FONT_SIZE (16)
-#define DEFAULT_FONT_SIZE (10)

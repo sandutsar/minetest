@@ -206,11 +206,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 		Adds new sun, moon and stars packets
 		Minimap modes
 	PROTOCOL VERSION 40:
-		Added 'basic_debug' privilege
 		TOCLIENT_MEDIA_PUSH changed, TOSERVER_HAVE_MEDIA added
+	PROTOCOL VERSION 41:
+		Added new particlespawner parameters
+		[scheduled bump for 5.6.0]
+	PROTOCOL VERSION 42:
+		TOSERVER_UPDATE_CLIENT_INFO added
+		new fields for TOCLIENT_SET_LIGHTING and TOCLIENT_SET_SKY
+		Send forgotten TweenedParameter properties
+		[scheduled bump for 5.7.0]
+	PROTOCOL VERSION 43:
+		"start_time" added to TOCLIENT_PLAY_SOUND
+		place_param2 type change u8 -> optional<u8>
+		[scheduled bump for 5.8.0]
+	PROTOCOL VERSION 44:
+		AO_CMD_SET_BONE_POSITION extended
+		Add TOCLIENT_MOVE_PLAYER_REL
+		Move default minimap from client-side C++ to server-side builtin Lua
+		[scheduled bump for 5.9.0]
 */
 
-#define LATEST_PROTOCOL_VERSION 40
+#define LATEST_PROTOCOL_VERSION 44
 #define LATEST_PROTOCOL_VERSION_STRING TOSTRING(LATEST_PROTOCOL_VERSION)
 
 // Server's supported network protocol range
@@ -218,31 +234,29 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SERVER_PROTOCOL_VERSION_MAX LATEST_PROTOCOL_VERSION
 
 // Client's supported network protocol range
-// The minimal version depends on whether
-// send_pre_v25_init is enabled or not
 #define CLIENT_PROTOCOL_VERSION_MIN 37
 #define CLIENT_PROTOCOL_VERSION_MAX LATEST_PROTOCOL_VERSION
 
 // Constant that differentiates the protocol from random data and other protocols
 #define PROTOCOL_ID 0x4f457403
 
-#define PASSWORD_SIZE 28       // Maximum password length. Allows for
-                               // base64-encoded SHA-1 (27+\0).
+#define PASSWORD_SIZE 28    // Maximum password length. Allows for
+                            // base64-encoded SHA-1 (27+\0).
 
-// See also: Formspec Version History in doc/lua_api.txt
-#define FORMSPEC_API_VERSION 4
+// See also formspec [Version History] in doc/lua_api.md
+#define FORMSPEC_API_VERSION 7
 
 #define TEXTURENAME_ALLOWED_CHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-"
 
 typedef u16 session_t;
 
-enum ToClientCommand
+enum ToClientCommand : u16
 {
 	TOCLIENT_HELLO = 0x02,
 	/*
 		Sent after TOSERVER_INIT.
 
-		u8 deployed serialisation version
+		u8 deployed serialization version
 		u16 deployed network compression mode
 		u16 deployed protocol version
 		u32 supported auth methods
@@ -273,9 +287,7 @@ enum ToClientCommand
 		u8 (bool) reconnect
 	*/
 
-	TOCLIENT_INIT_LEGACY = 0x10, // Obsolete
-
-	TOCLIENT_BLOCKDATA = 0x20, //TODO: Multiple blocks
+	TOCLIENT_BLOCKDATA = 0x20,
 	TOCLIENT_ADDNODE = 0x21,
 	/*
 		v3s16 position
@@ -284,23 +296,15 @@ enum ToClientCommand
 	*/
 	TOCLIENT_REMOVENODE = 0x22,
 
-	TOCLIENT_PLAYERPOS = 0x23, // Obsolete
-	TOCLIENT_PLAYERINFO = 0x24, // Obsolete
-	TOCLIENT_OPT_BLOCK_NOT_FOUND = 0x25, // Obsolete
-	TOCLIENT_SECTORMETA = 0x26, // Obsolete
-
 	TOCLIENT_INVENTORY = 0x27,
 	/*
 		[0] u16 command
 		[2] serialized inventory
 	*/
 
-	TOCLIENT_OBJECTDATA = 0x28, // Obsolete
-
 	TOCLIENT_TIME_OF_DAY = 0x29,
 	/*
 		u16 time (0-23999)
-		Added in a later version:
 		f1000 time_speed
 	*/
 
@@ -322,8 +326,6 @@ enum ToClientCommand
 		bool should_be_cached
 	*/
 
-	// (oops, there is some gap here)
-
 	TOCLIENT_CHAT_MESSAGE = 0x2F,
 	/*
 		u8 version
@@ -333,8 +335,6 @@ enum ToClientCommand
 		u16 length
 		wstring message
 	*/
-
-	TOCLIENT_CHAT_MESSAGE_OLD = 0x30, // Obsolete
 
 	TOCLIENT_ACTIVE_OBJECT_REMOVE_ADD = 0x31,
 	/*
@@ -409,26 +409,13 @@ enum ToClientCommand
 		string url
 	*/
 
-	TOCLIENT_TOOLDEF = 0x39,
-	/*
-		u32 length of the next item
-		serialized ToolDefManager
-	*/
-
 	TOCLIENT_NODEDEF = 0x3a,
 	/*
 		u32 length of the next item
 		serialized NodeDefManager
 	*/
 
-	TOCLIENT_CRAFTITEMDEF = 0x3b,
-	/*
-		u32 length of the next item
-		serialized CraftiItemDefManager
-	*/
-
 	TOCLIENT_ANNOUNCE_MEDIA = 0x3c,
-
 	/*
 		u32 number of files
 		for each texture {
@@ -447,15 +434,18 @@ enum ToClientCommand
 
 	TOCLIENT_PLAY_SOUND = 0x3f,
 	/*
-		s32 sound_id
+		s32 server_id
 		u16 len
 		u8[len] sound name
-		s32 gain*1000
-		u8 type (0=local, 1=positional, 2=object)
-		s32[3] pos_nodes*10000
+		f32 gain
+		u8 type (SoundLocation: 0=local, 1=positional, 2=object)
+		v3f pos_nodes (in BS-space)
 		u16 object_id
 		u8 loop (bool)
+		f32 fade
+		f32 pitch
 		u8 ephemeral (bool)
+		f32 start_time (in seconds)
 	*/
 
 	TOCLIENT_STOP_SOUND = 0x40,
@@ -512,11 +502,12 @@ enum ToClientCommand
 
 	TOCLIENT_SPAWN_PARTICLE = 0x46,
 	/*
-		v3f1000 pos
-		v3f1000 velocity
-		v3f1000 acceleration
-		f1000 expirationtime
-		f1000 size
+		-- struct range<T> { T min, T max, f32 bias };
+		v3f pos
+		v3f velocity
+		v3f acceleration
+		f32 expirationtime
+		f32 size
 		u8 bool collisiondetection
 		u32 len
 		u8[len] texture
@@ -525,22 +516,39 @@ enum ToClientCommand
 		TileAnimation animation
 		u8 glow
 		u8 object_collision
+		v3f drag
+		range<v3f> bounce
 	*/
 
 	TOCLIENT_ADD_PARTICLESPAWNER = 0x47,
 	/*
+		using range<T> = RangedParameter<T> {
+			T min, max
+			f32 bias
+		}
+		using tween<T> = TweenedParameter<T> {
+			u8 style
+			u16 reps
+			f32 beginning
+			T start, end
+		}
+
 		u16 amount
-		f1000 spawntime
-		v3f1000 minpos
-		v3f1000 maxpos
-		v3f1000 minvel
-		v3f1000 maxvel
-		v3f1000 minacc
-		v3f1000 maxacc
-		f1000 minexptime
-		f1000 maxexptime
-		f1000 minsize
-		f1000 maxsize
+		f32 spawntime
+		if PROTOCOL_VERSION >= 42 {
+			tween<T> pos, vel, acc, exptime, size
+		} else {
+			v3f minpos
+			v3f maxpos
+			v3f minvel
+			v3f maxvel
+			v3f minacc
+			v3f maxacc
+			f32 minexptime
+			f32 maxexptime
+			f32 minsize
+			f32 maxsize
+		}
 		u8 bool collisiondetection
 		u32 len
 		u8[len] texture
@@ -550,9 +558,66 @@ enum ToClientCommand
 		TileAnimation animation
 		u8 glow
 		u8 object_collision
-	*/
 
-	TOCLIENT_DELETE_PARTICLESPAWNER_LEGACY = 0x48, // Obsolete
+		if PROTOCOL_VERSION < 42 {
+			f32 pos_start_bias
+			f32 vel_start_bias
+			f32 acc_start_bias
+			f32 exptime_start_bias
+			f32 size_start_bias
+
+			range<v3f> pos_end
+			-- i.e v3f pos_end_min
+			--     v3f pos_end_max
+			--     f32 pos_end_bias
+			range<v3f> vel_end
+			range<v3f> acc_end
+		}
+
+		tween<range<v3f>> drag
+		-- i.e. v3f drag_start_min
+		--      v3f drag_start_max
+		--      f32 drag_start_bias
+		--      v3f drag_end_min
+		--      v3f drag_end_max
+		--      f32 drag_end_bias
+		tween<range<v3f>> jitter
+		tween<range<f32>> bounce
+
+		u8 attraction_kind
+			none  = 0
+			point = 1
+			line  = 2
+			plane = 3
+
+		if attraction_kind > none {
+			tween<range<f32>> attract_strength
+			tween<v3f>        attractor_origin
+			u16               attractor_origin_attachment_object_id
+			u8                spawner_flags
+			    bit 1: attractor_kill (particles dies on contact)
+			if attraction_mode > point {
+				tween<v3f> attractor_angle
+				u16        attractor_origin_attachment_object_id
+			}
+		}
+
+		tween<range<v3f>> radius
+		tween<range<v3f>> drag
+
+		u16 texpool_sz
+		texpool_sz.times {
+			u8 flags
+			-- bit 0: animated
+			-- other bits free & ignored as of proto v40
+			tween<f32> alpha
+			tween<v2f> scale
+			if flags.animated {
+				TileAnimation animation
+			}
+		}
+
+	*/
 
 	TOCLIENT_HUDADD = 0x49,
 	/*
@@ -638,6 +703,7 @@ enum ToClientCommand
 		u8[4] fog_sun_tint (ARGB)
 		u8[4] fog_moon_tint (ARGB)
 		std::string fog_tint_type
+		float body_orbit_tilt
 	*/
 
 	TOCLIENT_OVERRIDE_DAY_NIGHT_RATIO = 0x50,
@@ -659,6 +725,7 @@ enum ToClientCommand
 	/*
 		v3f1000 first
 		v3f1000 third
+		v3f1000 third_front
 	*/
 
 	TOCLIENT_DELETE_PARTICLESPAWNER = 0x53,
@@ -736,6 +803,12 @@ enum ToClientCommand
 		u32 count
 		u8[4] starcolor (ARGB)
 		f32 scale
+		f32 day_opacity
+	*/
+
+	TOCLIENT_MOVE_PLAYER_REL = 0x5d,
+	/*
+		v3f added_pos
 	*/
 
 	TOCLIENT_SRP_BYTES_S_B = 0x60,
@@ -763,30 +836,39 @@ enum ToClientCommand
 			std::string extra
 	*/
 
-	TOCLIENT_NUM_MSG_TYPES = 0x63,
+	TOCLIENT_SET_LIGHTING = 0x63,
+	/*
+		f32 shadow_intensity
+		f32 saturation
+		exposure parameters
+			f32 luminance_min
+			f32 luminance_max
+			f32 exposure_correction
+			f32 speed_dark_bright
+			f32 speed_bright_dark
+			f32 center_weight_power
+	*/
+
+	TOCLIENT_NUM_MSG_TYPES = 0x64,
 };
 
-enum ToServerCommand
+enum ToServerCommand : u16
 {
 	TOSERVER_INIT = 0x02,
 	/*
 		Sent first after connected.
 
-		u8 serialisation version (=SER_FMT_VER_HIGHEST_READ)
+		u8 serialization version (=SER_FMT_VER_HIGHEST_READ)
 		u16 supported network compression modes
 		u16 minimum supported network protocol version
 		u16 maximum supported network protocol version
 		std::string player name
 	*/
 
-	TOSERVER_INIT_LEGACY = 0x10, // Obsolete
-
 	TOSERVER_INIT2 = 0x11,
 	/*
-		Sent as an ACK for TOCLIENT_INIT.
+		Sent as an ACK for TOCLIENT_AUTH_ACCEPT.
 		After this, the server can send data.
-
-		[0] u16 TOSERVER_INIT2
 	*/
 
 	TOSERVER_MODCHANNEL_JOIN = 0x17,
@@ -809,10 +891,6 @@ enum ToServerCommand
 	 	std::string message
 	 */
 
-	TOSERVER_GETBLOCK = 0x20, // Obsolete
-	TOSERVER_ADDNODE = 0x21, // Obsolete
-	TOSERVER_REMOVENODE = 0x22, // Obsolete
-
 	TOSERVER_PLAYERPOS = 0x23,
 	/*
 		[0] u16 command
@@ -821,8 +899,10 @@ enum ToServerCommand
 		[2+12+12] s32 pitch*100
 		[2+12+12+4] s32 yaw*100
 		[2+12+12+4+4] u32 keyPressed
-		[2+12+12+4+4+1] u8 fov*80
+		[2+12+12+4+4+4] u8 fov*80
 		[2+12+12+4+4+4+1] u8 ceil(wanted_range / MAP_BLOCKSIZE)
+		[2+12+12+4+4+4+1+1] u8 camera_inverted (bool)
+
 	*/
 
 	TOSERVER_GOTBLOCKS = 0x24,
@@ -843,12 +923,6 @@ enum ToServerCommand
 		...
 	*/
 
-	TOSERVER_ADDNODE_FROM_INVENTORY = 0x26, // Obsolete
-	TOSERVER_CLICK_OBJECT = 0x27, // Obsolete
-	TOSERVER_GROUND_ACTION = 0x28, // Obsolete
-	TOSERVER_RELEASE = 0x29, // Obsolete
-	TOSERVER_SIGNTEXT = 0x30, // Obsolete
-
 	TOSERVER_INVENTORY_ACTION = 0x31,
 	/*
 		See InventoryAction in inventorymanager.h
@@ -860,15 +934,10 @@ enum ToServerCommand
 		wstring message
 	*/
 
-	TOSERVER_SIGNNODETEXT = 0x33, // Obsolete
-	TOSERVER_CLICK_ACTIVEOBJECT = 0x34, // Obsolete
-
 	TOSERVER_DAMAGE = 0x35,
 	/*
 		u8 amount
 	*/
-
-	TOSERVER_PASSWORD_LEGACY = 0x36, // Obsolete
 
 	TOSERVER_PLAYERITEM = 0x37,
 	/*
@@ -945,8 +1014,6 @@ enum ToServerCommand
 			u32 token
 	*/
 
-	TOSERVER_BREATH = 0x42, // Obsolete
-
 	TOSERVER_CLIENT_READY = 0x43,
 	/*
 		u8 major
@@ -984,7 +1051,15 @@ enum ToServerCommand
 		std::string bytes_M
 	*/
 
-	TOSERVER_NUM_MSG_TYPES = 0x53,
+	TOSERVER_UPDATE_CLIENT_INFO = 0x53,
+	/*
+		v2s16 render_target_size
+		f32 gui_scaling
+		f32 hud_scaling
+		v2f32 max_fs_info
+	*/
+
+	TOSERVER_NUM_MSG_TYPES = 0x54,
 };
 
 enum AuthMechanism
@@ -1002,7 +1077,7 @@ enum AuthMechanism
 	AUTH_MECHANISM_FIRST_SRP = 1 << 2,
 };
 
-enum AccessDeniedCode {
+enum AccessDeniedCode : u8 {
 	SERVER_ACCESSDENIED_WRONG_PASSWORD,
 	SERVER_ACCESSDENIED_UNEXPECTED_DATA,
 	SERVER_ACCESSDENIED_SINGLEPLAYER,
@@ -1025,18 +1100,18 @@ enum NetProtoCompressionMode {
 
 const static std::string accessDeniedStrings[SERVER_ACCESSDENIED_MAX] = {
 	"Invalid password",
-	"Your client sent something the server didn't expect.  Try reconnecting or updating your client",
+	"Your client sent something the server didn't expect.  Try reconnecting or updating your client.",
 	"The server is running in simple singleplayer mode.  You cannot connect.",
-	"Your client's version is not supported.\nPlease contact server administrator.",
-	"Player name contains disallowed characters.",
-	"Player name not allowed.",
-	"Too many users.",
+	"Your client's version is not supported.\nPlease contact the server administrator.",
+	"Player name contains disallowed characters",
+	"Player name not allowed",
+	"Too many users",
 	"Empty passwords are disallowed.  Set a password and try again.",
 	"Another client is connected with this name.  If your client closed unexpectedly, try again in a minute.",
-	"Server authentication failed.  This is likely a server error.",
+	"Internal server error",
 	"",
-	"Server shutting down.",
-	"This server has experienced an internal error. You will now be disconnected."
+	"Server shutting down",
+	"The server has experienced an internal error.  You will now be disconnected."
 };
 
 enum PlayerListModifer : u8

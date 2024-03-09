@@ -28,6 +28,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	#define VERSION_GITHASH VERSION_STRING
 #endif
 
+#define STRINGIFY(x) #x
+#define STR(x) STRINGIFY(x)
+
 const char *g_version_string = VERSION_STRING;
 const char *g_version_hash = VERSION_GITHASH;
 const char *g_build_info =
@@ -37,7 +40,6 @@ const char *g_build_info =
 #ifndef SERVER
 	"USE_GETTEXT=" STR(USE_GETTEXT) "\n"
 	"USE_SOUND=" STR(USE_SOUND) "\n"
-	"USE_FREETYPE=" STR(USE_FREETYPE) "\n"
 #endif
 	"STATIC_SHAREDIR=" STR(STATIC_SHAREDIR)
 #if USE_GETTEXT && defined(STATIC_LOCALEDIR)

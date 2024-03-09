@@ -39,6 +39,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MGV6_SNOWBIOMES 0x08
 #define MGV6_FLAT       0x10
 #define MGV6_TREES      0x20
+#define MGV6_TEMPLES    0x40
 
 
 extern FlagDesc flagdesc_mapgen_v6[];
@@ -83,8 +84,6 @@ struct MapgenV6Params : public MapgenParams {
 
 class MapgenV6 : public Mapgen {
 public:
-	EmergeParams *m_emerge;
-
 	int ystride;
 	u32 spflags;
 

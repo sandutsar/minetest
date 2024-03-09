@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "player.h"
 
+#include <cmath>
 #include "threading/mutex_auto_lock.h"
 #include "util/numeric.h"
 #include "hud.h"
@@ -70,23 +71,14 @@ Player::Player(const char *name, IItemDefManager *idef):
 		HUD_FLAG_HOTBAR_VISIBLE    | HUD_FLAG_HEALTHBAR_VISIBLE |
 		HUD_FLAG_CROSSHAIR_VISIBLE | HUD_FLAG_WIELDITEM_VISIBLE |
 		HUD_FLAG_BREATHBAR_VISIBLE | HUD_FLAG_MINIMAP_VISIBLE   |
-		HUD_FLAG_MINIMAP_RADAR_VISIBLE;
+		HUD_FLAG_MINIMAP_RADAR_VISIBLE | HUD_FLAG_BASIC_DEBUG   |
+		HUD_FLAG_CHAT_VISIBLE;
 
 	hud_hotbar_itemcount = HUD_HOTBAR_ITEMCOUNT_DEFAULT;
-
-	m_player_settings.readGlobalSettings();
-	// Register player setting callbacks
-	for (const std::string &name : m_player_settings.setting_names)
-		g_settings->registerChangedCallback(name,
-			&Player::settingsChangedCallback, &m_player_settings);
 }
 
 Player::~Player()
 {
-	// m_player_settings becomes invalid, remove callbacks
-	for (const std::string &name : m_player_settings.setting_names)
-		g_settings->deregisterChangedCallback(name,
-			&Player::settingsChangedCallback, &m_player_settings);
 	clearHud();
 }
 
@@ -137,6 +129,12 @@ HudElement* Player::getHud(u32 id)
 	return NULL;
 }
 
+void Player::hudApply(std::function<void(const std::vector<HudElement*>&)> f)
+{
+	MutexAutoLock lock(m_mutex);
+	f(hud);
+}
+
 HudElement* Player::removeHud(u32 id)
 {
 	MutexAutoLock lock(m_mutex);
@@ -159,19 +157,60 @@ void Player::clearHud()
 	}
 }
 
-void PlayerSettings::readGlobalSettings()
+#ifndef SERVER
+
+u32 PlayerControl::getKeysPressed() const
 {
-	free_move = g_settings->getBool("free_move");
-	pitch_move = g_settings->getBool("pitch_move");
-	fast_move = g_settings->getBool("fast_move");
-	continuous_forward = g_settings->getBool("continuous_forward");
-	always_fly_fast = g_settings->getBool("always_fly_fast");
-	aux1_descends = g_settings->getBool("aux1_descends");
-	noclip = g_settings->getBool("noclip");
-	autojump = g_settings->getBool("autojump");
+	u32 keypress_bits =
+		( (u32)(jump  & 1) << 4) |
+		( (u32)(aux1  & 1) << 5) |
+		( (u32)(sneak & 1) << 6) |
+		( (u32)(dig   & 1) << 7) |
+		( (u32)(place & 1) << 8) |
+		( (u32)(zoom  & 1) << 9)
+	;
+
+	// If any direction keys are pressed pass those through
+	if (direction_keys != 0)
+	{
+		keypress_bits |= direction_keys;
+	}
+	// Otherwise set direction keys based on joystick movement (for mod compatibility)
+	else if (isMoving())
+	{
+		float abs_d;
+
+		// (absolute value indicates forward / backward)
+		abs_d = std::abs(movement_direction);
+		if (abs_d < 3.0f / 8.0f * M_PI)
+			keypress_bits |= (u32)1; // Forward
+		if (abs_d > 5.0f / 8.0f * M_PI)
+			keypress_bits |= (u32)1 << 1; // Backward
+
+		// rotate entire coordinate system by 90 degree
+		abs_d = movement_direction + M_PI_2;
+		if (abs_d >= M_PI)
+			abs_d -= 2 * M_PI;
+		abs_d = std::abs(abs_d);
+		// (value now indicates left / right)
+		if (abs_d < 3.0f / 8.0f * M_PI)
+			keypress_bits |= (u32)1 << 2; // Left
+		if (abs_d > 5.0f / 8.0f * M_PI)
+			keypress_bits |= (u32)1 << 3; // Right
+	}
+
+	return keypress_bits;
 }
 
-void Player::settingsChangedCallback(const std::string &name, void *data)
+#endif
+
+void PlayerControl::unpackKeysPressed(u32 keypress_bits)
 {
-	((PlayerSettings *)data)->readGlobalSettings();
+	direction_keys = keypress_bits & 0xf;
+	jump  = keypress_bits & (1 << 4);
+	aux1  = keypress_bits & (1 << 5);
+	sneak = keypress_bits & (1 << 6);
+	dig   = keypress_bits & (1 << 7);
+	place = keypress_bits & (1 << 8);
+	zoom  = keypress_bits & (1 << 9);
 }
